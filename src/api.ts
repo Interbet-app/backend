@@ -8,7 +8,7 @@ const api = express();
 const corsOptions = {
    origin: process.env.CORS_ALLOW_ORIGIN || "*",
    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-   allowedHeaders: ["Content-Type", "Authorization"],
+   allowedHeaders: ["Content-Type", "authorization", "google_authentication"],
    optionsSuccessStatus: 200,
 };
 

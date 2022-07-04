@@ -15,9 +15,11 @@
    "author": "interbet.app",
    "license": "",
    "dependencies": {
+      "axios": "^0.27.2",
       "cors": "^2.8.5",
       "dotenv-safe": "^8.2.0",
       "express": "^4.18.1",
+      "google-auth-library": "^8.1.0",
       "helmet": "^5.1.0",
       "joi": "^17.6.0",
       "jsonwebtoken": "^8.5.1",

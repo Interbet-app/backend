@@ -10,6 +10,10 @@ export const users = Database.define<IUserModel>("users", {
    email: { type: Sequelize.STRING, allowNull: false, unique: true },
    team: { type: Sequelize.STRING, allowNull: true },
    affiliateId: { type: Sequelize.INTEGER, allowNull: true },
+   externalId: { type: Sequelize.STRING, allowNull: false, unique: true },
+   oauth: { type: Sequelize.ENUM, values: ["google", "ig", "facebook"], allowNull: true },
+   picture: { type: Sequelize.STRING, allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
+

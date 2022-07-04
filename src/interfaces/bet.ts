@@ -1,7 +1,6 @@
 export interface IBet {
    id?: number;
    userId: number;
-   gameId: number;
    oddId: number;
    payout: number;
    amount: number;

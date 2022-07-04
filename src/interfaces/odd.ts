@@ -1,5 +1,6 @@
 export interface IOdd {
    id?: number;
+   gameId: number;
    name: string;
    team: string;
    payout: number;
@@ -13,3 +14,4 @@ export interface IOdd {
    createdAt: Date;
    updatedAt: Date;
 }
+

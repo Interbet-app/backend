@@ -7,7 +7,6 @@ export interface IBetModel extends Model<IBet, CreationAttributes>, IBet {}
 export const bets = Database.define<IBetModel>("bets", {
    id: { type: Sequelize.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
    userId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: false },
-   gameId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: true },
    oddId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: true },
    payout: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    amount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
