@@ -9,7 +9,6 @@ import logger from "../log";
 export async function GoogleOAuth(_req: Request, res: Response) {
    try {
       const { email, email_verified, name, picture, sub } = res.locals.payload;
-      console.log(email, email_verified, name);
       if (!email_verified) return res.status(403).json({ message: "Your Google account e-mail is not verified!" });
       const user = await Users.getByEmail(email);
       if (!user) {
@@ -22,13 +21,28 @@ export async function GoogleOAuth(_req: Request, res: Response) {
             createdAt: new Date(),
             updatedAt: new Date(),
          });
-
          if (!newUser) return res.status(500).json({ message: "Internal server error!" });
          const token = await Jwt.sign(newUser.id!);
-         return res.status(200).json({ token, ...newUser, externalId: "" });
+         res.status(200).json({
+            token,
+            name: newUser.name,
+            email: newUser.email,
+            picture: newUser.picture,
+            oauth: newUser.oauth,
+            team: newUser.team,
+            affiliateId: newUser.affiliateId,
+         });
       } else {
          const token = await Jwt.sign(user.id!);
-         return res.status(200).json({ token, ...user, externalId: "" });
+         res.status(200).json({
+            token,
+            name: user.name,
+            email: user.email,
+            picture: user.picture,
+            oauth: user.oauth,
+            team: user.team,
+            affiliateId: user.affiliateId,
+         });
       }
    } catch (error) {
       logger.error(error);
