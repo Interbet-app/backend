@@ -26,7 +26,7 @@ export async function AuthUser(req: Request, res: Response, next: any) {
 export async function AuthGoogle(req: Request, res: Response, next: any) {
    try {
       const token = req.headers["google_authentication"] as string;
-      if (token) return res.status(403).json({ message: "Google authentication token is required!" });
+      if (!token) return res.status(403).json({ message: "Google authentication token is required!" });
       const ticket = await googleOAuth.verifyIdToken({ idToken: token, audience: GOOGLE_CLIENT_ID });
       const payload = ticket.getPayload();
       console.log("payload :", payload);
