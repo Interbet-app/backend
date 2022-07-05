@@ -4,9 +4,9 @@ export interface IUser {
    externalId: string;
    oauth: "google" | "ig" | "facebook";
    email: string;
-   team: string;
-   picture: string;
-   affiliateId: number;
+   team?: string;
+   picture?: string;
+   affiliateId?: number;
    createdAt: Date;
    updatedAt: Date;
 }

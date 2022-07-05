@@ -6,12 +6,10 @@ import { Users } from "../repositories";
 import axios from "axios";
 import logger from "../log";
 
-export async function GoogleOAuth(req: Request, res: Response) {
+export async function GoogleOAuth(_req: Request, res: Response) {
    try {
-      const { team, affiliateId } = req.body;
       const { email, email_verified, name, picture, sub } = res.locals.payload;
       console.log(email, email_verified, name);
-
       if (!email_verified) return res.status(403).json({ message: "Your Google account e-mail is not verified!" });
       const user = await Users.getByEmail(email);
       if (!user) {
@@ -19,9 +17,7 @@ export async function GoogleOAuth(req: Request, res: Response) {
             name,
             email,
             externalId: sub,
-            team: team,
             oauth: "google",
-            affiliateId,
             picture,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -42,7 +38,7 @@ export async function GoogleOAuth(req: Request, res: Response) {
 
 export async function FacebookOAuth(req: Request, res: Response) {
    try {
-      const { userId, token, team, affiliateId } = req.body;
+      const { userId, token } = req.body;
       const response = await axios({
          url: `https://graph.facebook.com/${userId}?fields=id,name,email,picture&access_token=${token}`,
          method: "GET",
@@ -58,8 +54,6 @@ export async function FacebookOAuth(req: Request, res: Response) {
             email: response.data.email,
             externalId: response.data.id,
             oauth: "facebook",
-            team,
-            affiliateId,
             picture: response.data.picture.data.url,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -72,6 +66,25 @@ export async function FacebookOAuth(req: Request, res: Response) {
          const token = await Jwt.sign(user.id!);
          return res.status(200).json({ token, ...user, externalId: "" });
       }
+   } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal server error!" });
+   }
+}
+
+export async function UserUpdate(req: Request, res: Response) {
+   try {
+      const { name, email, picture, team, affiliateId } = req.body;
+      const token = Jwt.getLocals(res) as Token;
+      const user = await Users.getById(token.userId);
+      if (!user) return res.status(404).json({ message: "User not found!" });
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (picture) user.picture = picture;
+      if (team) user.team = team;
+      if (affiliateId) user.affiliateId = affiliateId;
+      await user.save();
+      res.status(200).json({ ...user, externalId: "" });
    } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal server error!" });
