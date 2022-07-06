@@ -52,10 +52,11 @@ export async function GoogleOAuth(_req: Request, res: Response) {
 }
 export async function FacebookOAuth(req: Request, res: Response) {
    try {
-      const { id,email,name,picture,accessToken } = req.body;
-      const user = await Users.getByEmail(email);
+      const { id, email, name, picture, accessToken } = req.body;
+      let user;
+      user = await Users.getByEmail(email);
       if (!user) {
-         const newUser = await Users.create({
+         user = await Users.create({
             name: name,
             email: email,
             externalId: id,
@@ -64,14 +65,18 @@ export async function FacebookOAuth(req: Request, res: Response) {
             createdAt: new Date(),
             updatedAt: new Date(),
          });
-
-         if (!newUser) return res.status(500).json({ message: "Internal server error!" });
-         const token = await Jwt.sign(newUser.id!);
-         return res.status(200).json({ token, ...newUser, externalId: "" });
-      } else {
-         const token = await Jwt.sign(user.id!);
-         return res.status(200).json({ token, ...user, externalId: "" });
+         if (!user) return res.status(500).json({ message: "Internal server error!" });
       }
+      const token = await Jwt.sign(user.id!);
+      return res.status(200).json({
+         token,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         oauth: user.oauth,
+         team: user.team,
+         affiliateId: user.affiliateId,
+      });
    } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal server error!" });
@@ -82,7 +87,7 @@ export async function InstagramOAuth(req: Request, res: Response) {
       const code = req.params.code as string;
       if (!code) return res.status(422).send("Missing code");
       const data = {
-         client_id: `${INSTAGRAM_CLIENT_ID}`,	
+         client_id: `${INSTAGRAM_CLIENT_ID}`,
          client_secret: "fc74264bbd409c00bfc0e1fc607e1a5d",
          grant_type: "authorization_code",
          redirect_uri: "https://social-login-ig.herokuapp.com/oauth/ig/",
@@ -139,7 +144,7 @@ export async function InstagramUserRegister(req: Request, res: Response) {
             affiliateId,
          });
       }
-      
+
       const token = await Jwt.sign(user.id!);
       return res.status(200).json({
          token,
