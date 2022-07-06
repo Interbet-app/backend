@@ -6,6 +6,7 @@ import { Users } from "../repositories";
 import axios from "axios";
 import logger from "../log";
 
+const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
 export async function GoogleOAuth(_req: Request, res: Response) {
    try {
       const { email, email_verified, name, picture, sub } = res.locals.payload;
@@ -49,26 +50,17 @@ export async function GoogleOAuth(_req: Request, res: Response) {
       res.status(500).json({ message: "Internal server error!" });
    }
 }
-
 export async function FacebookOAuth(req: Request, res: Response) {
    try {
-      const { userId, token } = req.body;
-      const response = await axios({
-         url: `https://graph.facebook.com/${userId}?fields=id,name,email,picture&access_token=${token}`,
-         method: "GET",
-         headers: { "Content-Type": "application/json" },
-      });
-      if (response.status !== 200) return res.status(500).json({ message: "Internal server error!" });
-      console.log(response.data);
-
-      const user = await Users.getByEmail(response.data.email);
+      const { id,email,name,picture,accessToken } = req.body;
+      const user = await Users.getByEmail(email);
       if (!user) {
          const newUser = await Users.create({
-            name: response.data.name,
-            email: response.data.email,
-            externalId: response.data.id,
+            name: name,
+            email: email,
+            externalId: id,
             oauth: "facebook",
-            picture: response.data.picture.data.url,
+            picture: picture,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
@@ -85,7 +77,84 @@ export async function FacebookOAuth(req: Request, res: Response) {
       res.status(500).json({ message: "Internal server error!" });
    }
 }
+export async function InstagramOAuth(req: Request, res: Response) {
+   try {
+      const code = req.params.code as string;
+      if (!code) return res.status(422).send("Missing code");
+      const data = {
+         client_id: `${INSTAGRAM_CLIENT_ID}`,	
+         client_secret: "fc74264bbd409c00bfc0e1fc607e1a5d",
+         grant_type: "authorization_code",
+         redirect_uri: "https://social-login-ig.herokuapp.com/oauth/ig/",
+         code: code,
+      };
 
+      axios({
+         url: "/oauth/access_token",
+         method: "POST",
+         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+         data: new URLSearchParams(data),
+      })
+         .then((response) => {
+            const { access_token } = response.data;
+            axios({ url: `/me?fields=id,username&access_token=${access_token}`, method: "GET" })
+               .then(async (response) => {
+                  const { id, username } = response.data;
+                  const user = await Users.getExternalId(id);
+                  if (!user) return res.status(200).json({ id, username });
+                  const token = await Jwt.sign(user.id!);
+                  res.status(200).json({
+                     token,
+                     name: user.name,
+                     email: user.email,
+                     picture: user.picture,
+                     oauth: user.oauth,
+                     team: user.team,
+                     affiliateId: user.affiliateId,
+                  });
+               })
+               .catch(() => res.status(500).json({ message: "Error get user id and username from ig API!" }));
+         })
+         .catch(() => res.status(500).json({ message: "Error get user access_token from ig API!" }));
+   } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+   }
+}
+export async function InstagramUserRegister(req: Request, res: Response) {
+   try {
+      const { name, email, id, picture, team, affiliateId } = req.body;
+      let user;
+      user = await Users.getByEmail(email);
+      if (!user) {
+         user = await Users.create({
+            name,
+            email,
+            externalId: id,
+            oauth: "ig",
+            picture,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            team,
+            affiliateId,
+         });
+      }
+      
+      const token = await Jwt.sign(user.id!);
+      return res.status(200).json({
+         token,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         oauth: user.oauth,
+         team: user.team,
+         affiliateId: user.affiliateId,
+      });
+   } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal server error!" });
+   }
+}
 export async function UserUpdate(req: Request, res: Response) {
    try {
       const { name, email, picture, team, affiliateId } = req.body;
