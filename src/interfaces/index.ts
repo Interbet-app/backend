@@ -7,3 +7,6 @@ export * from "./bet";
 export * from "./wallet";
 export * from "./deposit";
 export * from "./withdrawal";
+export * from "./adds";
+export * from "./notification";
+export * from "./athletic";

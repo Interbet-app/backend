@@ -1,9 +1,7 @@
-export interface ITeam {
+export interface IAthletic {
    id?: number;
-   athleticId: number;
    name: string;
    abbreviation: string;
-   location: string;
    picture: string;
    createdAt: Date;
    updatedAt: Date;

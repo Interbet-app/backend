@@ -1,1 +1,5 @@
 export * from "./user.repository";
+export * from "./athletics.repository";
+export * from "./teams.repository";
+export * from "./notifications.repository";
+export * from "./wallets.repository";

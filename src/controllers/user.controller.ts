@@ -7,44 +7,42 @@ import axios from "axios";
 import logger from "../log";
 
 const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
-export async function GoogleOAuth(_req: Request, res: Response) {
+const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET as string;
+const INSTAGRAM_REDIRECT_URI = process.env.INSTAGRAM_REDIRECT_URI as string;
+
+export async function GetUser(_req: Request, res: Response) {
    try {
+      const token = Jwt.getLocals(res) as Token;
+      const user = await Users.getById(token.userId);
+      if (!user) return res.status(404).json({ message: "User not found!" });
+      return res.status(200).json({ ...user, externalId: "" });
+   } catch (error) {
+      logger.error(error);
+      res.status(500).json({ message: "Internal server error!" });
+   }
+}
+export async function GoogleOAuth(req: Request, res: Response) {
+   try {
+      const affiliateId = parseInt(req.body.affiliateId, 10);
       const { email, email_verified, name, picture, sub } = res.locals.payload;
       if (!email_verified) return res.status(403).json({ message: "Your Google account e-mail is not verified!" });
-      const user = await Users.getByEmail(email);
+      let user = await Users.getByEmail(email);
       if (!user) {
-         const newUser = await Users.create({
+         user = await Users.create({
             name,
             email,
             externalId: sub,
             oauth: "google",
+            level: 1,
             picture,
+            affiliateId,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
-         if (!newUser) return res.status(500).json({ message: "Internal server error!" });
-         const token = await Jwt.sign(newUser.id!);
-         res.status(200).json({
-            token,
-            name: newUser.name,
-            email: newUser.email,
-            picture: newUser.picture,
-            oauth: newUser.oauth,
-            team: newUser.team,
-            affiliateId: newUser.affiliateId,
-         });
-      } else {
-         const token = await Jwt.sign(user.id!);
-         res.status(200).json({
-            token,
-            name: user.name,
-            email: user.email,
-            picture: user.picture,
-            oauth: user.oauth,
-            team: user.team,
-            affiliateId: user.affiliateId,
-         });
+         if (!user) return res.status(500).json({ message: "Internal server error!" });
       }
+      const token = await Jwt.sign(user.id!);
+      res.status(200).json({ token, ...user, externalId: "" });
    } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal server error!" });
@@ -52,9 +50,11 @@ export async function GoogleOAuth(_req: Request, res: Response) {
 }
 export async function FacebookOAuth(req: Request, res: Response) {
    try {
-      const { id, email, name, picture, accessToken } = req.body;
-      let user;
-      user = await Users.getByEmail(email);
+      const { id, email, name, picture, accessToken, affiliateId } = req.body;
+
+      //! Validar token aqui posteriormente (verificar se é valido)
+
+      let user = await Users.getByEmail(email);
       if (!user) {
          user = await Users.create({
             name: name,
@@ -62,21 +62,15 @@ export async function FacebookOAuth(req: Request, res: Response) {
             externalId: id,
             oauth: "facebook",
             picture: picture,
+            level: 1,
+            affiliateId,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
          if (!user) return res.status(500).json({ message: "Internal server error!" });
       }
       const token = await Jwt.sign(user.id!);
-      return res.status(200).json({
-         token,
-         name: user.name,
-         email: user.email,
-         picture: user.picture,
-         oauth: user.oauth,
-         team: user.team,
-         affiliateId: user.affiliateId,
-      });
+      return res.status(200).json({ token, ...user, externalId: "" });
    } catch (error) {
       logger.error(error);
       res.status(500).json({ message: "Internal server error!" });
@@ -84,13 +78,13 @@ export async function FacebookOAuth(req: Request, res: Response) {
 }
 export async function InstagramOAuth(req: Request, res: Response) {
    try {
-      const code = req.params.code as string;
+      const { code, affiliateId } = req.body;
       if (!code) return res.status(422).send("Missing code");
       const data = {
-         client_id: `${INSTAGRAM_CLIENT_ID}`,
-         client_secret: "fc74264bbd409c00bfc0e1fc607e1a5d",
+         client_id: INSTAGRAM_CLIENT_ID,
+         client_secret: INSTAGRAM_CLIENT_SECRET,
          grant_type: "authorization_code",
-         redirect_uri: "https://social-login-ig.herokuapp.com/oauth/ig/",
+         redirect_uri: INSTAGRAM_REDIRECT_URI,
          code: code,
       };
 
@@ -105,18 +99,21 @@ export async function InstagramOAuth(req: Request, res: Response) {
             axios({ url: `/me?fields=id,username&access_token=${access_token}`, method: "GET" })
                .then(async (response) => {
                   const { id, username } = response.data;
-                  const user = await Users.getExternalId(id);
-                  if (!user) return res.status(200).json({ id, username });
+                  let user = await Users.getExternalId(id);
+                  if (!user) {
+                     user = await Users.create({
+                        name: username,
+                        email: username,
+                        externalId: id,
+                        oauth: "instagram",
+                        level: 1,
+                        affiliateId,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                     });
+                  }
                   const token = await Jwt.sign(user.id!);
-                  res.status(200).json({
-                     token,
-                     name: user.name,
-                     email: user.email,
-                     picture: user.picture,
-                     oauth: user.oauth,
-                     team: user.team,
-                     affiliateId: user.affiliateId,
-                  });
+                  res.status(200).json({ token, ...user, externalId: "" });
                })
                .catch(() => res.status(500).json({ message: "Error get user id and username from ig API!" }));
          })
@@ -126,52 +123,17 @@ export async function InstagramOAuth(req: Request, res: Response) {
       res.status(500).json({ message: "Internal Server Error" });
    }
 }
-export async function InstagramUserRegister(req: Request, res: Response) {
-   try {
-      const { name, email, id, picture, team, affiliateId } = req.body;
-      let user;
-      user = await Users.getByEmail(email);
-      if (!user) {
-         user = await Users.create({
-            name,
-            email,
-            externalId: id,
-            oauth: "ig",
-            picture,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            team,
-            affiliateId,
-         });
-      }
-
-      const token = await Jwt.sign(user.id!);
-      return res.status(200).json({
-         token,
-         name: user.name,
-         email: user.email,
-         picture: user.picture,
-         oauth: user.oauth,
-         team: user.team,
-         affiliateId: user.affiliateId,
-      });
-   } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error!" });
-   }
-}
 export async function UserUpdate(req: Request, res: Response) {
    try {
-      const { name, email, picture, team, affiliateId } = req.body;
+      const { name, email, picture, teamId, affiliateId } = req.body;
       const token = Jwt.getLocals(res) as Token;
       const user = await Users.getById(token.userId);
       if (!user) return res.status(404).json({ message: "User not found!" });
       if (name) user.name = name;
       if (email) user.email = email;
       if (picture) user.picture = picture;
-      if (team) user.team = team;
-      if (affiliateId) user.affiliateId = affiliateId;
-      await user.save();
+      if (teamId) user.teamId = teamId;
+      await Users.update(user);
       res.status(200).json({ ...user, externalId: "" });
    } catch (error) {
       logger.error(error);
@@ -189,4 +151,6 @@ export async function Logout(_req: Request, res: Response) {
       res.status(500).json({ message: "Internal Server Error!" });
    }
 }
+
+
 

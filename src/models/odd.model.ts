@@ -7,8 +7,8 @@ export interface IOddModel extends Model<IOdd, CreationAttributes>, IOdd {}
 export const odds = Database.define<IOddModel>("odds", {
    id: { type: Sequelize.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
    gameId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: false },
-   name: { type: Sequelize.STRING, allowNull: false },
-   team: { type: Sequelize.STRING, allowNull: false },
+   teamId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false },
+   name: { type: Sequelize.STRING(60), allowNull: false },
    payout: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    amount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    maxBetAmount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
@@ -20,3 +20,5 @@ export const odds = Database.define<IOddModel>("odds", {
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
+
+

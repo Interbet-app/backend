@@ -1,12 +1,13 @@
 export interface IUser {
    id?: number;
-   name: string;
-   externalId: string;
-   oauth: "google" | "ig" | "facebook";
-   email: string;
-   team?: string;
-   picture?: string;
    affiliateId?: number;
+   externalId: string;
+   teamId?: number;
+   name: string;
+   oauth: "google" | "instagram" | "facebook";
+   email: string;
+   level: number;
+   picture?: string;
    createdAt: Date;
    updatedAt: Date;
 }

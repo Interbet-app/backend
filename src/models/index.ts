@@ -5,3 +5,6 @@ export * from "./event.model";
 export * from "./bet.model";
 export * from "./odd.model";
 export * from "./game.model";
+export * from "./adds.model";
+export * from "./notifications.model";
+export * from "./athletics.model";

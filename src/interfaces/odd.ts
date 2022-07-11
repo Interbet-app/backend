@@ -2,7 +2,7 @@ export interface IOdd {
    id?: number;
    gameId: number;
    name: string;
-   team: string;
+   teamId: number;
    payout: number;
    amount: number;
    maxBetAmount: number;

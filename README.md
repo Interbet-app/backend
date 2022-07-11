@@ -20,8 +20,6 @@
   - [Design](https://github.com/) - ...
   - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
 
-
-
 ## ⚙️ Instalação
    Siga o passo a baixo para poder executar o projeto em sua maquina.
    Faça o clone do repositório para uma pasta em sua maquina após instale as dependências necessárias usando o comando abaixo:
@@ -32,6 +30,8 @@ npm install
 ```
 npm run dev
 ```
+## 📙 Documentação
+   Instale em seu _Vs Code_ a extensão <font color="yellow">*Swagger Viewer*</font> depois va ate o arquivo _documentation.yml_ e com o botão direito e use a opção _Preview Swagger_.
 
 ## ⛏️ Linguagens e Frameworks
 
