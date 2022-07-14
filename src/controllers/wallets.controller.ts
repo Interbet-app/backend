@@ -1,17 +1,23 @@
 import { Request, Response } from "express";
 import { Wallets } from "../repositories";
-import { Jwt } from "../utils/jwt";
+import { Jwt } from "../auth";
 import { Token } from "../types";
-import logger from "../log";
+import AppError from "../error";
 
-export async function GetWallet(_req: Request, res: Response) {
+export async function GetWallet(_req: Request, res: Response, next: any) {
    try {
-      const token = (await Jwt.getLocals(res)) as Token;
+      const token = (await Jwt.getLocals(res, next)) as Token;
       const wallet = await Wallets.getByUserId(token.userId);
-      if (!wallet) return res.status(404).json({ message: "Wallet not found!" });
-      return res.status(200).json({ ...wallet });
+      if (!wallet) throw new AppError(404, "Wallet not found!");
+      else
+         res.status(200).json({
+            balance: wallet.balance,
+            blocked: wallet.blocked,
+            score: wallet.score,
+            updatedAt: wallet.updatedAt,
+         });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error" });
+      next(error);
    }
 }
+

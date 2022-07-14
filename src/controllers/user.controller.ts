@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Cache } from "../cache";
-import { Jwt } from "../utils/jwt";
+import AppError from "../error";
+import { Jwt } from "../auth";
 import { Token } from "../types";
 import { Users } from "../repositories";
 import axios from "axios";
@@ -10,22 +11,31 @@ const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
 const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET as string;
 const INSTAGRAM_REDIRECT_URI = process.env.INSTAGRAM_REDIRECT_URI as string;
 
-export async function GetUser(_req: Request, res: Response) {
+export async function GetUser(_req: Request, res: Response, next: any) {
    try {
-      const token = Jwt.getLocals(res) as Token;
+      const token = Jwt.getLocals(res,next) as Token;
       const user = await Users.getById(token.userId);
-      if (!user) return res.status(404).json({ message: "User not found!" });
-      return res.status(200).json({ ...user, externalId: "" });
+      if (!user) throw new AppError(404, "User not found");
+      res.status(200).json({
+         level: user.level,
+         oauth: user.oauth,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         teamId: user.teamId,
+         affiliateId: user.affiliateId,
+         createdAt: user.createdAt,
+         updatedAt: user.updatedAt,
+      });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error!" });
+      next(error);
    }
 }
-export async function GoogleOAuth(req: Request, res: Response) {
+export async function GoogleOAuth(req: Request, res: Response, next: any) {
    try {
       const affiliateId = parseInt(req.body.affiliateId, 10);
       const { email, email_verified, name, picture, sub } = res.locals.payload;
-      if (!email_verified) return res.status(403).json({ message: "Your Google account e-mail is not verified!" });
+      if (!email_verified) throw new AppError(401, "Your Google account e-mail is not verified!");
       let user = await Users.getByEmail(email);
       if (!user) {
          user = await Users.create({
@@ -39,21 +49,29 @@ export async function GoogleOAuth(req: Request, res: Response) {
             createdAt: new Date(),
             updatedAt: new Date(),
          });
-         if (!user) return res.status(500).json({ message: "Internal server error!" });
+         if (!user) throw new AppError(500, "Internal server error");
       }
-      const token = await Jwt.sign(user.id!);
-      res.status(200).json({ token, ...user, externalId: "" });
+      const token = await Jwt.sign(user.id!,next);
+      res.status(200).json({
+         token,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         level: user.level,
+         affiliateId: user.affiliateId,
+         createdAt: user.createdAt,
+         updatedAt: user.updatedAt,
+         oauth: user.oauth,
+         teamId: user.teamId,
+      });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error!" });
+      next(error);
    }
 }
-export async function FacebookOAuth(req: Request, res: Response) {
+export async function FacebookOAuth(req: Request, res: Response, next: any) {
    try {
       const { id, email, name, picture, accessToken, affiliateId } = req.body;
-
       //! Validar token aqui posteriormente (verificar se é valido)
-
       let user = await Users.getByEmail(email);
       if (!user) {
          user = await Users.create({
@@ -67,19 +85,29 @@ export async function FacebookOAuth(req: Request, res: Response) {
             createdAt: new Date(),
             updatedAt: new Date(),
          });
-         if (!user) return res.status(500).json({ message: "Internal server error!" });
+         if (!user) throw new AppError(500, "Internal server error");
       }
-      const token = await Jwt.sign(user.id!);
-      return res.status(200).json({ token, ...user, externalId: "" });
+      const token = await Jwt.sign(user.id!,next);
+      res.status(200).json({
+         token,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         level: user.level,
+         affiliateId: user.affiliateId,
+         createdAt: user.createdAt,
+         updatedAt: user.updatedAt,
+         oauth: user.oauth,
+         teamId: user.teamId,
+      });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error!" });
+      next(error);
    }
 }
-export async function InstagramOAuth(req: Request, res: Response) {
+export async function InstagramOAuth(req: Request, res: Response, next: any) {
    try {
       const { code, affiliateId } = req.body;
-      if (!code) return res.status(422).send("Missing code");
+      if (!code) throw new AppError(400, "Missing code param!");
       const data = {
          client_id: INSTAGRAM_CLIENT_ID,
          client_secret: INSTAGRAM_CLIENT_SECRET,
@@ -100,7 +128,7 @@ export async function InstagramOAuth(req: Request, res: Response) {
                .then(async (response) => {
                   const { id, username } = response.data;
                   let user = await Users.getExternalId(id);
-                  if (!user) {
+                  if (!user)
                      user = await Users.create({
                         name: username,
                         email: username,
@@ -111,46 +139,65 @@ export async function InstagramOAuth(req: Request, res: Response) {
                         createdAt: new Date(),
                         updatedAt: new Date(),
                      });
-                  }
-                  const token = await Jwt.sign(user.id!);
-                  res.status(200).json({ token, ...user, externalId: "" });
+
+                  const token = await Jwt.sign(user.id!, next);
+                  res.status(200).json({
+                     token,
+                     level: user.level,
+                     oauth: user.oauth,
+                     name: user.name,
+                     email: user.email,
+                     picture: user.picture,
+                     teamId: user.teamId,
+                     affiliateId: user.affiliateId,
+                     createdAt: user.createdAt,
+                     updatedAt: user.updatedAt,
+                  });
                })
-               .catch(() => res.status(500).json({ message: "Error get user id and username from ig API!" }));
+               .catch((error) => {
+                  throw new AppError(500, "Error get user id and username from ig API!", error);
+               });
          })
-         .catch(() => res.status(500).json({ message: "Error get user access_token from ig API!" }));
+         .catch((error) => {
+            throw new AppError(500, "Error get user access_token from ig API!", error);
+         });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error);
    }
 }
-export async function UserUpdate(req: Request, res: Response) {
+export async function UserUpdate(req: Request, res: Response, next: any) {
    try {
-      const { name, email, picture, teamId, affiliateId } = req.body;
-      const token = Jwt.getLocals(res) as Token;
+      const { name, email, picture, teamId } = req.body;
+      const token = Jwt.getLocals(res,next) as Token;
       const user = await Users.getById(token.userId);
-      if (!user) return res.status(404).json({ message: "User not found!" });
+      if (!user) throw new AppError(404, "User not found!");
       if (name) user.name = name;
       if (email) user.email = email;
       if (picture) user.picture = picture;
       if (teamId) user.teamId = teamId;
-      await Users.update(user);
-      res.status(200).json({ ...user, externalId: "" });
+      await user.save();
+      res.status(200).json({
+         level: user.level,
+         oauth: user.oauth,
+         name: user.name,
+         email: user.email,
+         picture: user.picture,
+         teamId: user.teamId,
+         affiliateId: user.affiliateId,
+         createdAt: user.createdAt,
+         updatedAt: user.updatedAt,
+      });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal server error!" });
+      next(error);
    }
 }
-export async function Logout(_req: Request, res: Response) {
+export async function Logout(_req: Request, res: Response, next: any) {
    try {
-      const token = Jwt.getLocals(res) as Token;
-      if (!token) return res.status(401).json({ message: "Token not found!" });
+      const token = Jwt.getLocals(res,next) as Token;
       Cache.set(`${token.userId}`, token.jwt);
-      return res.status(200).json({ message: "Logout successful!" });
+      res.status(200).json({ message: "Logout successful!" });
    } catch (error) {
-      logger.error(error);
-      res.status(500).json({ message: "Internal Server Error!" });
+      next(error);
    }
 }
-
-
 

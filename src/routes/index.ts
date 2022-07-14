@@ -10,6 +10,9 @@ route.get("/teams/:name", AuthUser, Control.FindTeams);
 route.get("/athletics", AuthUser, Control.GetAthletics);
 route.get("/athletics/:name", AuthUser, Control.FindAthletics);
 
+route.get("/events", AuthUser, Control.GetEvents);
+route.get("/adds", AuthUser, Control.GetAdds);
+
 route.get("/user", AuthUser, Control.GetUser);
 route.put("/user", AuthUser, Control.UserUpdate);
 

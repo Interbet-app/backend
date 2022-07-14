@@ -1,4 +1,5 @@
 import express, { Response, Request } from "express";
+import AppError from "./error";
 import helmet from "helmet";
 import cors from "cors";
 import logger from "./log";
@@ -22,10 +23,21 @@ api.use(routes);
 api.use("/", (_req: Request, res: Response) => {
    res.status(403).json({ message: "Unauthorized access!" });
 });
+
 //Captura de erros
-api.use((error: any, res: Response) => {
-   logger.error(error);
-   res.status(500).json({ message: "Internal Server Error!" });
+api.use((error: Error, _req: Request, res: Response, _next: any) => {
+   if (error instanceof AppError) {
+      logger.error(error.message);
+      res.status(error.statusCode).json({
+         message: error.message,
+         error: error.error?.message,
+      });
+   } else {
+      logger.error(error.message);
+      res.status(500).json({ message: "Internal Server Error!" });
+   }
 });
 
 export default api;
+
+
