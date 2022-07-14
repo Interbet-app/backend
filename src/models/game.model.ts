@@ -12,6 +12,8 @@ export const games = Database.define<IGameModel>("games", {
    modality: { type: Sequelize.STRING(40), allowNull: true },
    winnerOddId: { type: Sequelize.INTEGER, allowNull: true },
    result: { type: Sequelize.STRING(60), allowNull: true },
+   location: { type: Sequelize.STRING(60), allowNull: true },
+   startDate: { type: Sequelize.DATE, allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });

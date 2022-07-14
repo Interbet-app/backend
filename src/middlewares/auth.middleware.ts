@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Cache } from "../cache/index";
 import AppError from "../error";
 import { Jwt } from "../auth";
+import { Token } from "../types";
+import { Maintenances } from "../repositories";
 import { OAuth2Client } from "google-auth-library";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const googleOAuth = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -31,6 +33,26 @@ export async function AuthGoogle(req: Request, res: Response, next: any) {
       const ticket = await googleOAuth.verifyIdToken({ idToken: token, audience: GOOGLE_CLIENT_ID });
       const payload = ticket.getPayload();
       res.locals.payload = payload;
+      next();
+   } catch (error) {
+      next(error);
+   }
+}
+
+export async function AuthAdmin(req: Request, res: Response, next: any) {
+   try {
+      const { method, path } = req;
+      const token = Jwt.getLocals(res, next) as Token;
+      if (!token) throw new AppError(403, "Authorization to admin is invalid!");
+      const maintenances = await Maintenances.getByUserId(token.userId);
+      let filter = path.substring(0, path.indexOf("/", 1));
+      if (filter.length < 2) filter = path;
+      const maintenance = maintenances.find((maintenance) => {
+         return maintenance.path === filter;
+      });
+      if (!maintenance) throw new AppError(403, `User is not allowed to access ${method} -> ${path}!`);
+      if (maintenance.method !== "ALL" && maintenance.method !== method.toUpperCase())
+         throw new AppError(403, `User is not allowed to access ${method} -> ${path}!`);
       next();
    } catch (error) {
       next(error);

@@ -5,3 +5,4 @@ export * from "./notifications.controller";
 export * from "./wallets.controller";
 export * from "./events.controller";
 export * from "./adds.controller";
+export * from "./maintenances.controller";

@@ -11,3 +11,6 @@ export function FacebookOAuthSchema(req: Request, res: Response, next: any) {
 export function InstagramOAuthSchema(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.instagram_oauth, req.body, res, next);
 }
+export function CreateMaintenance(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_maintenance, req.body, res, next);
+}

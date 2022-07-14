@@ -24,7 +24,7 @@ api.use("/", (_req: Request, res: Response) => {
    res.status(403).json({ message: "Unauthorized access!" });
 });
 
-//Captura de erros
+//Captura e processa os erros
 api.use((error: Error, _req: Request, res: Response, _next: any) => {
    if (error instanceof AppError) {
       logger.error(error.message);
@@ -33,11 +33,14 @@ api.use((error: Error, _req: Request, res: Response, _next: any) => {
          error: error.error?.message,
       });
    } else {
-      logger.error(error.message);
-      res.status(500).json({ message: "Internal Server Error!" });
+      if (error.message.includes("jwt expired")) {
+         res.status(403).json({ message: "Authorization token is expired!" });
+      } else {
+         logger.error(error.message);
+         res.status(500).json({ message: "Internal Server Error!" });
+      }
    }
 });
 
 export default api;
-
 

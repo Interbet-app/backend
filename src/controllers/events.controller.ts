@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import { Events } from "../repositories";
-import logger from "../log";
+import AppError from "../error";
 
-
-export async function GetEvents(_req: Request, res: Response) {
+export async function GetEvents(_req: Request, res: Response, next: any) {
    try {
       const events = await Events.getAll();
-      res.status(200).json({events: events});
+      const response = events.map((event) => {
+         return {
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            createdAt: event.createdAt,
+         };
+      });
+      res.status(200).json({ events: response });
    } catch (error) {
-      logger.error(error)
-      res.status(500).json({ message: "Internal server error!" });
+      next(error);
    }
 }
+

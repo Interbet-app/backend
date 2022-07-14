@@ -20,7 +20,12 @@ export const instagram_oauth = Joi.object().keys({
 
 export const update_user = Joi.object({
    name: Joi.string().max(60).required(),
-   email: Joi.string().max(60).required(),
-   picture: Joi.string().required(),
    teamId: Joi.number().required(),
-})
+});
+
+export const create_maintenance = Joi.object({
+   userId: Joi.number().required(),
+   path: Joi.string().required(),
+   method: Joi.string().valid("ALL", "DELETE", "GET", "POST", "PUT", "PATCH").required(),
+   group: Joi.string().optional(),
+});

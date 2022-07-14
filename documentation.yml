@@ -56,6 +56,8 @@ components:
                format: int64
             name:
                type: string
+            athleticId:
+               type: integer
             abbreviation:
                type: string
             location:
@@ -148,7 +150,28 @@ components:
             updatedAt:
                type: string
                format: date-time
-
+      maintenance:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            userId:
+               type: integer
+               format: int64
+            path:
+               type: string
+            method:
+               type: string
+               enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "ALL"]
+            group:
+               type: string
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
 paths:
    /google/oauth:
       post:
@@ -160,11 +183,15 @@ paths:
               required: true
               schema:
                  type: string
-            - name: "affiliateId"
-              in: query
-              schema:
-                 type: integer
-                 format: int64
+         requestBody: 
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        affiliateId:
+                           type: integer
+                           format: int64
          responses:
             "200":
                description: OK
@@ -185,38 +212,29 @@ paths:
       post:
          tags:
             - OAuth
-         parameters:
-            - name: accessToken
-              in: query
-              required: true
-              schema:
-                 type: string
-            - name: "affiliateId"
-              in: query
-              schema:
-                 type: integer
-                 format: int64
-            - name: "name"
-              description: "The name of facebook user"
-              in: query
-              schema:
-                 type: string
-            - name: "email"
-              description: "Email of the user"
-              in: query
-              schema:
-                 type: string
-            - name: "picture"
-              description: "Picture URL"
-              in: query
-              schema:
-                 type: string
-            - name: "id"
-              description: "Facebook ID"
-              in: query
-              schema:
-                 type: string
-
+         
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        accessToken:
+                           type: string
+                        affiliateId:
+                           type: integer
+                           format: int64
+                        email:
+                           type: string
+                        picture:
+                           type: string
+                        name:
+                           type: string
+                           description: Name of the user from facebook
+                        id:
+                           type: string
+                           description: Facebook ID
          responses:
             "200":
                description: OK
@@ -280,22 +298,18 @@ paths:
             - User
          security:
             - bearerAuth: ["authentication"]
-         parameters:
-            - name: "name"
-              description: "The name of user"
-              in: query
-              schema:
-                 type: string
-            - name: "email"
-              description: "Email of the user"
-              in: query
-              schema:
-                 type: string
-            - name: "picture"
-              description: "Picture URL"
-              in: query
-              schema:
-                 type: string
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        name:
+                           type: string
+                        teamId:
+                           type: integer
+                           format: int64
          responses:
             "200":
                description: OK
@@ -331,7 +345,7 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/notification"
-   /notifications/mark-as-read/{id}:
+   /notifications/{id}/:
       put:
          tags:
             - Notifications
@@ -351,7 +365,6 @@ paths:
                   application/json:
                      schema:
                         $ref: "#/components/schemas/notification"
-   /notifications/{id}:
       delete:
          tags:
             - Notifications
@@ -388,7 +401,39 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/team"
-   /teams/{search}:
+      post:
+         tags:
+            - Teams
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               multipart/form-data:
+                  schema:
+                     type: object
+                     properties:
+                        name:
+                           type: string
+                        abbreviation:
+                           type: string
+                        location:
+                           type: string
+                        athleticId:
+                           type: number
+                        picture:
+                           type: string
+                           format: binary
+                           description: File to upload
+                        
+         responses:
+            "200":
+               description: Return teams
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/team"
+   /teams/{search}/:
       get:
          tags:
             - Teams
@@ -409,6 +454,7 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/team"
+
    /athletics:
       get:
          tags:
@@ -424,7 +470,36 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/athletic"
-   /athletics/{search}:
+      post:
+         tags:
+            - Athletics
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               multipart/form-data:
+                  schema:
+                     type: object
+                     properties:
+                        picture:
+                           type: string
+                           format: binary
+                           description: File to upload
+                        name:
+                           type: string
+                           description: Name of the athletic
+                        abbreviation:
+                           type: string
+                           description: Abbreviation of the athletic
+         responses:
+            "200":
+               description: Return the created athletic
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/athletic"
+   /athletics/{search}/:
       get:
          tags:
             - Athletics
@@ -445,6 +520,7 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/athletic"
+
    /events:
       get:
          tags:
@@ -460,3 +536,61 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/events"
+
+   /maintenances:
+      get:
+         tags:
+            - Maintenances
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all maintenances
+               content:
+                  application/json:
+                     schema:
+                        type: array
+                        items:
+                           $ref: "#/components/schemas/maintenance"
+      post:
+         tags:
+            - Maintenances
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        userId:
+                           type: integer
+                           format: int64
+                        path:
+                           type: string
+                        group:
+                           type: string
+                        method:
+                           type: string
+                           enum: ["GET", "POST", "PUT", "DELETE", "ALL", "PATCH"]
+         responses:
+            "201":
+               description: "Created successfully"
+   /maintenances/{id}/:
+      delete:
+         tags:
+            - Maintenances
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: "Deleted successfully"
+

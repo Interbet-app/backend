@@ -5,3 +5,4 @@ export * from "./notifications.repository";
 export * from "./wallets.repository";
 export * from "./events.repository";
 export * from "./adds.repository";
+export * from "./maintenances.repository";
