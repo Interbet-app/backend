@@ -14,3 +14,6 @@ export function InstagramOAuthSchema(req: Request, res: Response, next: any) {
 export function CreateMaintenance(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.create_maintenance, req.body, res, next);
 }
+export function CreateEvent(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_event, req.body, res, next);
+}

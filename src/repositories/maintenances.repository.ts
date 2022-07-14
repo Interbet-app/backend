@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { maintenances, IMaintenanceModel } from "../models";
 import { IMaintenance } from "../interfaces";
 
@@ -15,7 +16,7 @@ export class Maintenances {
    }
 
    static async getByGroup(group: string): Promise<IMaintenanceModel[]> {
-      return await maintenances.findAll({ where: { group: group } });
+      return await maintenances.findAll({ where: { group: { [Op.like]: `%${group}%` } } });
    }
 
    static async create(maintenance: IMaintenance): Promise<IMaintenanceModel> {

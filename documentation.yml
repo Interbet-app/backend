@@ -183,7 +183,7 @@ paths:
               required: true
               schema:
                  type: string
-         requestBody: 
+         requestBody:
             content:
                application/json:
                   schema:
@@ -212,7 +212,6 @@ paths:
       post:
          tags:
             - OAuth
-         
          requestBody:
             required: true
             content:
@@ -425,7 +424,7 @@ paths:
                            type: string
                            format: binary
                            description: File to upload
-                        
+
          responses:
             "200":
                description: Return teams
@@ -454,7 +453,6 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/team"
-
    /athletics:
       get:
          tags:
@@ -520,7 +518,6 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/athletic"
-
    /events:
       get:
          tags:
@@ -536,7 +533,54 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/events"
-
+      post:
+         tags:
+            - Events
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        name:
+                           type: string
+                           description: Name of the event
+                        description:
+                           type: string
+                           description: Description of the event
+                        title:
+                           type: string
+                           description: Title of the event
+                        location:
+                           type: string
+                           description: Location of the event
+         responses:
+            "200":
+               description: Return the created event
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/event"
+   /maintenances/{group}/:
+      get:
+         tags:
+            - Maintenances
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: group
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+                 description: Group to filter maintenances
+         responses:
+            "200":
+               description: "Return the array os search maintenances"
    /maintenances:
       get:
          tags:

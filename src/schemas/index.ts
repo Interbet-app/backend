@@ -29,3 +29,10 @@ export const create_maintenance = Joi.object({
    method: Joi.string().valid("ALL", "DELETE", "GET", "POST", "PUT", "PATCH").required(),
    group: Joi.string().optional(),
 });
+
+export const create_event = Joi.object({
+   name: Joi.string().max(60).required(),
+   description: Joi.string().max(255).required(),
+   title: Joi.string().max(40).required(),
+   location: Joi.string().max(80).required(),
+})

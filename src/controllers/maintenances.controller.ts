@@ -32,7 +32,6 @@ export async function CreateMaintenance(req: Request, res: Response, next: any) 
       next(error);
    }
 }
-
 export async function DeleteMaintenance(req: Request, res: Response, next: any) {
    try {
       const id = parseInt(req.params.id, 10);
@@ -43,4 +42,25 @@ export async function DeleteMaintenance(req: Request, res: Response, next: any) 
    } catch (error) {
       next(error);
    }
+}
+export async function FindGroupMaintenances(req: Request, res: Response, next: any) {
+ try {
+      const group = req.params.group;
+      if (!group) throw new AppError(422, "Group is required!");
+      const maintenances = await Maintenances.getByGroup(group);
+      const response = maintenances.map((maintenance) => {
+         return {
+            id: maintenance.id,
+            userId: maintenance.userId,
+            path: maintenance.path,
+            method: maintenance.method,
+            group: maintenance.group,
+            createdAt: maintenance.createdAt,
+            updatedAt: maintenance.updatedAt,
+         };
+      });
+    res.status(200).json({ maintenances: response });
+ } catch (error) {
+   next(error);
+ }
 }

@@ -18,4 +18,22 @@ export async function GetEvents(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function CreateEvent(req: Request, res: Response, next: any) {
+   try {
+      const { name, description, title, location } = req.body;
+      const event = await Events.create({ name, description, title, location, createdAt: new Date(), updatedAt: new Date()});
+      if(!event) throw new AppError(500, "Event not created!");
+      res.status(201).json({
+         id: event.id,
+         name: event.name,
+         description: event.description,
+         title: event.title,
+         location: event.location,
+         createdAt: event.createdAt,
+         updatedAt: event.updatedAt,
+      });
+   } catch (error) {
+      next(error);
+   }
+}
 

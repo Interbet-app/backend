@@ -4,6 +4,7 @@ import AppError from "../error";
 import { Jwt } from "../auth";
 import { Token } from "../types";
 import { Maintenances } from "../repositories";
+import { IMaintenance } from "../interfaces";
 import { OAuth2Client } from "google-auth-library";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 const googleOAuth = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -47,16 +48,19 @@ export async function AuthAdmin(req: Request, res: Response, next: any) {
       const maintenances = await Maintenances.getByUserId(token.userId);
       let filter = path.substring(1, path.indexOf("/", 1));
       if (filter.length < 2) filter = path.substring(1);
-      const maintenance = maintenances.find((maintenance) => {
-         return maintenance.path === filter;
+
+      let allows: IMaintenance[] = [];
+      maintenances.forEach((maintenance) => {
+         if (maintenance.path == filter) allows.push(maintenance);
       });
-      if (!maintenance) throw new AppError(403, `User is not allowed to access ${method} -> ${path}!`);
-      if (maintenance.method !== "ALL" && maintenance.method !== method.toUpperCase())
-         throw new AppError(403, `2 User is not allowed to access ${method} -> ${path}!`);
-      
+      if (allows.length < 1) throw new AppError(403, `User is not allowed to access the route '${path}'!`);
+      const allowed = allows.find((allow) => { return allow.method === "ALL" || allow.method == method.toUpperCase();
+      });
+      if (!allowed) throw new AppError(403, `User is not allowed to access the '${method}' in the route '${path}'!`);
       next();
    } catch (error) {
       next(error);
    }
 }
+
 

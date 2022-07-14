@@ -14,6 +14,8 @@ route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
 
 route.get("/events", AuthUser, Control.GetEvents);
+route.post("/events", AuthUser, AuthAdmin, Middle.CreateEvent, Control.CreateEvent);
+
 route.get("/adds", AuthUser, Control.GetAdds);
 
 route.get("/user", AuthUser, Control.GetUser);
@@ -31,6 +33,7 @@ route.put("/notifications/:id/", AuthUser, Control.NotificationMarkAsRead);
 route.delete("/notifications/:id/", AuthUser, Control.NotificationDelete);
 
 route.get("/maintenances", AuthUser, AuthAdmin, Control.GetMaintenances);
+route.get("/maintenances/:group/", AuthUser, AuthAdmin, Control.FindGroupMaintenances);
 route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
