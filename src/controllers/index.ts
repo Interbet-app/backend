@@ -6,3 +6,5 @@ export * from "./wallets.controller";
 export * from "./events.controller";
 export * from "./adds.controller";
 export * from "./maintenances.controller";
+export * from "./games.controller";
+export * from "./odds.controller";

@@ -6,3 +6,5 @@ export * from "./wallets.repository";
 export * from "./events.repository";
 export * from "./adds.repository";
 export * from "./maintenances.repository";
+export * from "./games.repository";
+export * from "./odds.repository";

@@ -35,4 +35,55 @@ export const create_event = Joi.object({
    description: Joi.string().max(255).required(),
    title: Joi.string().max(40).required(),
    location: Joi.string().max(80).required(),
-})
+});
+
+export const create_game = Joi.object({
+   eventId: Joi.number().required(),
+   name: Joi.string().max(40).required(),
+   status: Joi.string().valid("open", "pendent", "closed").required(),
+   modality: Joi.string().max(60).required(),
+   location: Joi.string().max(60).required(),
+   startDate: Joi.date().required(),
+});
+
+export const update_game = Joi.object({
+   gameId: Joi.number().required(),
+   name: Joi.string().max(60).required(),
+   status: Joi.string().valid("open", "pendent", "closed").required(),
+   modality: Joi.string().max(70).required(),
+   location: Joi.string().max(60).required(),
+   startDate: Joi.date().required(),
+   winnerOddId: Joi.number().optional(),
+   result: Joi.string().max(60).optional(),
+});
+
+export const create_odd = Joi.object({
+   gameId: Joi.number().required(),
+   teamId: Joi.number().required(),
+   name: Joi.string().max(60).required(),
+   payout: Joi.number().required(),
+   maxBetAmount: Joi.number().required(),
+   score: Joi.number().required(),
+   offer: Joi.boolean().required(),
+   status: Joi.string().valid("open", "lock").optional(),
+});
+
+export const update_odd = Joi.object({
+   oddId: Joi.number().required(),
+   gameId: Joi.number().required(),
+   teamId: Joi.number().required(),
+   name: Joi.string().max(60).required(),
+   payout: Joi.number().required(),
+   maxBetAmount: Joi.number().required(),
+   score: Joi.number().required(),
+   offer: Joi.boolean().required(),
+   status: Joi.string().valid("open", "lock").optional(),
+});
+
+export const update_wallet = Joi.object({
+   walletId: Joi.number().required(),
+   balance: Joi.number().optional(),
+   score: Joi.number().optional(),
+   blocked: Joi.number().optional(),
+   updatedAt: Joi.date().required(),
+});

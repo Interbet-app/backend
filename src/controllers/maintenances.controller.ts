@@ -36,8 +36,8 @@ export async function DeleteMaintenance(req: Request, res: Response, next: any) 
    try {
       const id = parseInt(req.params.id, 10);
       if (!id) throw new AppError(422, "Maintenance Id is required!");
-      const result = await Maintenances.delete(id);
-      if (!result) throw new AppError(500, "Internal Server Error");
+      const maintenance = await Maintenances.getById(id);
+      if (!maintenance) throw new AppError(404, "Maintenance not found!");
       res.sendStatus(200);
    } catch (error) {
       next(error);
@@ -63,4 +63,5 @@ export async function FindGroupMaintenances(req: Request, res: Response, next: a
  } catch (error) {
    next(error);
  }
+
 }

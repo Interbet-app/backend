@@ -45,22 +45,20 @@ export async function AuthAdmin(req: Request, res: Response, next: any) {
       const { method, path } = req;
       const token = Jwt.getLocals(res, next) as Token;
       if (!token) throw new AppError(403, "Authorization to admin is invalid!");
+      
       const maintenances = await Maintenances.getByUserId(token.userId);
       let filter = path.substring(1, path.indexOf("/", 1));
       if (filter.length < 2) filter = path.substring(1);
 
-      let allows: IMaintenance[] = [];
-      maintenances.forEach((maintenance) => {
-         if (maintenance.path == filter) allows.push(maintenance);
-      });
-      if (allows.length < 1) throw new AppError(403, `User is not allowed to access the route '${path}'!`);
-      const allowed = allows.find((allow) => { return allow.method === "ALL" || allow.method == method.toUpperCase();
-      });
+      const roles = maintenances.filter((maintenance: IMaintenance) => maintenance.path == filter);
+      if (roles.length === 0) throw new AppError(403, `User is not allowed to access the route '${path}'!`);
+
+      const allowed = roles.filter((allow) => allow.method === "ALL" || allow.method == method.toUpperCase());
       if (!allowed) throw new AppError(403, `User is not allowed to access the '${method}' in the route '${path}'!`);
+
       next();
    } catch (error) {
       next(error);
    }
 }
-
 

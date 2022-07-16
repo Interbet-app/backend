@@ -18,4 +18,10 @@ export class File {
    static filterExt(permittedExt: String[], mimetype: string): boolean {
       return permittedExt.includes(mimetype);
    }
+   static IsFormatAllowed = (file: any,formats: string[]): boolean => {
+      const format = file.type;
+      return formats.some((type) => type === format);
+   };
 }
+
+

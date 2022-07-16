@@ -31,7 +31,7 @@ export class S3 {
          return new AppError(500, "Error uploading file to S3", error);
       }
    }
-   public async find(fileName: string): Promise<AWS.S3.ListObjectsV2Output | AppError> {
+   public async FindFile(fileName: string): Promise<AWS.S3.ListObjectsV2Output | AppError> {
       try {
          const params = {
             Bucket: this.BUCKET_NAME,
@@ -42,7 +42,7 @@ export class S3 {
          return new AppError(500, "Error finding file in S3", error);
       }
    }
-   public async delete(fileName: string): Promise<AWS.S3.DeleteObjectOutput | AppError> {
+   public async DeleteFile(fileName: string): Promise<AWS.S3.DeleteObjectOutput | AppError> {
       try {
          const params = {
             Bucket: this.BUCKET_NAME,

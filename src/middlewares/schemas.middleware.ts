@@ -17,3 +17,18 @@ export function CreateMaintenance(req: Request, res: Response, next: any) {
 export function CreateEvent(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.create_event, req.body, res, next);
 }
+export function CreateGame(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_game, req.body, res, next);
+}
+export function UpdateGame(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.update_game, req.body, res, next);
+}
+export function CreateOdd(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_odd, req.body, res, next);
+}
+export function UpdateOdd(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.update_odd, req.body, res, next);
+}
+export function UpdateWallet(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.update_wallet, req.body, res, next);
+}

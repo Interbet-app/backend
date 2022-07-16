@@ -2,10 +2,10 @@ openapi: "3.0.0"
 info:
    title: InterBet
    version: "1.0.0"
+   
 
 servers:
    - url: https://interbet-api.herokuapp.com
-   - url: https://api/v1/interbet.app
    - url: localhost:4000
 
 components:
@@ -88,7 +88,7 @@ components:
             updatedAt:
                type: string
                format: date-time
-      events:
+      event:
          type: object
          properties:
             id:
@@ -172,6 +172,92 @@ components:
             updatedAt:
                type: string
                format: date-time
+      add:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            image:
+               type: string
+            url:
+               type: string
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+      game:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            name:
+               type: string
+            eventId:
+               type: integer
+               format: int64
+            winnerOddId:
+               type: integer
+               format: int64
+            status:
+               type: string
+               enum: ["pending", "ongoing", "finished"]
+            modality:
+               type: string
+            location:
+               type: string
+            result:
+               type: string
+            startDate:
+               type: string
+               format: date-time
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+      odd:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            name:
+               type: string
+            teamId:
+               type: integer
+               format: int64
+            gameId:
+               type: integer
+               format: int64
+            payout:
+               type: number
+            amount:
+               type: number
+            maxBetAmount:
+               type: number
+            payment:
+               type: number
+            bets:
+               type: integer
+            score:
+               type: integer
+            offer:
+               type: boolean
+            status:
+               type: string
+               enum: ["lock", "open"]
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+
 paths:
    /google/oauth:
       post:
@@ -282,7 +368,7 @@ paths:
    /user:
       get:
          tags:
-            - User
+            - Usuários
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -294,7 +380,7 @@ paths:
                         $ref: "#/components/schemas/user"
       put:
          tags:
-            - User
+            - Usuários
          security:
             - bearerAuth: ["authentication"]
          requestBody:
@@ -319,7 +405,7 @@ paths:
    /wallet:
       get:
          tags:
-            - Wallet
+            - Carteiras
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -329,10 +415,47 @@ paths:
                   application/json:
                      schema:
                         $ref: "#/components/schemas/wallet"
+      put:
+         tags:
+            - Carteiras
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     required:
+                        - walletId
+                        - updatedAt
+                     properties:
+                        balance:
+                           type: number
+                           format: double
+                        blocked:
+                           type: number
+                           format: double
+                        walletId:
+                           type: integer
+                           format: int64
+                        updatedAt:
+                           type: string
+                           format: date-time
+                        score:
+                           type: number
+                           format: int
+         responses:
+            "200":
+               description: Return the updated wallet
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/wallet"
    /notifications:
       get:
          tags:
-            - Notifications
+            - Notificações
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -341,13 +464,16 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/notification"
+                        type: object
+                        properties:
+                           notifications:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/notification"
    /notifications/{id}/:
       put:
          tags:
-            - Notifications
+            - Notificações
          security:
             - bearerAuth: ["authentication"]
          parameters:
@@ -366,7 +492,7 @@ paths:
                         $ref: "#/components/schemas/notification"
       delete:
          tags:
-            - Notifications
+            - Notificações
          security:
             - bearerAuth: ["authentication"]
          parameters:
@@ -388,7 +514,7 @@ paths:
    /teams:
       get:
          tags:
-            - Teams
+            - Times
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -397,12 +523,15 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/team"
+                        type: object
+                        properties:
+                           teams:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/team"
       post:
          tags:
-            - Teams
+            - Times
          security:
             - bearerAuth: ["authentication"]
          requestBody:
@@ -435,7 +564,7 @@ paths:
    /teams/{search}/:
       get:
          tags:
-            - Teams
+            - Times
          security:
             - bearerAuth: ["authentication"]
          parameters:
@@ -450,13 +579,16 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/team"
+                        type: object
+                        properties:
+                           teams:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/team"
    /athletics:
       get:
          tags:
-            - Athletics
+            - Atléticas
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -465,12 +597,15 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/athletic"
+                        type: object
+                        properties:
+                           athletics:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/athletic"
       post:
          tags:
-            - Athletics
+            - Atléticas
          security:
             - bearerAuth: ["authentication"]
          requestBody:
@@ -500,7 +635,7 @@ paths:
    /athletics/{search}/:
       get:
          tags:
-            - Athletics
+            - Atléticas
          security:
             - bearerAuth: ["authentication"]
          parameters:
@@ -515,59 +650,16 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/athletic"
-   /events:
-      get:
-         tags:
-            - Events
-         security:
-            - bearerAuth: ["authentication"]
-         responses:
-            "200":
-               description: Return all events
-               content:
-                  application/json:
-                     schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/events"
-      post:
-         tags:
-            - Events
-         security:
-            - bearerAuth: ["authentication"]
-         requestBody:
-            required: true
-            content:
-               application/json:
-                  schema:
-                     type: object
-                     properties:
-                        name:
-                           type: string
-                           description: Name of the event
-                        description:
-                           type: string
-                           description: Description of the event
-                        title:
-                           type: string
-                           description: Title of the event
-                        location:
-                           type: string
-                           description: Location of the event
-         responses:
-            "200":
-               description: Return the created event
-               content:
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/event"
+                        type: object
+                        properties:
+                           athletics:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/athletic"
    /maintenances/{group}/:
       get:
          tags:
-            - Maintenances
+            - Manutenção da administração
          security:
             - bearerAuth: ["authentication"]
          parameters:
@@ -580,11 +672,20 @@ paths:
                  description: Group to filter maintenances
          responses:
             "200":
-               description: "Return the array os search maintenances"
+               description: Return all maintenances by group
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           maintenances:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/maintenance"
    /maintenances:
       get:
          tags:
-            - Maintenances
+            - Manutenção da administração
          security:
             - bearerAuth: ["authentication"]
          responses:
@@ -593,12 +694,15 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: array
-                        items:
-                           $ref: "#/components/schemas/maintenance"
+                        type: object
+                        properties:
+                           maintenances:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/maintenance"
       post:
          tags:
-            - Maintenances
+            - Manutenção da administração
          security:
             - bearerAuth: ["authentication"]
          requestBody:
@@ -624,7 +728,409 @@ paths:
    /maintenances/{id}/:
       delete:
          tags:
-            - Maintenances
+            - Manutenção da administração
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: "Deleted successfully"
+   /adds:
+      get:
+         tags:
+            - Anúncios
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all adds
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           adds:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/add"
+      post:
+         tags:
+            - Anúncios
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               multipart/form-data:
+                  schema:
+                     type: object
+                     properties:
+                        url:
+                           type: string
+                        image:
+                           type: string
+                           format: binary
+                           description: File to upload
+         responses:
+            "200":
+               description: Return the created add
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/add"
+   /adds/{id}/:
+      delete:
+         tags:
+            - Anúncios
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: "Deleted successfully"
+   /events:
+      get:
+         tags:
+            - Eventos
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all events
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           events:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/event"
+      post:
+         tags:
+            - Eventos
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               multipart/form-data:
+                  schema:
+                     type: object
+                     properties:
+                        name:
+                           type: string
+                        description:
+                           type: string
+                        title:
+                           type: string
+                        location:
+                           type: string
+         responses:
+            "200":
+               description: Return the created event
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/event"
+   /events/{id}/:
+      delete:
+         tags:
+            - Eventos
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: "Deleted successfully"
+   /games:
+      get:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all games
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           games:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/game"
+      post:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        name:
+                           type: string
+                        eventId:
+                           type: integer
+                           format: int64
+                        status:
+                           type: string
+                           enum: ["pendent", "open", "closed"]
+                        location:
+                           type: string
+                        modality:
+                           type: string
+                        startDate:
+                           type: string
+                           format: date-time
+         responses:
+            "200":
+               description: Return the created game
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/game"
+      put:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     required:
+                        - gameId
+                        - name
+                        - eventId
+                        - status
+                        - location
+                        - modality
+                        - startDate
+                     properties:
+                        gameId:
+                           type: integer
+                           format: int64
+                        name:
+                           type: string
+                        eventId:
+                           type: integer
+                           format: int64
+                        status:
+                           type: string
+                           enum: ["pendent", "open", "closed"]
+                        location:
+                           type: string
+                        modality:
+                           type: string
+                        startDate:
+                           type: string
+                           format: date-time
+                        winnerOddId:
+                           type: integer
+                           format: int64
+                        result:
+                           type: string
+         responses:
+            "200":
+               description: Return the updated game
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/game"
+   /games/{id}/:
+      get:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return the game
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/game"
+      delete:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: "Deleted successfully"
+   /odds:
+      get:
+         tags:
+            - Odds
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all odds
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           odds:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/odd"
+      post:
+         tags:
+            - Odds
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        gameId:
+                           type: integer
+                           format: int64
+                        teamId:
+                           type: integer
+                           format: int64
+                        name:
+                           type: string
+                        payout:
+                           type: number
+                           format: double
+                        maxBetAmount:
+                           type: number
+                           format: double
+                        score:
+                           type: integer
+                           format: int
+                        status:
+                           type: string
+                           enum: ["open", "lock"]
+         responses:
+            "200":
+               description: Return the created odd
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/odd"
+      put:
+         tags:
+            - Odds
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     required:
+                        - oddId
+                        - gameId
+                        - teamId
+                        - name
+                        - payout
+                        - maxBetAmount
+                        - score
+                        - offer
+                     properties:
+                        oddId:
+                           type: integer
+                           format: int64
+                        gameId:
+                           type: integer
+                           format: int64
+                        teamId:
+                           type: integer
+                           format: int64
+                        name:
+                           type: string
+                        payout:
+                           type: number
+                           format: double
+                        maxBetAmount:
+                           type: number
+                           format: double
+                        score:
+                           type: integer
+                           format: int
+                        offer:
+                           type: boolean
+                        status:
+                           type: string
+                           enum: ["open", "lock"]
+         responses:
+            "200":
+               description: Return the updated odd
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/odd"
+   /odds/{id}/:
+      get:
+         tags:
+            - Odds
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return the odd
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/odd"
+      delete:
+         tags:
+            - Odds
          security:
             - bearerAuth: ["authentication"]
          parameters:
