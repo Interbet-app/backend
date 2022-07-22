@@ -8,3 +8,4 @@ export * from "./adds.repository";
 export * from "./maintenances.repository";
 export * from "./games.repository";
 export * from "./odds.repository";
+export * from "./bets.repository";

@@ -5,7 +5,6 @@ import { Jwt } from "../auth";
 import { Token } from "../types";
 import { Users } from "../repositories";
 import axios from "axios";
-import logger from "../log";
 
 const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
 const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET as string;

@@ -5,6 +5,12 @@ import * as Middle from "../middlewares";
 
 const route = Router();
 
+route.get("/bets", AuthUser, AuthAdmin, Control.GetBets);
+route.post("/bets", AuthUser, Control.CreateBet);
+route.get("/bets/me", AuthUser, Control.GetUserBets);
+route.get("/bets/game/:id", AuthUser, AuthAdmin, Control.GetBetsByGame);
+route.delete("/bets/:id/", AuthUser, AuthAdmin, Control.DeleteBet);
+
 route.get("/games", AuthUser, Control.GetGames);
 route.get("/games/:id/", AuthUser, Control.GetGame);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
@@ -20,10 +26,14 @@ route.delete("/odds/:id/", AuthUser, AuthAdmin, Control.DeleteOdd);
 route.get("/teams", AuthUser, Control.GetTeams);
 route.get("/teams/:name", AuthUser, Control.FindTeams);
 route.post("/teams", AuthUser, AuthAdmin, Control.CreateTeam);
+route.put("/teams", AuthUser, AuthAdmin, Control.UpdateTeam);
+route.delete("/teams/:id/", AuthUser, AuthAdmin, Control.DeleteTeam);
 
 route.get("/athletics", AuthUser, Control.GetAthletics);
 route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
+route.put("/athletics", AuthUser, AuthAdmin, Control.UpdateAthletic);
+route.delete("/athletics/:id/", AuthUser, AuthAdmin, Control.DeleteAthletic);
 
 route.get("/events", AuthUser, Control.GetEvents);
 route.post("/events", AuthUser, AuthAdmin, Middle.CreateEvent, Control.CreateEvent);

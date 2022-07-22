@@ -8,3 +8,4 @@ export * from "./adds.controller";
 export * from "./maintenances.controller";
 export * from "./games.controller";
 export * from "./odds.controller";
+export * from "./bets.controller";
