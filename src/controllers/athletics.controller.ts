@@ -53,9 +53,9 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
             if (!name) throw new AppError(422, "Missing name parameter!");
             if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
 
-            if (!File.IsFormatAllowed(req.file, ["image/png", "image/jpeg", "image/jpg"]))
+            if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
                throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-            const check = File.breakMimetype(req.file.mimetype);
+            const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image")
                throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
@@ -74,7 +74,6 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
                updatedAt: new Date(),
             });
             if (!athletic) throw new AppError(500, "Error at save the athletic!");
-
             res.status(201).json({
                id: athletic.id,
                name: athletic.name,
@@ -102,14 +101,14 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          if (!name) throw new AppError(422, "Missing name parameter!");
          if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
 
-          if (!File.IsFormatAllowed(req.file, ["image/png", "image/jpeg", "image/jpg"]))
-             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-          const check = File.breakMimetype(req.file.mimetype);
-          if (check?.type !== "image")
-             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-
          const athletic = await Athletics.getById(athleticId);
          if (!athletic) throw new AppError(404, "Athletic not found!");
+
+         if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
+            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+         const check = File.BreakMimetype(req.file.mimetype);
+         if (check?.type !== "image")
+            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
          const bucket = new S3();
          const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
@@ -127,7 +126,14 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          athletic.updatedAt = new Date();
          await athletic.save();
 
-         res.status(200).json({ ...athletic } as IAthletic);
+         res.status(200).json({
+            id: athletic.id,
+            name: athletic.name,
+            abbreviation: athletic.abbreviation,
+            picture: athletic.picture,
+            createdAt: athletic.createdAt,
+            updatedAt: athletic.updatedAt,
+         });
       } catch (error) {
          next(error);
       }
@@ -149,5 +155,4 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 

@@ -97,7 +97,19 @@ export async function UpdateGame(req: Request, res: Response, next: any) {
       if (result) game.result = result;
       if (winnerOddId) game.winnerOddId = winnerOddId;
       await game.save();
-      res.status(200).json({ ...game, } as IGame);
+      res.status(200).json({
+         id: game.id,
+         eventId: game.eventId,
+         winnerOddId: game.winnerOddId,
+         name: game.name,
+         status: game.status,
+         modality: game.modality,
+         location: game.location,
+         result: game.result,
+         startDate: game.startDate,
+         createdAt: game.createdAt,
+         updatedAt: game.updatedAt,
+      });
    } catch (error) {
       next(error);
    }
@@ -109,7 +121,7 @@ export async function DeleteGame(req: Request, res: Response, next: any) {
       const game = await Games.getById(id);
       if (!game) throw new AppError(404, "Game not found");
       await game.destroy();
-      res.status(204).json({});
+      res.status(204).json({ message: "Game deleted" });
    } catch (error) {
       next(error);
    }

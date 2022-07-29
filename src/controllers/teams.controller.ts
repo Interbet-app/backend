@@ -3,7 +3,6 @@ import { Teams, Athletics } from "../repositories";
 import { S3 } from "../aws";
 import multer from "multer";
 import AppError from "../error";
-import { ITeam } from "../interfaces";
 import { File } from "../functions";
 
 export async function GetTeams(_req: Request, res: Response, next: any) {
@@ -61,9 +60,9 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
             const athletic = await Athletics.getById(athleticId);
             if (!athletic) throw new AppError(404, "Athletic not found or invalid athleticId!");
 
-            if (!File.IsFormatAllowed(req.file, ["image/png", "image/jpeg", "image/jpg"]))
+            if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
                throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-            const check = File.breakMimetype(req.file.mimetype);
+            const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image")
                throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
@@ -83,7 +82,16 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
                updatedAt: new Date(),
             });
             if (!athletic) throw new AppError(500, "Error at save the team!");
-            res.status(201).json({ ...team } as ITeam);
+            res.status(201).json({
+               id: team.id,
+               name: team.name,
+               abbreviation: team.abbreviation,
+               picture: team.picture,
+               location: team.location,
+               athleticId: team.athleticId,
+               createdAt: team.createdAt,
+               updatedAt: team.updatedAt,
+            });
          } catch (error) {
             next(error);
          }
@@ -107,11 +115,11 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          const team = await Teams.getById(teamId);
          if (!team) throw new AppError(404, "Team not found or invalid teamId!");
 
-          if (!File.IsFormatAllowed(req.file, ["image/png", "image/jpeg", "image/jpg"]))
-             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-          const check = File.breakMimetype(req.file.mimetype);
-          if (check?.type !== "image")
-             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+         if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
+            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+         const check = File.BreakMimetype(req.file.mimetype);
+         if (check?.type !== "image")
+            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
          const bucket = new S3();
          const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
@@ -129,7 +137,16 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          team.athleticId = athleticId;
          team.updatedAt = new Date();
          await team.save();
-         res.status(200).json({ ...team } as ITeam);
+         res.status(200).json({
+            id: team.id,
+            name: team.name,
+            abbreviation: team.abbreviation,
+            picture: team.picture,
+            location: team.location,
+            athleticId: team.athleticId,
+            createdAt: team.createdAt,
+            updatedAt: team.updatedAt,
+         });
       } catch (error) {
          next(error);
       }

@@ -111,7 +111,22 @@ export async function UpdateOdd(req: Request, res: Response, next: any) {
       odd.updatedAt = new Date();
       await odd.save();
 
-      res.status(200).json({ odd: { ...odd } as IOdd });
+      res.status(200).json({
+         id: odd.id,
+         gameId: odd.gameId,
+         teamId: odd.teamId,
+         name: odd.name,
+         payout: odd.payout,
+         amount: odd.amount,
+         maxBetAmount: odd.maxBetAmount,
+         payment: odd.payment,
+         bets: odd.bets,
+         score: odd.score,
+         offer: odd.offer,
+         status: odd.status,
+         createdAt: odd.createdAt,
+         updatedAt: odd.updatedAt,
+      });
    } catch (error) {
       next(error);
    }
@@ -124,7 +139,7 @@ export async function DeleteOdd(req: Request, res: Response, next: any) {
       if (!odd) throw new AppError(404, "Odd not found");
       const deleted = await Odds.delete(id);
       if (!deleted) throw new AppError(400, "Odd not deleted");
-      res.sendStatus(200);
+      res.status(200).json({ message: "Odd deleted" });
    } catch (error) {
       next(error);
    }

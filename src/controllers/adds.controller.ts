@@ -31,11 +31,12 @@ export async function CreateAdds(req: Request, res: Response, next: any) {
          if (error) throw new AppError(400, error.message);
          if (!req.file) throw new AppError(422, "Missing file as image!");
          if (!url) throw new AppError(422, "Missing url parameter!");
-         
-         if (!File.IsFormatAllowed(req.file, ["image/png", "image/jpeg", "image/jpg"])) 
+
+         if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
-         const check = File.breakMimetype(req.file.mimetype);
-         if (check?.type !== "image") throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+         const check = File.BreakMimetype(req.file.mimetype);
+         if (check?.type !== "image")
+            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
          const bucket = new S3();
          const file_bucket_name = `adds/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
@@ -65,7 +66,7 @@ export async function CreateAdds(req: Request, res: Response, next: any) {
 }
 export async function DeleteAdds(req: Request, res: Response, next: any) {
    try {
-      const id  = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id, 10);
       if (!id) throw new AppError(422, "Missing id parameter!");
       const adds = await Adds.getById(id);
       if (!adds) throw new AppError(404, "Adds not found!");
@@ -82,7 +83,4 @@ export async function DeleteAdds(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
-
 

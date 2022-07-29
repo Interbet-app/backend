@@ -77,7 +77,17 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       wallet.balance = Number(wallet.balance) - parseFloat(amount);
       wallet.blocked = Number(wallet.blocked) + parseFloat(amount);
       await wallet.save();
-      res.status(201).json({ ...bet } as IBet);
+      res.status(201).json({ 
+         id: bet.id,
+         userId: bet.userId,
+         oddId: bet.oddId,
+         amount: bet.amount,
+         payout: bet.payout,
+         status: bet.status,
+         result: bet.result,
+         createdAt: bet.createdAt,
+         updatedAt: bet.updatedAt,
+      });
    } catch (error) {
       next(error);
    }
@@ -104,7 +114,20 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       const searchOdds = odds.map((odd) => odd.id!);
       if (!searchOdds || searchOdds.length === 0) throw new AppError(404, "Game not have bets");
       const bets = await Bets.getByOdds(searchOdds);
-      res.status(200).json({ bets: [...bets] as IBet[] });
+      const response = bets.map((bet) => {
+         return {
+            id: bet.id,
+            userId: bet.userId,
+            oddId: bet.oddId,
+            amount: bet.amount,
+            payout: bet.payout,
+            status: bet.status,
+            result: bet.result,
+            createdAt: bet.createdAt,
+            updatedAt: bet.updatedAt,
+         };
+      });
+      res.status(200).json({ bets: response });
    } catch (error) {
       next(error);
    }

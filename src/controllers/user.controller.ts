@@ -32,7 +32,7 @@ export async function GetUser(_req: Request, res: Response, next: any) {
 }
 export async function GoogleOAuth(req: Request, res: Response, next: any) {
    try {
-      const affiliateId = parseInt(req.body.affiliateId, 10);
+      const affiliateId = req.body.affiliateId;
       const { email, email_verified, name, picture, sub } = res.locals.payload;
       if (!email_verified) throw new AppError(401, "Your Google account e-mail is not verified!");
       let user = await Users.getByEmail(email);
