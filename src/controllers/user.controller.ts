@@ -116,14 +116,17 @@ export async function InstagramOAuth(req: Request, res: Response, next: any) {
       };
 
       axios({
-         url: "/oauth/access_token",
+         url: "https://api.instagram.com/oauth/access_token",
          method: "POST",
          headers: { "Content-Type": "application/x-www-form-urlencoded" },
          data: new URLSearchParams(data),
       })
          .then((response) => {
             const { access_token } = response.data;
-            axios({ url: `/me?fields=id,username&access_token=${access_token}`, method: "GET" })
+            axios({
+               url: `https://graph.instagram.com/me?fields=id,username&access_token=${access_token}`,
+               method: "GET",
+            })
                .then(async (response) => {
                   const { id, username } = response.data;
                   let user = await Users.getExternalId(id);
@@ -199,4 +202,6 @@ export async function Logout(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
+
 
