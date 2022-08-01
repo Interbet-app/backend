@@ -122,47 +122,43 @@ export async function InstagramOAuth(req: Request, res: Response, next: any) {
          data: new URLSearchParams(data),
       })
          .then((response) => {
-            try {
-               const { access_token } = response.data;
-               axios({ url: `/me?fields=id,username&access_token=${access_token}`, method: "GET" })
-                  .then(async (response) => {
-                     const { id, username } = response.data;
-                     let user = await Users.getExternalId(id);
-                     if (!user)
-                        user = await Users.create({
-                           name: username,
-                           email: username,
-                           externalId: id,
-                           oauth: "instagram",
-                           level: 1,
-                           affiliateId,
-                           createdAt: new Date(),
-                           updatedAt: new Date(),
-                        });
-
-                     const token = await Jwt.sign(user.id!, next);
-                     res.status(200).json({
-                        token,
-                        level: user.level,
-                        oauth: user.oauth,
-                        name: user.name,
-                        email: user.email,
-                        picture: user.picture,
-                        teamId: user.teamId,
-                        affiliateId: user.affiliateId,
-                        createdAt: user.createdAt,
-                        updatedAt: user.updatedAt,
+            const { access_token } = response.data;
+            axios({ url: `/me?fields=id,username&access_token=${access_token}`, method: "GET" })
+               .then(async (response) => {
+                  const { id, username } = response.data;
+                  let user = await Users.getExternalId(id);
+                  if (!user)
+                     user = await Users.create({
+                        name: username,
+                        email: username,
+                        externalId: id,
+                        oauth: "instagram",
+                        level: 1,
+                        affiliateId,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
                      });
-                  })
-                  .catch((error) => {
-                     throw new AppError(500, "Error get user id and username from ig API!", error);
+
+                  const token = await Jwt.sign(user.id!, next);
+                  res.status(200).json({
+                     token,
+                     level: user.level,
+                     oauth: user.oauth,
+                     name: user.name,
+                     email: user.email,
+                     picture: user.picture,
+                     teamId: user.teamId,
+                     affiliateId: user.affiliateId,
+                     createdAt: user.createdAt,
+                     updatedAt: user.updatedAt,
                   });
-            } catch (error) {
-               console.log(error);
-            }
+               })
+               .catch((error) => {
+                  res.status(500).json({ message: "Error getting user info from Instagram", error });
+               });
          })
          .catch((error) => {
-            throw new AppError(500, "Error get user access_token from ig API!", error);
+            res.status(500).json({ message: "Error getting access token from Instagram", error });
          });
    } catch (error) {
       next(error);
