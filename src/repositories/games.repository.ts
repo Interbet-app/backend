@@ -1,17 +1,20 @@
-import { games, IGameModel } from "../models";
+import { games } from "../models";
 import { IGame } from "../interfaces";
 
 export class Games {
-   static async getAll(): Promise<IGame[]> {
-      return await games.findAll();
+   static async All() {
+      return await games.findAll() as IGame[];
    }
-   static async getById(id: number): Promise<IGameModel | null> {
-      return await games.findByPk(id);
+   static async ById(id: number){
+      return await games.findByPk(id) as IGame;
    }
-   static async create(game: IGame): Promise<IGame> {
-      return await games.create(game);
+   static async Create(game: IGame){
+      return await games.create(game) as IGame;
    }
-   static async delete(id: number): Promise<number> {
+   static async Update(game: IGame) {
+      return await games.update(game, { where: { id: game.id } });
+   }
+   static async Destroy(id: number) {
       return await games.destroy({ where: { id: id } });
    }
 }
