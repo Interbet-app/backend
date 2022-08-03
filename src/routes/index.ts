@@ -62,6 +62,7 @@ route.get("/notifications", AuthUser, Control.UserNotifications);
 route.put("/notifications/:id/", AuthUser, Control.NotificationMarkAsRead);
 route.delete("/notifications/:id/", AuthUser, Control.NotificationDelete);
 
+route.get("/maintenances/me", AuthUser, Control.UserMaintenances);
 route.get("/maintenances", AuthUser, AuthAdmin, Control.GetMaintenances);
 route.get("/maintenances/:group/", AuthUser, AuthAdmin, Control.FindGroupMaintenances);
 route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
