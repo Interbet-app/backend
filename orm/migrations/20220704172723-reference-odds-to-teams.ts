@@ -11,7 +11,7 @@ module.exports = {
             field: "id",
          },
          onDelete: "cascade",
-         onUpdate: "cascade",
+         onUpdate: "SET NULL",
       });
    },
 

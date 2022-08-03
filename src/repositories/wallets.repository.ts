@@ -1,25 +1,22 @@
-import { wallets,IWalletModel } from "../models";
+import { wallets } from "../models";
 import { IWallet } from "../interfaces";
 
 export class Wallets {
-   static async getAll(): Promise<IWalletModel[]> {
-      return await wallets.findAll();
+   static async All() {
+      return (await wallets.findAll()) as IWallet[];
    }
-   static async getById(id: number): Promise<IWalletModel | null> {
-      return await wallets.findByPk(id);
+   static async ById(id: number) {
+      return (await wallets.findByPk(id)) as IWallet;
    }
-   static async getByUserId(userId: number): Promise<IWalletModel | null> {
-      return await wallets.findOne({ where: { userId: userId } });
+   static async ByUserId(userId: number) {
+      return (await wallets.findOne({ where: { userId: userId } })) as IWallet;
    }
-   static async create(wallet: IWallet): Promise<IWalletModel> {
-      return await wallets.create(wallet);
+   static async Create(wallet: IWallet) {
+      return (await wallets.create(wallet)) as IWallet;
    }
-   static async delete(id: number): Promise<Number> {
+   static async Destroy(id: number) {
       return await wallets.destroy({ where: { id: id } });
    }
 }
-
-
-
 
 

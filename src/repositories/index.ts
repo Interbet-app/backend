@@ -1,3 +1,4 @@
+export * from '../models'
 export * from "./user.repository";
 export * from "./athletics.repository";
 export * from "./teams.repository";

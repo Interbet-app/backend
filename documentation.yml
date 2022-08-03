@@ -219,6 +219,43 @@ components:
             updatedAt:
                type: string
                format: date-time
+      game-full:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            name:
+               type: string
+            eventId:
+               type: integer
+               format: int64
+            winnerOddId:
+               type: integer
+               format: int64
+            status:
+               type: string
+               enum: ["pending", "ongoing", "finished"]
+            modality:
+               type: string
+            location:
+               type: string
+            result:
+               type: string
+            startDate:
+               type: string
+               format: date-time
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+            odds:
+               type: array
+               items:
+                  $ref: "#/components/schemas/odd"
+
       odd:
          type: object
          properties:
@@ -242,8 +279,6 @@ components:
             payment:
                type: number
             bets:
-               type: integer
-            score:
                type: integer
             offer:
                type: boolean
@@ -443,6 +478,37 @@ paths:
          responses:
             "200":
                description: Return wallet details
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/wallet"
+      post:
+         tags:
+            - Carteiras
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        userId: 
+                           type: integer
+                           format: integer
+                        balance:
+                           type: number
+                           format: double
+                        blocked:
+                           type: number
+                           format: double
+                        score:
+                           type: number
+                           format: integer
+         responses:
+            "200":
+               description: OK
                content:
                   application/json:
                      schema:
@@ -1123,6 +1189,21 @@ paths:
          responses:
             "200":
                description: "Deleted successfully"
+   /games/full:
+      get:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all games
+               content:
+                  application/json:
+                     schema:
+                        type: array
+                        items:
+                           $ref: "#/components/schemas/game-full"
    /odds:
       get:
          tags:
@@ -1268,6 +1349,31 @@ paths:
          responses:
             "200":
                description: "Deleted successfully"
+   /odds/game/{id}/:
+      get:
+         tags:
+            - Odds
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return all odds of a game
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           odds:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/odd"
    /bets:
       get:
          tags:
@@ -1370,3 +1476,4 @@ paths:
                               type: array
                               items:
                                  $ref: "#/components/schemas/bet"
+

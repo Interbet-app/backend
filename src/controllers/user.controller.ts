@@ -3,7 +3,8 @@ import { Cache } from "../cache";
 import AppError from "../error";
 import { Jwt } from "../auth";
 import { Token } from "../types";
-import { Users } from "../repositories";
+import { Users, users } from "../repositories";
+import { IUser } from "../interfaces";
 import axios from "axios";
 
 const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
@@ -13,19 +14,9 @@ const INSTAGRAM_REDIRECT_URI = process.env.INSTAGRAM_REDIRECT_URI as string;
 export async function GetUser(_req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
-      const user = await Users.getById(token.userId);
+      const user = await Users.ById(token.userId);
       if (!user) throw new AppError(404, "User not found");
-      res.status(200).json({
-         level: user.level,
-         oauth: user.oauth,
-         name: user.name,
-         email: user.email,
-         picture: user.picture,
-         teamId: user.teamId,
-         affiliateId: user.affiliateId,
-         createdAt: user.createdAt,
-         updatedAt: user.updatedAt,
-      });
+      res.status(200).json(user as IUser);
    } catch (error) {
       next(error);
    }
@@ -35,9 +26,9 @@ export async function GoogleOAuth(req: Request, res: Response, next: any) {
       const affiliateId = req.body.affiliateId;
       const { email, email_verified, name, picture, sub } = res.locals.payload;
       if (!email_verified) throw new AppError(401, "Your Google account e-mail is not verified!");
-      let user = await Users.getByEmail(email);
+      let user = await Users.ByEmail(email);
       if (!user) {
-         user = await Users.create({
+         user = await Users.Create({
             name,
             email,
             externalId: sub,
@@ -71,9 +62,9 @@ export async function FacebookOAuth(req: Request, res: Response, next: any) {
    try {
       const { id, email, name, picture, accessToken, affiliateId } = req.body;
       //! Validar token aqui posteriormente (verificar se é valido)
-      let user = await Users.getByEmail(email);
+      let user = await Users.ByEmail(email);
       if (!user) {
-         user = await Users.create({
+         user = await Users.Create({
             name: name,
             email: email,
             externalId: id,
@@ -129,9 +120,9 @@ export async function InstagramOAuth(req: Request, res: Response, next: any) {
             })
                .then(async (response) => {
                   const { id, username } = response.data;
-                  let user = await Users.getExternalId(id);
+                  let user = await Users.ByExternalId(id);
                   if (!user)
-                     user = await Users.create({
+                     user = await Users.Create({
                         name: username,
                         email: username,
                         externalId: id,
@@ -171,24 +162,15 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
    try {
       const { name, email, picture, teamId } = req.body;
       const token = Jwt.getLocals(res, next) as Token;
-      const user = await Users.getById(token.userId);
+      const user = await users.findByPk(token.userId);
       if (!user) throw new AppError(404, "User not found!");
       if (name) user.name = name;
       if (email) user.email = email;
       if (picture) user.picture = picture;
       if (teamId) user.teamId = teamId;
+      user.updatedAt = new Date();
       await user.save();
-      res.status(200).json({
-         level: user.level,
-         oauth: user.oauth,
-         name: user.name,
-         email: user.email,
-         picture: user.picture,
-         teamId: user.teamId,
-         affiliateId: user.affiliateId,
-         createdAt: user.createdAt,
-         updatedAt: user.updatedAt,
-      });
+      res.status(200).json(user as IUser);
    } catch (error) {
       next(error);
    }
@@ -202,6 +184,4 @@ export async function Logout(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
 

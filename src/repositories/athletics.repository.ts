@@ -1,26 +1,22 @@
 import { Op } from "sequelize";
-import { athletics,IAthleticModel } from "../models";
+import { athletics } from "../models";
 import { IAthletic } from "../interfaces";
 
 export class Athletics {
-   static getById(id: number): Promise<IAthleticModel | null> {
-      return athletics.findByPk(id);
+   static async ById(id: number) {
+      return (await athletics.findByPk(id)) as IAthletic;
    }
-   static findByName(name: string): Promise<IAthleticModel[] | null> {
-      return athletics.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
+   static async ByName(name: string) {
+      return (await athletics.findAll({ where: { name: { [Op.like]: `%${name}%` } } })) as IAthletic[];
    }
-   static getAll(): Promise<IAthleticModel[]> {
-      return athletics.findAll();
+   static async All() {
+      return (await athletics.findAll()) as IAthletic[];
    }
-   static create(athletic: IAthletic): Promise<IAthleticModel> {
-      return athletics.create(athletic);
+   static async Create(athletic: IAthletic) {
+      return (await athletics.create(athletic)) as IAthletic;
    }
-   static delete(id: number): Promise<Number> {
-      return athletics.destroy({ where: { id: id } });
+   static async Destroy(id: number) {
+      return await athletics.destroy({ where: { id: id } });
    }
 }
-
-
-
-
 

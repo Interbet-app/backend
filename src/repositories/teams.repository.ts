@@ -1,22 +1,22 @@
 import { Op } from "sequelize";
-import { teams,ITeamModel } from "../models";
+import { teams } from "../models";
 import { ITeam } from "../interfaces";
 
 export class Teams {
-   static getById(id: number): Promise<ITeamModel | null> {
-      return teams.findByPk(id);
+   static async ById(id: number) {
+      return await teams.findByPk(id) as ITeam;
    }
-   static getAll(): Promise<ITeamModel[]> {
-      return teams.findAll();
+   static async All() {
+      return await teams.findAll() as ITeam[];
    }
-   static findByName(name: string): Promise<ITeamModel[] | null> {
-      return teams.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
+   static async ByName(name: string) {
+      return await teams.findAll({ where: { name: { [Op.like]: `%${name}%` } } }) as ITeam[];
    }
-   static create(team: ITeam): Promise<ITeamModel> {
-      return teams.create(team);
+   static async Create(team: ITeam){
+      return await teams.create(team) as ITeam;
    }
-   static delete(id: number): Promise<Number> {
-      return teams.destroy({ where: { id: id } });
+   static async Destroy(id: number) {
+      return await teams.destroy({ where: { id: id } });
    }
 }
 

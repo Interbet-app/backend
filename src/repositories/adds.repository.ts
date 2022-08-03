@@ -1,17 +1,18 @@
-import { adds,IAddsModel } from '../models'
-import { IAdds } from '../interfaces'
+import { adds } from "../models";
+import { IAdds } from "../interfaces";
 
 export class Adds {
-   static async getAll(): Promise<IAddsModel[]> {
-      return await adds.findAll();
+   static async All() {
+      return (await adds.findAll()) as IAdds[];
    }
-   static async getById(id: number): Promise<IAddsModel | null> {
-      return await adds.findByPk(id);
+   static async ById(id: number) {
+      return (await adds.findByPk(id)) as IAdds;
    }
-   static async create(add: IAdds): Promise<IAddsModel> {
-      return await adds.create(add);
+   static async Create(add: IAdds) {
+      return (await adds.create(add)) as IAdds;
    }
-   static async delete(id: number): Promise<number> {
+   static async Destroy(id: number) {
       return await adds.destroy({ where: { id: id } });
    }
 }
+

@@ -12,13 +12,16 @@ route.get("/bets/game/:id", AuthUser, AuthAdmin, Control.GetBetsByGame);
 route.delete("/bets/:id/", AuthUser, AuthAdmin, Control.DeleteBet);
 
 route.get("/games", AuthUser, Control.GetGames);
+route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", AuthUser, Control.GetGame);
+
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", AuthUser, AuthAdmin, Control.DeleteGame);
 
 route.get("/odds", AuthUser, Control.GetOdds);
 route.get("/odds/:id/", AuthUser, Control.GetOdd);
+route.get("/odds/game/:id/", AuthUser, Control.OddsByGame);
 route.post("/odds", AuthUser, AuthAdmin, Middle.CreateOdd, Control.CreateOdd);
 route.put("/odds", AuthUser, AuthAdmin, Middle.UpdateOdd, Control.UpdateOdd);
 route.delete("/odds/:id/", AuthUser, AuthAdmin, Control.DeleteOdd);
@@ -47,6 +50,7 @@ route.get("/user", AuthUser, Control.GetUser);
 route.put("/user", AuthUser, Control.UserUpdate);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
+route.post("/wallet", AuthUser, AuthAdmin, Control.CreateWallet);
 route.put("/wallet", AuthUser, AuthAdmin, Middle.UpdateWallet, Control.UpdateWallet);
 
 route.post("/google/oauth", Middle.GoogleOAuthSchema, AuthGoogle, Control.GoogleOAuth);

@@ -3,22 +3,22 @@ import { maintenances, IMaintenanceModel } from "../models";
 import { IMaintenance } from "../interfaces";
 
 export class Maintenances {
-   static async getAll(): Promise<IMaintenanceModel[]> {
+   static async All(): Promise<IMaintenanceModel[]> {
       return await maintenances.findAll();
    }
-   static async getById(id: number): Promise<IMaintenanceModel | null> {
+   static async ById(id: number): Promise<IMaintenanceModel | null> {
       return await maintenances.findByPk(id);
    }
-   static async getByUserId(userId: number): Promise<IMaintenanceModel[]> {
+   static async ByUserId(userId: number): Promise<IMaintenanceModel[]> {
       return await maintenances.findAll({ where: { userId: userId } });
    }
-   static async getByGroup(group: string): Promise<IMaintenanceModel[]> {
-      return await maintenances.findAll({ where: { group: { [Op.like]: `%${group}%` } } });
+   static async ByGroup(group: string) {
+      return await maintenances.findAll({ where: { group: { [Op.like]: `%${group}%` } } }) as IMaintenance[];
    }
-   static async create(maintenance: IMaintenance): Promise<IMaintenanceModel> {
-      return await maintenances.create(maintenance);
+   static async Create(maintenance: IMaintenance) {
+      return await maintenances.create(maintenance) as IMaintenance;
    }
-   static async delete(id: number): Promise<number> {
+   static async Destroy(id: number) {
       return await maintenances.destroy({ where: { id: id } });
    }
 }

@@ -8,7 +8,6 @@ export interface IOdd {
    maxBetAmount: number;
    payment: number;
    bets: number;
-   score: number;
    offer: boolean;
    status: "open" | "lock";
    createdAt: Date;

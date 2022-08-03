@@ -48,6 +48,7 @@ export const create_game = Joi.object({
 
 export const update_game = Joi.object({
    gameId: Joi.number().required(),
+   eventId: Joi.number().required(),
    name: Joi.string().max(60).required(),
    status: Joi.string().valid("open", "pendent", "closed").required(),
    modality: Joi.string().max(70).required(),
@@ -63,7 +64,6 @@ export const create_odd = Joi.object({
    name: Joi.string().max(60).required(),
    payout: Joi.number().required(),
    maxBetAmount: Joi.number().required(),
-   score: Joi.number().required(),
    offer: Joi.boolean().required(),
    status: Joi.string().valid("open", "lock").optional(),
 });
@@ -75,15 +75,17 @@ export const update_odd = Joi.object({
    name: Joi.string().max(60).required(),
    payout: Joi.number().required(),
    maxBetAmount: Joi.number().required(),
-   score: Joi.number().required(),
    offer: Joi.boolean().required(),
    status: Joi.string().valid("open", "lock").optional(),
 });
 
 export const update_wallet = Joi.object({
    walletId: Joi.number().required(),
-   balance: Joi.number().optional(),
-   score: Joi.number().optional(),
-   blocked: Joi.number().optional(),
+   balance: Joi.number().required(),
+   score: Joi.number().required(),
+   blocked: Joi.number().required(),
    updatedAt: Joi.date().required(),
 });
+
+
+

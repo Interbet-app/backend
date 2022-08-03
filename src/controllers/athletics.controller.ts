@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Athletics } from "../repositories";
+import { Athletics, athletics } from "../repositories";
 import { IAthletic } from "../interfaces";
 import multer from "multer";
 import AppError from "../error";
@@ -8,16 +8,8 @@ import { File } from "../functions";
 
 export async function GetAthletics(_req: Request, res: Response, next: any) {
    try {
-      const athletics = await Athletics.getAll();
-      const response = athletics.map((athletic) => {
-         return {
-            id: athletic.id,
-            name: athletic.name,
-            abbreviation: athletic.abbreviation,
-            picture: athletic.picture,
-         };
-      });
-      res.status(200).json({ athletics: response });
+      const athletics = await Athletics.All();
+      res.status(200).json({ athletics: athletics });
    } catch (error) {
       next(error);
    }
@@ -26,18 +18,8 @@ export async function FindAthletics(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
       if (!name) throw new AppError(422, "Missing search parameter!");
-      const athletics = await Athletics.findByName(name);
-      const response = !athletics
-         ? []
-         : athletics.map((athletic) => {
-              return {
-                 id: athletic.id,
-                 name: athletic.name,
-                 abbreviation: athletic.abbreviation,
-                 picture: athletic.picture,
-              };
-           });
-      res.status(200).json({ athletics: response });
+      const athletics = await Athletics.ByName(name);
+      res.status(200).json({ athletics: athletics });
    } catch (error) {
       next(error);
    }
@@ -66,7 +48,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
 
             //Se o upload para o bucket na aws falhou, retorna o erro
             if (result instanceof AppError) throw result;
-            const athletic = await Athletics.create({
+            const athletic = await Athletics.Create({
                name,
                abbreviation,
                picture: result.Location,
@@ -74,14 +56,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
                updatedAt: new Date(),
             });
             if (!athletic) throw new AppError(500, "Error at save the athletic!");
-            res.status(201).json({
-               id: athletic.id,
-               name: athletic.name,
-               abbreviation: athletic.abbreviation,
-               picture: athletic.picture,
-               createdAt: athletic.createdAt,
-               updatedAt: athletic.updatedAt,
-            });
+            res.status(201).json(athletic);
          } catch (error) {
             next(error);
          }
@@ -101,7 +76,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          if (!name) throw new AppError(422, "Missing name parameter!");
          if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
 
-         const athletic = await Athletics.getById(athleticId);
+         const athletic = await athletics.findByPk(athleticId);
          if (!athletic) throw new AppError(404, "Athletic not found!");
 
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
@@ -126,14 +101,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          athletic.updatedAt = new Date();
          await athletic.save();
 
-         res.status(200).json({
-            id: athletic.id,
-            name: athletic.name,
-            abbreviation: athletic.abbreviation,
-            picture: athletic.picture,
-            createdAt: athletic.createdAt,
-            updatedAt: athletic.updatedAt,
-         });
+         res.status(200).json(athletic as IAthletic);
       } catch (error) {
          next(error);
       }
@@ -143,13 +111,13 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
    try {
       const athleticId = parseInt(req.params.id, 10);
       if (!athleticId) throw new AppError(422, "Missing id parameter!");
-      const athletic = await Athletics.getById(athleticId);
+      const athletic = await Athletics.ById(athleticId);
       if (!athletic) throw new AppError(404, "Athletic not found!");
       const bucket = new S3();
       const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
       const result = await bucket.DeleteFile(to_delete);
       if (result instanceof AppError) throw result;
-      await athletic.destroy();
+      await Athletics.Destroy(athleticId);
       res.status(204).json({ message: "Athletic deleted!" });
    } catch (error) {
       next(error);

@@ -1,24 +1,21 @@
-import { users,IUserModel } from "../models";
+import { users, IUserModel } from "../models";
 import { IUser } from "../interfaces";
 
 export class Users {
-   static getById(id: number): Promise<IUserModel | null> {
-      return users.findByPk(id);
+   static async ById(id: number) {
+      return (await users.findByPk(id)) as IUser;
    }
-   static getByEmail(email: string): Promise<IUserModel | null> {
-      return users.findOne({ where: { email } });
+   static async ByEmail(email: string) {
+      return (await users.findOne({ where: { email } })) as IUser;
    }
-   static getExternalId(id: number): Promise<IUserModel | null> {
-      return users.findOne({ where: { externalId: id } });
+   static async ByExternalId(id: number) {
+      return (await users.findOne({ where: { externalId: id } })) as IUser;
    }
-   static create(user: IUser): Promise<IUserModel> {
-      return users.create(user);
+   static async Create(user: IUser) {
+      return (await users.create(user)) as IUser;
    }
-   static delete(id: number): Promise<Number> {
-      return users.destroy({ where: { id: id } });
+   static async Destroy(id: number) {
+      return await users.destroy({ where: { id: id } });
    }
 }
-
-
-
 

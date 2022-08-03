@@ -46,7 +46,7 @@ export async function AuthAdmin(req: Request, res: Response, next: any) {
       const token = Jwt.getLocals(res, next) as Token;
       if (!token) throw new AppError(403, "Authorization to admin is invalid!");
       
-      const maintenances = await Maintenances.getByUserId(token.userId);
+      const maintenances = await Maintenances.ByUserId(token.userId);
       let filter = path.substring(1, path.indexOf("/", 1));
       if (filter.length < 2) filter = path.substring(1);
 

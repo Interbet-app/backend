@@ -1,24 +1,24 @@
-import { notifications,INotificationModel } from "../models";
+import { notifications } from "../models";
 import { INotification } from "../interfaces";
 
 export class Notifications {
-   static getById(id: number): Promise<INotificationModel | null> {
-      return notifications.findByPk(id);
+   static async ById(id: number) {
+      return await notifications.findByPk(id) as INotification;
    }
-   static getByUserId(userId: number): Promise<INotificationModel[]> {
-      return notifications.findAll({ where: { userId: userId } });
+   static async ByUserId(userId: number) {
+      return await notifications.findAll({ where: { userId: userId } }) as INotification[];
    }
-   static getByUnread(unread: boolean): Promise<INotificationModel[]> {
-      return notifications.findAll({ where: { unread: unread } });
+   static async ByUnread(unread: boolean) {
+      return await notifications.findAll({ where: { unread: unread } }) as INotification[];
    }
-   static getAll(): Promise<INotificationModel[]> {
-      return notifications.findAll();
+   static async All() {
+      return await notifications.findAll() as INotification[];
    }
-   static create(notification: INotification): Promise<INotificationModel> {
-      return notifications.create(notification);
+   static async Create(notification: INotification){
+      return await notifications.create(notification) as INotification;
    }
-   static delete(id: number): Promise<Number> {
-      return notifications.destroy({ where: { id: id } });
+   static async Destroy(id: number){
+      return await notifications.destroy({ where: { id: id } });
    }
 }
 

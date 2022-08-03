@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { Teams, Athletics } from "../repositories";
+import { Teams, Athletics, teams } from "../repositories";
+import { ITeam } from "../interfaces";
 import { S3 } from "../aws";
 import multer from "multer";
 import AppError from "../error";
@@ -7,18 +8,8 @@ import { File } from "../functions";
 
 export async function GetTeams(_req: Request, res: Response, next: any) {
    try {
-      const teams = await Teams.getAll();
-      const response = teams.map((team) => {
-         return {
-            id: team.id,
-            name: team.name,
-            athleticId: team.athleticId,
-            abbreviation: team.abbreviation,
-            picture: team.picture,
-            created: team.createdAt,
-         };
-      });
-      res.status(200).json({ teams: response });
+      const teams = await Teams.All();
+      res.status(200).json({ teams: teams });
    } catch (error) {
       next(error);
    }
@@ -27,19 +18,8 @@ export async function FindTeams(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
       if (!name) throw new AppError(422, "Missing search parameter!");
-      const teams = await Teams.findByName(name);
-      const response = !teams
-         ? []
-         : teams.map((team) => {
-              return {
-                 id: team.id,
-                 name: team.name,
-                 abbreviation: team.abbreviation,
-                 picture: team.picture,
-                 created: team.createdAt,
-              };
-           });
-      res.status(200).json({ teams: response });
+      const teams = await Teams.ByName(name);
+      res.status(200).json({ teams: teams });
    } catch (error) {
       next(error);
    }
@@ -57,7 +37,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
             if (!athleticId) throw new AppError(422, "Missing athleticId parameter!");
             if (!location) throw new AppError(422, "Missing location parameter!");
 
-            const athletic = await Athletics.getById(athleticId);
+            const athletic = await Athletics.ById(athleticId);
             if (!athletic) throw new AppError(404, "Athletic not found or invalid athleticId!");
 
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
@@ -72,7 +52,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
 
             //Se o upload para o bucket na aws falhou, retorna o erro
             if (result instanceof AppError) throw result;
-            const team = await Teams.create({
+            const team = await Teams.Create({
                name,
                abbreviation,
                athleticId,
@@ -82,16 +62,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
                updatedAt: new Date(),
             });
             if (!athletic) throw new AppError(500, "Error at save the team!");
-            res.status(201).json({
-               id: team.id,
-               name: team.name,
-               abbreviation: team.abbreviation,
-               picture: team.picture,
-               location: team.location,
-               athleticId: team.athleticId,
-               createdAt: team.createdAt,
-               updatedAt: team.updatedAt,
-            });
+            res.status(201).json({ team });
          } catch (error) {
             next(error);
          }
@@ -112,7 +83,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
          if (!location) throw new AppError(422, "Missing location parameter!");
          if (!athleticId) throw new AppError(422, "Missing athleticId parameter!");
-         const team = await Teams.getById(teamId);
+         const team = await teams.findByPk(teamId);
          if (!team) throw new AppError(404, "Team not found or invalid teamId!");
 
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
@@ -137,16 +108,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          team.athleticId = athleticId;
          team.updatedAt = new Date();
          await team.save();
-         res.status(200).json({
-            id: team.id,
-            name: team.name,
-            abbreviation: team.abbreviation,
-            picture: team.picture,
-            location: team.location,
-            athleticId: team.athleticId,
-            createdAt: team.createdAt,
-            updatedAt: team.updatedAt,
-         });
+         res.status(200).json(team as ITeam);
       } catch (error) {
          next(error);
       }
@@ -156,17 +118,16 @@ export async function DeleteTeam(req: Request, res: Response, next: any) {
    try {
       const teamId = parseInt(req.params.id, 10);
       if (!teamId) throw new AppError(422, "Missing id parameter!");
-      const team = await Teams.getById(teamId);
+      const team = await Teams.ById(teamId);
       if (!team) throw new AppError(404, "Team not found or invalid teamId!");
       const bucket = new S3();
       const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
       const result = await bucket.DeleteFile(to_delete);
       if (result instanceof AppError) throw result;
-      await team.destroy();
+      await Teams.Destroy(teamId);
       res.status(200).json({ message: "Team deleted!" });
    } catch (error) {
       next(error);
    }
 }
-
 

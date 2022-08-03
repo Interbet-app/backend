@@ -1,17 +1,17 @@
-import { events, IEventModel } from "../models";
+import { events } from "../models";
 import { IEvent } from "../interfaces";
 
 export class Events {
-   static async getAll(): Promise<IEventModel[]> {
-      return await events.findAll();
+   static async All() {
+      return (await events.findAll()) as IEvent[];
    }
-   static async getById(id: number): Promise<IEventModel | null> {
-      return await events.findByPk(id);
+   static async ById(id: number) {
+      return (await events.findByPk(id)) as IEvent;
    }
-   static async create(event: IEvent): Promise<IEventModel> {
-      return await events.create(event);
+   static async Create(event: IEvent) {
+      return (await events.create(event)) as IEvent;
    }
-   static async delete(id: number): Promise<number> {
+   static async Destroy(id: number): Promise<number> {
       return await events.destroy({ where: { id: id } });
    }
 }

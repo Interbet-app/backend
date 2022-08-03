@@ -14,7 +14,6 @@ export const odds = Database.define<IOddModel>("odds", {
    maxBetAmount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    payment: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    bets: { type: Sequelize.INTEGER, allowNull: false },
-   score: { type: Sequelize.INTEGER, allowNull: false },
    offer: { type: Sequelize.BOOLEAN, allowNull: false },
    status: { type: Sequelize.ENUM("open", "lock"), allowNull: false },
    createdAt: Sequelize.DATE,

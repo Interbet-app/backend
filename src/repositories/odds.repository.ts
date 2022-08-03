@@ -1,21 +1,22 @@
-import { odds, IOddModel } from "../models";
+import { odds } from "../models";
 import { IOdd } from "../interfaces";
 
+
 export class Odds {
-   static getAll(): Promise<IOdd[]> {
-      return odds.findAll();
+   static async All() {
+      return (await odds.findAll()) as IOdd[];
    }
-   static getById(id: number): Promise<IOddModel | null> {
-      return odds.findByPk(id);
+   static async ById(id: number) {
+      return (await odds.findByPk(id)) as IOdd;
    }
-   static getByGameId(gameId: number): Promise<IOdd[] | null> {
-      return odds.findAll({ where: { gameId } });
+   static async ByGameId(gameId: number) {
+      return (await odds.findAll({ where: { gameId } })) as IOdd[];
    }
-   static create(odd: IOdd): Promise<IOdd> {
-      return odds.create(odd);
+   static async Create(odd: IOdd) {
+      return (await odds.create(odd)) as IOdd;
    }
-   static delete(id: number): Promise<Number> {
-      return odds.destroy({ where: { id: id } });
+   static async Destroy(id: number) {
+      return await odds.destroy({ where: { id: id } });
    }
 }
 
