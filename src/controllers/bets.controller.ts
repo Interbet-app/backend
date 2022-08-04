@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Bets, Odds, Wallets } from "../repositories";
+import { Bets, Odds, odds } from "../repositories";
 import { wallets } from "../models";
 import AppError from "../error";
 import { Jwt } from "../auth";
@@ -29,12 +29,11 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (!wallet) throw new AppError(404, "Wallet not found");
 
       const { oddId, amount } = req.body;
-      const odd = await Odds.ById(oddId);
+      const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Odd not found");
       if (odd.status !== "open") throw new AppError(400, "Odd is not active");
       if (parseFloat(amount) > Number(wallet.balance)) throw new AppError(400, "User not have sufficient funds");
-      if (parseFloat(amount) > Number(odd.maxBetAmount))
-         throw new AppError(400, "Bet amount exceeded the odd's limit amount!");
+      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Bet amount exceeded the odd's limit amount!");
 
       const bet = await Bets.Create({
          userId: token.userId,
@@ -47,9 +46,17 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          updatedAt: new Date(),
       });
       if (!bet) throw new AppError(500, "Bet not created");
+
+      odd.amount = Number(odd.amount) + parseFloat(amount);
+      odd.payment = Number(odd.payment) + (parseFloat(amount) + (parseFloat(amount) * odd.payout));
+      odd.bets = Number(odd.bets) + 1;
+      odd.updatedAt = new Date();
+      await odd.save();
+
       wallet.balance = Number(wallet.balance) - parseFloat(amount);
       wallet.blocked = Number(wallet.blocked) + parseFloat(amount);
       await wallet.save();
+      
       res.status(201).json(bet);
    } catch (error) {
       next(error);
@@ -80,4 +87,5 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 

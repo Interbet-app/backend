@@ -1178,11 +1178,6 @@ paths:
                         startDate:
                            type: string
                            format: date-time
-                        winnerOddId:
-                           type: integer
-                           format: int64
-                        result:
-                           type: string
          responses:
             "200":
                description: Return the updated game
@@ -1267,6 +1262,55 @@ paths:
                               type: array
                               items:
                                  $ref: "#/components/schemas/odd"
+   /games/process-result/{id}/:
+      post:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        winnerOddId:
+                           type: integer
+                           format: int64
+                        result:
+                           type: string
+         responses:
+            "200":
+               description: Return the game process result statistics
+               content:
+                  application/json:
+                     schema:
+                        properties:
+                           sumBets:
+                              type: integer
+                           betAmount:
+                              type: number
+                              format: double
+                           winnersAmount:
+                              type: number
+                              format: double
+                           lossesAmount:
+                              type: number
+                              format: double
+                           profit:
+                              type: number
+                              format: double
+                           commission:
+                              type: number
+                              format: double
    /odds:
       get:
          tags:

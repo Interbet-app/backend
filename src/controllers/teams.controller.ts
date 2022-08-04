@@ -38,7 +38,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
          try {
-            const { name, abbreviation, athleticId, location } = req.body;
+            const { name, abbreviation, athleticId, location, adminId } = req.body;
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Missing file as picture!");
             if (!name) throw new AppError(422, "Missing name parameter!");
@@ -66,6 +66,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
                abbreviation,
                athleticId,
                picture: result.Location,
+               adminId: adminId ? adminId : null,
                location,
                createdAt: new Date(),
                updatedAt: new Date(),
@@ -84,7 +85,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
    const storage = multer.memoryStorage();
    multer({ storage }).single("picture")(req, res, async (error: any) => {
       try {
-         const { teamId, name, abbreviation, location, athleticId } = req.body;
+         const { teamId, name, abbreviation, location, athleticId, adminId } = req.body;
          if (error) throw new AppError(400, error.message);
          if (!req.file) throw new AppError(422, "Missing file as picture!");
          if (!teamId) throw new AppError(422, "Missing teamId parameter!");
@@ -115,6 +116,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          team.picture = result2.Location;
          team.location = location;
          team.athleticId = athleticId;
+         if (adminId) team.adminId = adminId;
          team.updatedAt = new Date();
          await team.save();
          res.status(200).json(team as ITeam);
@@ -139,5 +141,4 @@ export async function DeleteTeam(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 

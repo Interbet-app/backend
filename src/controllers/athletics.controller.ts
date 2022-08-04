@@ -29,7 +29,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
          try {
-            const { name, abbreviation } = req.body;
+            const { name, abbreviation, adminId } = req.body;
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Missing file as picture!");
             if (!name) throw new AppError(422, "Missing name parameter!");
@@ -54,6 +54,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
                picture: result.Location,
                createdAt: new Date(),
                updatedAt: new Date(),
+               adminId: adminId ? adminId : null,
             });
             if (!athletic) throw new AppError(500, "Error at save the athletic!");
             res.status(201).json(athletic);
@@ -71,7 +72,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
       try {
          if (error) throw new AppError(400, error.message);
          if (!req.file) throw new AppError(422, "Missing file as picture!");
-         const { athleticId, name, abbreviation } = req.body;
+         const { athleticId, name, abbreviation, adminId } = req.body;
          if (!athleticId) throw new AppError(422, "Missing id parameter!");
          if (!name) throw new AppError(422, "Missing name parameter!");
          if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
@@ -98,6 +99,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          athletic.name = name;
          athletic.abbreviation = abbreviation;
          athletic.picture = result2.Location;
+         if (adminId) athletic.adminId = adminId;
          athletic.updatedAt = new Date();
          await athletic.save();
 
@@ -123,4 +125,3 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-

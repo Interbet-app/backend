@@ -54,8 +54,6 @@ export const update_game = Joi.object({
    modality: Joi.string().max(70).required(),
    location: Joi.string().max(60).required(),
    startDate: Joi.date().required(),
-   winnerOddId: Joi.number().optional(),
-   result: Joi.string().max(60).optional(),
 });
 
 export const create_odd = Joi.object({

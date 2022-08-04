@@ -1,5 +1,6 @@
 export interface ITeam {
    id?: number;
+   adminId?: number;
    athleticId: number;
    name: string;
    abbreviation: string;

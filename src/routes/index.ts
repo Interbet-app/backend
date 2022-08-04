@@ -16,6 +16,7 @@ route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", AuthUser, Control.GetGame);
 route.get("/games/details/:id/", AuthUser, Control.GameDetails);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
+route.post("/games/process-result/:id/", AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", AuthUser, AuthAdmin, Control.DeleteGame);
 
