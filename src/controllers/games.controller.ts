@@ -11,6 +11,17 @@ export async function GetGames(_req: Request, res: Response, next: any) {
       next(err);
    }
 }
+export async function GameDetails(req: Request, res: Response, next: any) {
+   try {
+      const gameId = parseInt(req.params.id, 10);
+      const game = await Games.ById(gameId);
+      const odds = await Odds.ByGameId(gameId);
+      if (!game) throw new AppError(404, "Game not found");
+      res.status(200).json({ game: game, odds: odds });
+   } catch (error) {
+      next(error);
+   }
+}
 export async function GamesAndOdds(_req: Request, res: Response, next: any) {
    try {
       const games = await Games.All();

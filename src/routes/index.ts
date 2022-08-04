@@ -14,7 +14,7 @@ route.delete("/bets/:id/", AuthUser, AuthAdmin, Control.DeleteBet);
 route.get("/games", AuthUser, Control.GetGames);
 route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", AuthUser, Control.GetGame);
-
+route.get("/games/details/:id/", AuthUser, Control.GameDetails);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", AuthUser, AuthAdmin, Control.DeleteGame);
@@ -28,6 +28,7 @@ route.delete("/odds/:id/", AuthUser, AuthAdmin, Control.DeleteOdd);
 
 route.get("/teams", AuthUser, Control.GetTeams);
 route.get("/teams/:name", AuthUser, Control.FindTeams);
+route.get("/teams/info/:id/", AuthUser, Control.GetTeam);
 route.post("/teams", AuthUser, AuthAdmin, Control.CreateTeam);
 route.put("/teams", AuthUser, AuthAdmin, Control.UpdateTeam);
 route.delete("/teams/:id/", AuthUser, AuthAdmin, Control.DeleteTeam);
@@ -69,4 +70,5 @@ route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Contr
 route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
 export default route;
+
 

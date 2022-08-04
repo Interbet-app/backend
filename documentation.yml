@@ -255,7 +255,6 @@ components:
                type: array
                items:
                   $ref: "#/components/schemas/odd"
-
       odd:
          type: object
          properties:
@@ -716,6 +715,25 @@ paths:
                               items:
                                  $ref: "#/components/schemas/team"
    /teams/{id}/:
+      get:
+         tags:
+            - Times
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return team by id
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/team"
       delete:
          tags:
             - Times
@@ -1222,6 +1240,33 @@ paths:
                         type: array
                         items:
                            $ref: "#/components/schemas/game-full"
+   /games/details/{id}/:
+      get:
+         tags:
+            - Jogos
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return the game
+               content:
+                  application/json:
+                     schema:
+                        properties:
+                           game:
+                              type: object
+                              $ref: "#/components/schemas/game"
+                           odds:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/odd"
    /odds:
       get:
          tags:
@@ -1494,4 +1539,3 @@ paths:
                               type: array
                               items:
                                  $ref: "#/components/schemas/bet"
-

@@ -14,6 +14,15 @@ export async function GetTeams(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function GetTeam(req: Request, res: Response, next: any) {
+   try {
+      const teamId = parseInt(req.params.id);
+      const team = await Teams.ById(teamId);
+      res.status(200).json(team);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function FindTeams(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
@@ -130,4 +139,5 @@ export async function DeleteTeam(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 
