@@ -70,6 +70,12 @@ route.get("/maintenances/:group/", AuthUser, AuthAdmin, Control.FindGroupMainten
 route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
+route.get("/deposits", AuthUser, Control.UserDeposits);
+route.post("/deposits", AuthUser, AuthAdmin, Middle.CreateDeposit, Control.CreateDeposit);
+
+//- Callback routes
+route.post("/deposits/mp/callback", Control.MercadoPagoCallback);
+
 export default route;
 
 

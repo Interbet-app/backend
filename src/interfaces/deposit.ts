@@ -1,9 +1,13 @@
 export interface IDeposit {
    id?: number;
    userId: number;
-   clientSecret: string;
    amount: number;
-   status: "created" | "pendent" | "completed" | "canceled";
+   status: "pendent" | "completed" | "canceled";
+   mp_id?: number;
+   mp_status?: string;
+   mp_ticker_url?: string;
+   mp_qr_code?: string;
+   mp_expires?: Date;
    createdAt: Date;
    updatedAt: Date;
 }

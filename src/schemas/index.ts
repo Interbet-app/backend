@@ -85,5 +85,10 @@ export const update_wallet = Joi.object({
    updatedAt: Joi.date().required(),
 });
 
-
+export const create_deposit = Joi.object({
+   amount: Joi.number().required(),
+   email: Joi.string().required(),
+   document_type: Joi.string().valid("cpf", "cnpj").required(),
+   document: Joi.string().min(11).max(14).required(),
+});
 

@@ -32,3 +32,6 @@ export function UpdateOdd(req: Request, res: Response, next: any) {
 export function UpdateWallet(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.update_wallet, req.body, res, next);
 }
+export function CreateDeposit(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_deposit, req.body, res, next);
+}
