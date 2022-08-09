@@ -10,7 +10,7 @@ import mercadopago from "../payments";
 export async function UserDeposits(_req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
-      const data = await wallets.findAll({
+      const data = await deposits.findAll({
          where: { userId: token.userId },
          order: [["createdAt", "DESC"]],
       });
