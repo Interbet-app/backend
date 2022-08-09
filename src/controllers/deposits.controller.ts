@@ -33,7 +33,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
 
       const deposit = await deposits.create({
          userId: token.userId,
-         amount,
+         amount: Number(amount),
          status: "pendent",
          createdAt: new Date(),
          updatedAt: new Date(),
@@ -42,7 +42,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       mercadopago.payment
          .create({
             payment_method_id: "pix",
-            transaction_amount: Number(deposit.amount),
+            transaction_amount: Number(amount),
             external_reference: `${deposit.id}`,
             installments: 1,
             date_of_expiration: expire,
