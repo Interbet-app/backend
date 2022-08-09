@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Bets, Odds, odds } from "../repositories";
-import { wallets } from "../models";
+import { athletics, wallets,teams } from "../models";
 import AppError from "../error";
 import { Jwt } from "../auth";
 import { Token } from "../types";
@@ -33,7 +33,8 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (!odd) throw new AppError(404, "Odd not found");
       if (odd.status !== "open") throw new AppError(400, "Odd is not active");
       if (parseFloat(amount) > Number(wallet.balance)) throw new AppError(400, "User not have sufficient funds");
-      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Bet amount exceeded the odd's limit amount!");
+      if (parseFloat(amount) > Number(odd.maxBetAmount))
+         throw new AppError(400, "Bet amount exceeded the odd's limit amount!");
 
       const bet = await Bets.Create({
          userId: token.userId,
@@ -48,7 +49,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (!bet) throw new AppError(500, "Bet not created");
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
-      odd.payment = Number(odd.payment) + (parseFloat(amount) + (parseFloat(amount) * odd.payout));
+      odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
       odd.bets = Number(odd.bets) + 1;
       odd.updatedAt = new Date();
       await odd.save();
@@ -57,6 +58,22 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       wallet.blocked = Number(wallet.blocked) + parseFloat(amount);
       await wallet.save();
       
+      //! Não é odd de empate
+      if (odd.teamId > 0) {
+         const team = await teams.findOne({ where: { id: odd.teamId } });
+         if (team) {
+            const athletic = await athletics.findByPk(team.athleticId);
+            if (athletic && athletic.adminId) {
+               const wallet = await wallets.findOne({ where: { userId: athletic.adminId } });
+               const commission = Number(amount) * 0.01; //! 1% de comissão para a atlética
+               if (wallet) {
+                  wallet.balance = Number(wallet.balance) + Number(commission);
+                  wallet.updatedAt = new Date();
+                  await wallet.save();
+               }
+            }
+         }
+      }
       res.status(201).json(bet);
    } catch (error) {
       next(error);
@@ -87,5 +104,4 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 
