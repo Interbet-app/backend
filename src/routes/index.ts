@@ -71,7 +71,7 @@ route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Contr
 route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
 route.get("/deposits", AuthUser, Control.UserDeposits);
-route.post("/deposits", AuthUser, AuthAdmin, Middle.CreateDeposit, Control.CreateDeposit);
+route.post("/deposits", AuthUser, Middle.CreateDeposit, Control.CreateDeposit);
 
 //- Callback routes
 route.post("/deposits/mp/callback", Control.MercadoPagoCallback);
