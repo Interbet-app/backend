@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { Games, Events, Odds, games, odds, bets, wallets, IBetModel, teams, athletics } from "../repositories";
+import { Games, Events, Odds, games, odds, bets, wallets, IBetModel, teams } from "../repositories";
 import { IGame } from "../interfaces";
 import AppError from "../error";
 import logger from "../log";
@@ -24,12 +24,13 @@ export async function GameDetails(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GamesAndOdds(_req: Request, res: Response, next: any) {
+export async function GamesAndOdds(req: Request, res: Response, next: any) {
    try {
-      const games = await Games.All();
+      const { modality } = req.body;
+      const data = await games.findAll({ where: modality ? { modality: modality } : {} });
       const odds = await Odds.All();
 
-      const games_odds = games.map((game) => {
+      const games_odds = data.map((game) => {
          return {
             id: game.id,
             name: game.name,
@@ -182,7 +183,10 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
                   await wallet.save();
                }
             }
-         } else logger.error(`Team ${winnerOdd.teamId} not found by game winner odd ${winnerOddId} process the commission ${commission}!`);
+         } else
+            logger.error(
+               `Team ${winnerOdd.teamId} not found by game winner odd ${winnerOddId} process the commission ${commission}!`
+            );
       }
 
       //! Obter todas as apostas do jogo
@@ -216,7 +220,7 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
             userWallet.balance = Number(userWallet.balance) + profit;
             Statistics.winnersAmount += profit;
          } else Statistics.lossesAmount += aposta.amount;
-         
+
          userWallet.blocked = Number(userWallet.blocked) - Number(aposta.amount);
          if (userWallet.blocked < 0) userWallet.blocked = 0;
          userWallet.updatedAt = new Date();
@@ -229,6 +233,4 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
 

@@ -55,7 +55,6 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       await odd.save();
 
       wallet.balance = Number(wallet.balance) - parseFloat(amount);
-      wallet.blocked = Number(wallet.blocked) + parseFloat(amount);
       await wallet.save();
       
       //! Não é odd de empate
