@@ -26,10 +26,12 @@ export async function GameDetails(req: Request, res: Response, next: any) {
 }
 export async function GamesAndOdds(req: Request, res: Response, next: any) {
    try {
-      const { modality } = req.body;
-      const data = await games.findAll({ where: modality ? { modality: modality } : {} });
-      const odds = await Odds.All();
+      const { modality } = req.query;
+      let data;
+      if (modality) data = await games.findAll({ where: { modality: { [Op.like]: `%${modality}%` } } });
+      else data = await games.findAll();
 
+      const odds = await Odds.All();
       const games_odds = data.map((game) => {
          return {
             id: game.id,
