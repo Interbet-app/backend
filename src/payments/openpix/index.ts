@@ -21,6 +21,8 @@ export class OpenPix {
       this.axios = axios.create({
          baseURL: "https://api.openpix.com.br/api",
          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
             Authorization: this.authorization,
          },
       });
@@ -32,14 +34,13 @@ export class OpenPix {
       comment: string
    ): Promise<OpenPixPayment | AppError> {
       try {
-         const response = await this.axios.post("/openpix/v1/charge?return_existing=true", {
+         const body = {
             correlationID: `${correlationID}`,
             amount: `${Number(amount) * 100}`,
             comment: comment,
-         });
-
+         };
+         const response = await this.axios.post("/openpix/v1/charge?return_existing=true", JSON.stringify(body));
          logger.info(response.data);
-
          return {
             correlationID: response.data.charge.correlationID,
             value: response.data.charge.value,
@@ -56,5 +57,6 @@ export class OpenPix {
       }
    }
 }
+
 
 
