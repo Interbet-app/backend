@@ -58,12 +58,14 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       const signature = req.headers["x-openpix-signature"] as string;
       const { value, correlationID, transactionID, status } = req.body;
 
+      console.log("Body : ", req.body);
+
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) {
          logger.error("Invalid signature ->", signature);
          return res.sendStatus(401);
       }
-      const deposit = await deposits.findOne({ where: { id: correlationID } });
+      const deposit = await deposits.findOne({ where: { id: Number(correlationID) } });
       if (deposit == null) throw new AppError(404, "Id de pagamento nao encontrado!");
       if (status !== "COMPLETE") throw new AppError(400, "Status do pagamento inválido!");
 

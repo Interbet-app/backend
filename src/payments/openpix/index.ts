@@ -4,7 +4,6 @@ import logger from "../../log";
 import AppError from "../../error";
 
 export type OpenPixPayment = {
-   correlationID: string;
    value: string;
    status: "ACTIVE" | "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
    brCode: string;
@@ -50,7 +49,6 @@ export class OpenPix {
 
          const response = await this.axios.post("/v1/charge?return_existing=true", payload);
          return {
-            correlationID: response.data.charge.correlationID,
             value: response.data.charge.value,
             status: response.data.charge.status,
             brCode: response.data.charge.brCode,
