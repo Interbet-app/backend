@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import logger from "../../log";
 import AppError from "../../error";
 
@@ -14,9 +14,16 @@ export type OpenPixPayment = {
 };
 export class OpenPix {
    private readonly authorization: string;
+   private axios: AxiosInstance;
 
    constructor() {
       this.authorization = process.env.OPEN_PIX_APP_ID as string;
+      this.axios = axios.create({
+         baseURL: "https://api.openpix.com.br/api/openpix",
+         headers: {
+            Authorization: this.authorization,
+         },
+      });
    }
 
    public async CreatePayment(
@@ -31,16 +38,7 @@ export class OpenPix {
             comment: comment,
          };
 
-         const res = await fetch("https://api.openpix.com.br/api/openpix/v1/charge", {
-            method: "POST",
-            headers: {
-               "Content-Type": "application/json",
-               Accept: "application/json",
-               Authorization: this.authorization,
-            },
-            body: JSON.stringify(payload),
-         });
-         const response = await res.json();
+         const response = await this.axios.post("/v1/charges", payload);
 
          logger.info(response);
          return {
@@ -59,6 +57,7 @@ export class OpenPix {
       }
    }
 }
+
 
 
 
