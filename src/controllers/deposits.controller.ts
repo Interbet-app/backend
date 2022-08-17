@@ -57,7 +57,7 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
    try {
       const signature = req.headers["x-openpix-signature"] as string;
       const { value, correlationID, status } = req.body.pix.charge;
-      const { transactionID } = req.body.pix;
+      const { transactionID } = req.body.charge;
 
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) {
