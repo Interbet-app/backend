@@ -46,9 +46,10 @@ export class OpenPix {
             createdAt: response.data.charge.createdAt,
             paymentLinkUrl: response.data.charge.paymentLinkUrl,
          } as OpenPixPayment;
-         
+
       } catch (error: any) {
          logger.error(error);
+         logger.error(error?.response);
          return new AppError(500, error.message);
       }
    }
