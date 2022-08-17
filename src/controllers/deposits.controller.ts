@@ -56,7 +56,8 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
 export async function OpenPixCallback(req: Request, res: Response, next: any) {
    try {
       const signature = req.headers["x-openpix-signature"] as string;
-      const { value, correlationID, transactionID, status } = req.body.pix.charge;
+      const { value, correlationID, status } = req.body.pix.charge;
+      const { transactionID } = req.body.pix;
 
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) {
@@ -70,16 +71,16 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       const amount = Number(value) / 100;
       if (Number(deposit.amount) != Number(amount)) throw new AppError(400, "Valor do pagamento inválido!");
 
-      const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
-      if (!wallet) {
-         logger.error(
-            `Carteira referente ao deposito do usuário nao encontrada usuário:${deposit.userId} valor: ${deposit.amount}!`
-         );
-         return res.sendStatus(200);
+      if (deposit.status == "pendent") {
+         const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
+         if (!wallet) {
+            logger.error(`Carteira do usuário nao encontrada para creditar deposito, ${deposit.userId} valor: ${deposit.amount}!`);
+            return res.sendStatus(200);
+         }
+         wallet.balance = Number(wallet.balance) + Number(deposit.amount);
+         wallet.updatedAt = new Date();
+         await wallet.save();
       }
-      wallet.balance = Number(wallet.balance) + Number(deposit.amount);
-      wallet.updatedAt = new Date();
-      await wallet.save();
 
       deposit.status = "completed";
       deposit.externalId = transactionID;
