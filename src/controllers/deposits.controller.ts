@@ -43,7 +43,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       });
 
       const Pix = new OpenPix();
-      const payment = await Pix.CreatePayment(deposit.id!, amount, "interbet deposit");
+      const payment = await Pix.CreatePayment(deposit.id!, amount, "Depósito Interbet");
       if (payment instanceof AppError) throw payment;
       deposit.externalStatus = payment.status;
       deposit.externalUrl = payment.paymentLinkUrl;
