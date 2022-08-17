@@ -76,7 +76,6 @@ route.post("/deposits/openpix", AuthUser, Control.CreateDepositOpenPix);
 
 //- Callback routes
 route.post("/deposits/mp/callback", Control.MercadoPagoCallback);
-route.post("/deposits/create/callback", Control.OpenPixCallback);
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 route.post("/deposits/receive/callback", Control.OpenPixCallback);
 route.post("/deposits/expire/callback", Control.OpenPixCallback);

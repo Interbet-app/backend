@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { createHmac } from "crypto";
 import logger from "../../log";
 import AppError from "../../error";
 
@@ -12,8 +13,13 @@ export type OpenPixPayment = {
    createdAt: string;
    paymentLinkUrl: string;
 };
+
+export type HookAction = "complete" | "receive" | "expire";
 export class OpenPix {
    private readonly authorization: string;
+   public HMAC_COMPLETE: string;
+   public HMAC_RECEIVE: string;
+   public HMAC_EXPIRE: string;
    private axios: AxiosInstance;
 
    constructor() {
@@ -24,13 +30,21 @@ export class OpenPix {
             Authorization: this.authorization,
          },
       });
+      this.HMAC_COMPLETE = process.env.OPEN_PIX_HOOK_RECEIVE_KEY as string;
+      this.HMAC_RECEIVE = process.env.OPEN_PIX_HOOK_COMPLETE_KEY as string;
+      this.HMAC_EXPIRE = process.env.OPEN_PIX_HOOK_EXPIRE_KEY as string;
+   }
+   private GetSignature(action: string) {
+      switch (action) {
+         case "complete":
+            return this.HMAC_COMPLETE;
+         case "receive":
+            return this.HMAC_RECEIVE;
+         default: return "this.HMAC_EXPIRE";
+      }
    }
 
-   public async CreatePayment(
-      correlationID: number,
-      amount: number,
-      comment: string
-   ): Promise<OpenPixPayment | AppError> {
+   public async CreatePayment(correlationID: number, amount: number, comment: string ): Promise<OpenPixPayment | AppError> {
       try {
          const payload = {
             correlationID: `${correlationID}`,
@@ -39,8 +53,6 @@ export class OpenPix {
          };
 
          const response = await this.axios.post("/v1/charge?return_existing=true", payload);
-
-         logger.info(response);
          return {
             correlationID: response.data.charge.correlationID,
             value: response.data.charge.value,
@@ -52,13 +64,20 @@ export class OpenPix {
             paymentLinkUrl: response.data.charge.paymentLinkUrl,
          } as OpenPixPayment;
       } catch (error: any) {
-         logger.error(error);
          return new AppError(500, "Falha ao criar pix", error);
       }
    }
+
+   public VerifySignature(body: object, key: string, action: HookAction): boolean {
+      try {
+         const hmac = createHmac("sha1", this.GetSignature(action));
+         const signature = hmac.update(JSON.stringify(body)).digest("base64");
+         return signature === key;
+      } catch (error) {
+         logger.error(error);
+         return false;
+      }
+   }
 }
-
-
-
 
 

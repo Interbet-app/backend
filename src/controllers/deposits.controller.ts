@@ -179,6 +179,10 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       logger.info("Body :", req.body);
       logger.info("Query :", req.query);
       logger.info("Headers :", req.headers);
+      logger.info("Params :", req.params);
+
+      console.log("Body :", req.body);
+      console.log("Headers :", req.headers);
       res.status(200).end();
    } catch (error) {
       next(error);
