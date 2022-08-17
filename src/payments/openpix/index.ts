@@ -26,7 +26,11 @@ export class OpenPix {
       });
    }
 
-   public async CreatePayment(correlationID: number, amount: number, comment: string): Promise<OpenPixPayment | AppError> {
+   public async CreatePayment(
+      correlationID: number,
+      amount: number,
+      comment: string
+   ): Promise<OpenPixPayment | AppError> {
       try {
          const response = await this.axios.post("/openpix/v1/charge", {
             correlationID: `${correlationID}`,
@@ -35,7 +39,7 @@ export class OpenPix {
          });
 
          logger.info(response.data);
-         
+
          return {
             correlationID: response.data.charge.correlationID,
             value: response.data.charge.value,
@@ -46,11 +50,9 @@ export class OpenPix {
             createdAt: response.data.charge.createdAt,
             paymentLinkUrl: response.data.charge.paymentLinkUrl,
          } as OpenPixPayment;
-
       } catch (error: any) {
          logger.error(error);
-         logger.error(error?.response.data);
-         return new AppError(500, error.message);
+         return new AppError(500, "Falha ao criar pix", error);
       }
    }
 }
