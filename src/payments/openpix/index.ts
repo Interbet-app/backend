@@ -49,7 +49,7 @@ export class OpenPix {
 
       } catch (error: any) {
          logger.error(error);
-         logger.error(error?.response);
+         logger.error(error?.response.data);
          return new AppError(500, error.message);
       }
    }
