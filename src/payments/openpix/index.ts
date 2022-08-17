@@ -32,7 +32,7 @@ export class OpenPix {
       comment: string
    ): Promise<OpenPixPayment | AppError> {
       try {
-         const response = await this.axios.post("/openpix/v1/charge", {
+         const response = await this.axios.post("/openpix/v1/charge?return_existing=true", {
             correlationID: `${correlationID}`,
             amount: `${Number(amount) * 100}`,
             comment: comment,
@@ -56,4 +56,5 @@ export class OpenPix {
       }
    }
 }
+
 
