@@ -49,7 +49,7 @@ export class OpenPix {
          };
 
          const response = await this.axios.post("/v1/charge?return_existing=true", payload);
-         const qrcode = await QRCode.toString(response.data.brCode) as string;
+         const qrcode = (await QRCode.toDataURL(response.data.brCode, { type: "image/jpeg" })) as string;
 
          return {
             value: response.data.charge.value,
@@ -75,6 +75,4 @@ export class OpenPix {
       }
    }
 }
-
-
 
