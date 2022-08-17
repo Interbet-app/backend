@@ -6,6 +6,7 @@ import logger from "../log";
 import { Jwt } from "../auth";
 import { Token } from "../types";
 import mercadopago from "../payments";
+import { OpenPix } from "../payments/openpix";
 
 export async function UserDeposits(_req: Request, res: Response, next: any) {
    try {
@@ -77,6 +78,38 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function CreateDepositOpenPix(req: Request, res: Response, next: any) {
+   try {
+      const token = Jwt.getLocals(res, next) as Token;
+      const user = await users.findOne({ where: { id: token.userId } });
+      if (!user) throw new AppError(404, "User not found!");
+
+      const { amount } = req.body;
+      const expire = new Date();
+      expire.setDate(expire.getDate() + 1);
+
+      const deposit = await deposits.create({
+         userId: token.userId,
+         amount: Number(amount),
+         status: "pendent",
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+
+      const Pix = new OpenPix();
+      const payment = await Pix.CreatePayment(deposit.id!, amount, "test payment");
+      if (payment instanceof AppError) throw payment;
+      deposit.mp_id = Number(payment.transactionID);
+      deposit.mp_status = payment.status;
+      deposit.mp_ticker_url = payment.paymentLinkUrl;
+      deposit.mp_qr_code = payment.brCode;
+      deposit.mp_expires = expire;
+      await deposit.save();
+      res.status(200).json(deposit as IDeposit);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function MercadoPagoCallback(req: Request, res: Response, next: any) {
    try {
       const { id, topic } = req.query;
@@ -136,6 +169,17 @@ export async function MercadoPagoCallback(req: Request, res: Response, next: any
             logger.error(error);
             res.sendStatus(500);
          });
+   } catch (error) {
+      next(error);
+   }
+}
+
+export async function OpenPixCallback(req: Request, res: Response, next: any) {
+   try {
+      logger.info("Body :", req.body);
+      logger.info("Query :", req.query);
+      logger.info("Headers :", req.headers);
+      res.status(200).end();
    } catch (error) {
       next(error);
    }
