@@ -5,7 +5,6 @@ import AppError from "../error";
 import logger from "../log";
 import { Jwt } from "../auth";
 import { Token } from "../types";
-import mercadopago from "../payments";
 import { OpenPix } from "../payments/openpix";
 
 export async function UserDeposits(_req: Request, res: Response, next: any) {
@@ -21,64 +20,8 @@ export async function UserDeposits(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 export async function CreateDeposit(req: Request, res: Response, next: any) {
-   try {
-      const token = Jwt.getLocals(res, next) as Token;
-      const user = await users.findOne({ where: { id: token.userId } });
-      if (!user) throw new AppError(404, "User not found!");
-
-      const { amount, email, document, document_type } = req.body;
-
-      const expire = new Date();
-      expire.setDate(expire.getDate() + 1);
-
-      const deposit = await deposits.create({
-         userId: token.userId,
-         amount: Number(amount),
-         status: "pendent",
-         createdAt: new Date(),
-         updatedAt: new Date(),
-      });
-
-      mercadopago.payment
-         .create({
-            payment_method_id: "pix",
-            transaction_amount: Number(amount),
-            external_reference: `${deposit.id}`,
-            installments: 1,
-            date_of_expiration: expire,
-            statement_descriptor: "INTERBET",
-            payer: {
-               email,
-               identification: {
-                  type: document_type,
-                  number: document,
-               },
-            },
-         })
-         .then(async (payment: any) => {
-            try {
-               deposit.mp_id = payment.response.id;
-               deposit.mp_status = payment.response.status;
-               deposit.mp_ticker_url = payment.response.point_of_interaction.transaction_data.ticket_url;
-               deposit.mp_qr_code = payment.response.point_of_interaction.transaction_data.qr_code;
-               deposit.mp_expires = expire;
-               await deposit.save();
-               res.status(200).json(deposit as IDeposit);
-            } catch (error: any) {
-               logger.error(error);
-               res.status(500).json(error);
-            }
-         })
-         .catch((error: any) => {
-            logger.error(error);
-            res.status(500).json(error);
-         });
-   } catch (error) {
-      next(error);
-   }
-}
-export async function CreateDepositOpenPix(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findOne({ where: { id: token.userId } });
@@ -97,78 +40,14 @@ export async function CreateDepositOpenPix(req: Request, res: Response, next: an
       });
 
       const Pix = new OpenPix();
-      const payment = await Pix.CreatePayment(deposit.id!, amount, "test payment");
+      const payment = await Pix.CreatePayment(deposit.id!, amount, "interbet deposit");
       if (payment instanceof AppError) throw payment;
-      deposit.mp_id = Number(payment.transactionID);
-      deposit.mp_status = payment.status;
-      deposit.mp_ticker_url = payment.paymentLinkUrl;
-      deposit.mp_qr_code = payment.brCode;
-      deposit.mp_expires = expire;
+      deposit.externalStatus = payment.status;
+      deposit.externalUrl = payment.paymentLinkUrl;
+      deposit.externalQrCode = payment.brCode;
+      deposit.expireAt = expire;
       await deposit.save();
       res.status(200).json(deposit as IDeposit);
-   } catch (error) {
-      next(error);
-   }
-}
-export async function MercadoPagoCallback(req: Request, res: Response, next: any) {
-   try {
-      const { id, topic } = req.query;
-      if (id == "123456") return res.status(200).end(); //! Test
-      if (!id) throw new AppError(422, "ID do pagamento não informado!");
-      if (!topic) throw new AppError(422, "Tópico do pagamento não informado!");
-      if (topic !== "payment") throw new AppError(400, "Tópico da notificação inválido!");
-
-      mercadopago.payment
-         .get(id)
-         .then(async (payment: any) => {
-            try {
-               const { status } = payment.response;
-               const deposit = await deposits.findOne({ where: { mp_id: payment.response.id } });
-               if (deposit == null) throw new AppError(404, "Id de pagamento nao encontrado!");
-               switch (status) {
-                  case "approved":
-                     deposit.status = "completed";
-                     deposit.mp_status = status;
-                     deposit.updatedAt = new Date();
-                     await deposit.save();
-                     const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
-                     if (wallet == null) {
-                        await wallets.create({
-                           userId: deposit.userId,
-                           balance: deposit.amount,
-                           blocked: 0,
-                           score: 0,
-                           createdAt: new Date(),
-                           updatedAt: new Date(),
-                        });
-                     } else {
-                        wallet.balance = Number(wallet.balance) + Number(deposit.amount);
-                        wallet.updatedAt = new Date();
-                        await wallet.save();
-                     }
-                     return res.sendStatus(200);
-                  case "cancelled": {
-                     deposit.status = "canceled";
-                     deposit.mp_status = status;
-                     deposit.updatedAt = new Date();
-                     await deposit.save();
-                  }
-                  default: {
-                     deposit.mp_status = status;
-                     deposit.updatedAt = new Date();
-                     await deposit.save();
-                     return res.sendStatus(200);
-                  }
-               }
-            } catch (error) {
-               logger.error(error);
-               res.sendStatus(400);
-            }
-         })
-         .catch((error: any) => {
-            logger.error(error);
-            res.sendStatus(500);
-         });
    } catch (error) {
       next(error);
    }
@@ -176,13 +55,40 @@ export async function MercadoPagoCallback(req: Request, res: Response, next: any
 
 export async function OpenPixCallback(req: Request, res: Response, next: any) {
    try {
-      logger.info("Body :", req.body);
-      logger.info("Query :", req.query);
-      logger.info("Headers :", req.headers);
-      logger.info("Params :", req.params);
+      const signature = req.headers["x-openpix-signature"] as string;
+      const { value, correlationID, transactionID, status } = req.body;
 
-      console.log("Body :", req.body);
-      console.log("Headers :", req.headers);
+      const Pix = new OpenPix();
+      if (!Pix.VerifySignature(req.body, signature, "complete")) {
+         logger.error("Invalid signature ->", signature);
+         return res.sendStatus(401);
+      }
+      const deposit = await deposits.findOne({ where: { id: correlationID } });
+      if (deposit == null) throw new AppError(404, "Id de pagamento nao encontrado!");
+      if (status !== "COMPLETE") throw new AppError(400, "Status do pagamento inválido!");
+
+      const amount = Number(value) / 100;
+      if (deposit.amount !== amount) throw new AppError(400, "Valor do pagamento inválido!");
+
+      const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
+      if (!wallet) {
+         logger.error(
+            `Carteira referente ao deposito do usuário nao encontrada usuário:${deposit.userId} valor: ${deposit.amount}!`
+         );
+         return res.sendStatus(200);
+      }
+      wallet.balance = Number(wallet.balance) + Number(deposit.amount);
+      wallet.updatedAt = new Date();
+      await wallet.save();
+
+      deposit.status = "completed";
+      deposit.externalId = transactionID;
+      deposit.externalStatus = status;
+      deposit.externalQrCode = "";
+      deposit.externalUrl = "";
+      deposit.updatedAt = new Date();
+      await deposit.save();
+
       res.status(200).end();
    } catch (error) {
       next(error);

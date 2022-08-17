@@ -318,6 +318,37 @@ components:
             updatedAt:
                type: string
                format: date-time
+      deposit:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            userId:
+               type: integer
+               format: int64
+            amount:
+               type: number
+            status:
+               type: string
+               enum: ["pendent", "completed", "canceled"]
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+            expireAt:
+               type: string
+               format: date-time
+            externalId:
+               type: string
+            externalUrl:
+               type: string
+            externalQrCode:
+               type: string
+            externalStatus:
+               type: string
 paths:
    /google/oauth:
       post:
@@ -493,7 +524,7 @@ paths:
                   schema:
                      type: object
                      properties:
-                        userId: 
+                        userId:
                            type: integer
                            format: integer
                         balance:
@@ -1583,3 +1614,44 @@ paths:
                               type: array
                               items:
                                  $ref: "#/components/schemas/bet"
+   /deposits:
+      get:
+         tags:
+            - Depósitos
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all deposits for user
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           deposits:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/deposit"
+      post:
+         tags:
+            - Depósitos
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        amount:
+                           type: number
+                           format: double
+         responses:
+            "200":
+               description: Return the created deposit
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/deposit"
+

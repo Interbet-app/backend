@@ -7,7 +7,6 @@ export type OpenPixPayment = {
    correlationID: string;
    value: string;
    status: "ACTIVE" | "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
-   transactionID: string;
    brCode: string;
    expiresIn: string;
    createdAt: string;
@@ -18,7 +17,6 @@ export type HookAction = "complete" | "receive" | "expire";
 export class OpenPix {
    private readonly authorization: string;
    public HMAC_COMPLETE: string;
-   public HMAC_RECEIVE: string;
    public HMAC_EXPIRE: string;
    private axios: AxiosInstance;
 
@@ -30,21 +28,19 @@ export class OpenPix {
             Authorization: this.authorization,
          },
       });
-      this.HMAC_COMPLETE = process.env.OPEN_PIX_HOOK_RECEIVE_KEY as string;
-      this.HMAC_RECEIVE = process.env.OPEN_PIX_HOOK_COMPLETE_KEY as string;
+      this.HMAC_COMPLETE = process.env.OPEN_PIX_HOOK_COMPLETE_KEY as string;
       this.HMAC_EXPIRE = process.env.OPEN_PIX_HOOK_EXPIRE_KEY as string;
    }
    private GetSignature(action: string) {
-      switch (action) {
-         case "complete":
-            return this.HMAC_COMPLETE;
-         case "receive":
-            return this.HMAC_RECEIVE;
-         default: return "this.HMAC_EXPIRE";
-      }
+      if (action === "complete") return this.HMAC_COMPLETE;
+      if (action === "expire") return this.HMAC_EXPIRE;
    }
 
-   public async CreatePayment(correlationID: number, amount: number, comment: string ): Promise<OpenPixPayment | AppError> {
+   public async CreatePayment(
+      correlationID: number,
+      amount: number,
+      comment: string
+   ): Promise<OpenPixPayment | AppError> {
       try {
          const payload = {
             correlationID: `${correlationID}`,
@@ -57,7 +53,6 @@ export class OpenPix {
             correlationID: response.data.charge.correlationID,
             value: response.data.charge.value,
             status: response.data.charge.status,
-            transactionID: response.data.charge.transactionID,
             brCode: response.data.charge.brCode,
             expiresIn: response.data.charge.expiresIn,
             createdAt: response.data.charge.createdAt,
@@ -70,7 +65,7 @@ export class OpenPix {
 
    public VerifySignature(body: object, key: string, action: HookAction): boolean {
       try {
-         const hmac = createHmac("sha1", this.GetSignature(action));
+         const hmac = createHmac("sha1", this.GetSignature(action)!);
          const signature = hmac.update(JSON.stringify(body)).digest("base64");
          return signature === key;
       } catch (error) {

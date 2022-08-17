@@ -3,11 +3,11 @@ export interface IDeposit {
    userId: number;
    amount: number;
    status: "pendent" | "completed" | "canceled";
-   mp_id?: number;
-   mp_status?: string;
-   mp_ticker_url?: string;
-   mp_qr_code?: string;
-   mp_expires?: Date;
+   externalUrl?: string;
+   externalStatus?: string;
+   externalId?: string;
+   externalQrCode?: string;
+   expireAt?: Date;
    createdAt: Date;
    updatedAt: Date;
 }

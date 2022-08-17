@@ -71,16 +71,9 @@ route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Contr
 route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
 route.get("/deposits", AuthUser, Control.UserDeposits);
-route.post("/deposits", AuthUser, Middle.CreateDeposit, Control.CreateDeposit);
-route.post("/deposits/openpix", AuthUser, Control.CreateDepositOpenPix);
+route.post("/deposits", AuthUser, Control.CreateDeposit);
 
 //- Callback routes
-route.post("/deposits/mp/callback", Control.MercadoPagoCallback);
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
-route.post("/deposits/receive/callback", Control.OpenPixCallback);
-route.post("/deposits/expire/callback", Control.OpenPixCallback);
+
 export default route;
-
-
-
-
