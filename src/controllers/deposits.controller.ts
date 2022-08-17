@@ -68,7 +68,7 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       if (status !== "COMPLETED") throw new AppError(400, "Status do pagamento inválido!");
 
       const amount = Number(value) / 100;
-      if (deposit.amount !== amount) throw new AppError(400, "Valor do pagamento inválido!");
+      if (Number(deposit.amount) != Number(amount)) throw new AppError(400, "Valor do pagamento inválido!");
 
       const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
       if (!wallet) {
