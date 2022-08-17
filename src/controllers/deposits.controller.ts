@@ -5,7 +5,8 @@ import AppError from "../error";
 import logger from "../log";
 import { Jwt } from "../auth";
 import { Token } from "../types";
-import { OpenPix } from "../payments/openpix";
+import { OpenPix } from "../payments";
+
 
 export async function UserDeposits(_req: Request, res: Response, next: any) {
    try {
@@ -20,7 +21,6 @@ export async function UserDeposits(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function CreateDeposit(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
@@ -28,6 +28,9 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       if (!user) throw new AppError(404, "User not found!");
 
       const { amount } = req.body;
+      if (!amount) throw new AppError(400, "Forneça o valor do depósito!");
+      if (amount < 0) throw new AppError(400, "Valor do depósito inválido!");
+
       const expire = new Date();
       expire.setDate(expire.getDate() + 1);
 
@@ -52,7 +55,6 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function OpenPixCallback(req: Request, res: Response, next: any) {
    try {
       const signature = req.headers["x-openpix-signature"] as string;
