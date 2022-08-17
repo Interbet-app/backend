@@ -38,7 +38,7 @@ export class OpenPix {
             comment: comment,
          };
 
-         const response = await this.axios.post("/v1/charges", payload);
+         const response = await this.axios.post("/v1/charge?return_existing=true", payload);
 
          logger.info(response);
          return {
@@ -57,6 +57,7 @@ export class OpenPix {
       }
    }
 }
+
 
 
 
