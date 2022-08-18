@@ -119,21 +119,23 @@ export async function LastGamesResults(req: Request, res: Response, next: any) {
       if (!athletic) throw new AppError(404, "Athletic not found!");
 
       const times = await teams.findAll({ where: { athleticId: athleticId } });
+      console.log(times);
       const teamsIds = times.map((team) => team.id!);
+      console.log(teamsIds);
       const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
+      console.log(AthleticsOdds);
       const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
+      console.log(gamesIds);
       const result = await games.findAll({
          where: {
             id: {
                [Op.in]: gamesIds,
             },
-            winnerOddId: {
-               [Op.not]: undefined,
-            },
          },
          order: [["updatedAt", "DESC"]],
          limit: 5,
       });
+
       res.status(200).json(result as IGame[]);
    } catch (error) {
       next(error);
