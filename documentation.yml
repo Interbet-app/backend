@@ -203,7 +203,7 @@ components:
                format: int64
             status:
                type: string
-               enum: ["pending", "ongoing", "finished"]
+               enum: ["open", "pendent", "closed"]
             modality:
                type: string
             location:
@@ -235,7 +235,7 @@ components:
                format: int64
             status:
                type: string
-               enum: ["pending", "ongoing", "finished"]
+               enum: ["open", "pendent", "closed"]
             modality:
                type: string
             location:
@@ -348,6 +348,35 @@ components:
             externalQrCode:
                type: string
             externalStatus:
+               type: string
+      withdrawal:
+         type: object
+         properties:
+            id:
+               type: integer
+               format: int64
+            userId:
+               type: integer
+               format: int64
+            amount:
+               type: number
+            status:
+               type: string
+               enum: ["pendent", "completed"]
+            createdAt:
+               type: string
+               format: date-time
+            updatedAt:
+               type: string
+               format: date-time
+            externalId:
+               type: string
+            externalStatus:
+               type: string
+            pixKeyType:
+               type: string
+               enum: ["CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"]
+            pixKey:
                type: string
 paths:
    /google/oauth:
@@ -896,6 +925,26 @@ paths:
          responses:
             "200":
                description: Return 200 if deleted successfully
+   /athletics/games/details/{id}/:
+      get:
+         tags:
+            - Atléticas
+         security:
+            - bearerAuth: ["authentication"]
+         parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                 type: integer
+                 format: int64
+         responses:
+            "200":
+               description: Return the game details
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/games"
    /maintenances/{group}/:
       get:
          tags:
@@ -1626,12 +1675,9 @@ paths:
                content:
                   application/json:
                      schema:
-                        type: object
-                        properties:
-                           deposits:
-                              type: array
-                              items:
-                                 $ref: "#/components/schemas/deposit"
+                        type: array
+                        items:
+                           $ref: "#/components/schemas/deposit"
       post:
          tags:
             - Depósitos
@@ -1654,4 +1700,50 @@ paths:
                   application/json:
                      schema:
                         $ref: "#/components/schemas/deposit"
+   /withdrawal:
+      get:
+         tags:
+            - Saques
+         security:
+            - bearerAuth: ["authentication"]
+         responses:
+            "200":
+               description: Return all withdrawals for user
+               content:
+                  application/json:
+                     schema:
+                        type: object
+                        properties:
+                           withdrawals:
+                              type: array
+                              items:
+                                 $ref: "#/components/schemas/withdrawal"
+      post:
+         tags:
+            - Saques
+         security:
+            - bearerAuth: ["authentication"]
+         requestBody:
+            required: true
+            content:
+               application/json:
+                  schema:
+                     type: object
+                     properties:
+                        amount:
+                           type: number
+                           format: double
+                        pixKey:
+                           type: string
+                        pixKeyType:
+                           type: string
+                           enum: ["CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"]
+
+         responses:
+            "200":
+               description: Return the created withdrawal
+               content:
+                  application/json:
+                     schema:
+                        $ref: "#/components/schemas/withdrawal"
 
