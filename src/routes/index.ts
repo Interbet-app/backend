@@ -73,6 +73,9 @@ route.delete("/maintenances/:id/", AuthUser, AuthAdmin, Control.DeleteMaintenanc
 route.get("/deposits", AuthUser, Control.UserDeposits);
 route.post("/deposits", AuthUser, Control.CreateDeposit);
 
+route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
+route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
+
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 

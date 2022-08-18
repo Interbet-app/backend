@@ -12,6 +12,10 @@ export type OpenPixPayment = {
    createdAt: string;
    paymentLinkUrl: string;
 };
+export type OpenPixSend = {
+   externalId: string;
+   externalStatus: "PENDING" | "CONFIRMED";
+};
 
 export type HookAction = "complete" | "receive" | "expire";
 export class OpenPix {
@@ -61,6 +65,30 @@ export class OpenPix {
          } as OpenPixPayment;
       } catch (error: any) {
          return new AppError(500, "Falha ao criar pix", error);
+      }
+   }
+
+   public async Send(
+      correlationId: number,
+      amount: number,
+      pixKey: string,
+      pixKeyType: string
+   ): Promise<OpenPixSend | AppError> {
+      try {
+         const payload = {
+            correlationId: `${correlationId}`,
+            value: `${Number(amount) * 100}`,
+            pixKey,
+            pixKeyType,
+         };
+         await this.axios.post("/v1/pay/pix-key", payload);
+         const confirm = await this.axios.post("/v1/pay/confirm", { correlationId: `${correlationId}` });
+         return {
+            externalId: confirm.data.payment.correlationID,
+            externalStatus: confirm.data.payment.destination.status,
+         };
+      } catch (error: any) {
+         return new AppError(500, "Falha ao enviar pix", error);
       }
    }
 

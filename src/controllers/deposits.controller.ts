@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
 import { wallets, users, deposits } from "../models";
 import { IDeposit } from "../interfaces";
+import { Jwt, Token } from "../auth";
+import { OpenPix } from "../payments";
 import AppError from "../error";
 import logger from "../log";
-import { Jwt } from "../auth";
-import { Token } from "../types";
-import { OpenPix } from "../payments";
-
 
 export async function UserDeposits(_req: Request, res: Response, next: any) {
    try {
@@ -76,7 +74,9 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       if (deposit.status == "pendent") {
          const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
          if (!wallet) {
-            logger.error(`Carteira do usuário nao encontrada para creditar deposito, ${deposit.userId} valor: ${deposit.amount}!`);
+            logger.error(
+               `Carteira do usuário nao encontrada para creditar deposito, ${deposit.userId} valor: ${deposit.amount}!`
+            );
             return res.sendStatus(200);
          }
          wallet.balance = Number(wallet.balance) + Number(deposit.amount);
@@ -97,5 +97,3 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-

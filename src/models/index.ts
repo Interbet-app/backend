@@ -10,3 +10,4 @@ export * from "./notifications.model";
 export * from "./athletics.model";
 export * from "./maintenances.model";
 export * from "./deposits.model";
+export * from "./withdrawals.model";

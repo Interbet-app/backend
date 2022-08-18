@@ -1,7 +1,12 @@
 import { Response } from "express";
-import { Token } from "../types";
 import AppError from "../error";
 import jwt, { VerifyOptions } from "jsonwebtoken";
+
+export type Token = {
+   userId: number;
+   jwt?: string;
+};
+
 
 export class Jwt {
    static publicKey = process.env.JWT_RSA_PUBLIC as string;
@@ -38,4 +43,5 @@ export class Jwt {
       }
    }
 }
+
 
