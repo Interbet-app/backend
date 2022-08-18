@@ -36,6 +36,7 @@ route.delete("/teams/:id/", AuthUser, AuthAdmin, Control.DeleteTeam);
 
 route.get("/athletics", AuthUser, Control.GetAthletics);
 route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
+route.get("/athletics/games/details/:id/", AuthUser, Control.LastGamesResults);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
 route.put("/athletics", AuthUser, AuthAdmin, Control.UpdateAthletic);
 route.delete("/athletics/:id/", AuthUser, AuthAdmin, Control.DeleteAthletic);

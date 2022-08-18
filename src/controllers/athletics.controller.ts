@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { Athletics, athletics } from "../repositories";
-import { IAthletic } from "../interfaces";
+import { Op } from "sequelize";
+import { Athletics, athletics, odds, teams, games } from "../repositories";
+import { IAthletic, IGame } from "../interfaces";
 import multer from "multer";
 import AppError from "../error";
 import { S3 } from "../aws";
@@ -109,6 +110,35 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
       }
    });
 }
+export async function LastGamesResults(req: Request, res: Response, next: any) {
+   try {
+      const athleticId = parseInt(req.params.id, 10);
+      if (!athleticId) throw new AppError(422, "Missing id parameter!");
+
+      const athletic = await athletics.findByPk(athleticId);
+      if (!athletic) throw new AppError(404, "Athletic not found!");
+
+      const times = await teams.findAll({ where: { athleticId: athleticId } });
+      const teamsIds = times.map((team) => team.id!);
+      const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
+      const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
+      const result = await games.findAll({
+         where: {
+            id: {
+               [Op.in]: gamesIds,
+            },
+            winnerOddId: {
+               [Op.not]: undefined,
+            },
+         },
+         order: [["updatedAt", "DESC"]],
+         limit: 5,
+      });
+      res.status(200).json(result as IGame[]);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function DeleteAthletic(req: Request, res: Response, next: any) {
    try {
       const athleticId = parseInt(req.params.id, 10);
@@ -125,3 +155,4 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
