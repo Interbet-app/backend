@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { ValidateSchema } from "../validators";
 import * as Schemas from "../schemas";
 
+export function ID(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.ID, req.params, res, next);
+}
 export function GoogleOAuthSchema(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.google_oauth, req.body, res, next);
 }
@@ -32,6 +35,12 @@ export function UpdateOdd(req: Request, res: Response, next: any) {
 export function UpdateWallet(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.update_wallet, req.body, res, next);
 }
-export function CreateDeposit(req: Request, res: Response, next: any) {
-   return ValidateSchema(Schemas.create_deposit, req.body, res, next);
+export function CreatePlayer(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_player, req.body, res, next);
+}
+export function UpdatePlayer(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.update_player, req.body, res, next);
+}
+export function MultipleBets(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.multiple_bets, req.body, res, next);
 }

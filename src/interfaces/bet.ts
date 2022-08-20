@@ -6,6 +6,14 @@ export interface IBet {
    amount: number;
    status: "pendent" | "completed";
    result: "pendent" | "win" | "lose";
+   paid: boolean;
+   group?: string;
    createdAt: Date;
    updatedAt: Date;
+}
+
+export interface NewBet {
+   oddId: number;
+   amount: number;
+
 }

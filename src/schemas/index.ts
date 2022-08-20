@@ -1,5 +1,10 @@
 import Joi from "joi";
 
+export const ID = Joi.object({
+   id: Joi.number().required().messages({
+      "any.required": "Parâmetro 'id' é obrigatório!",
+   }),
+});
 export const google_oauth = Joi.object({
    affiliateId: Joi.number().optional(),
 });
@@ -81,14 +86,25 @@ export const update_wallet = Joi.object({
    walletId: Joi.number().required(),
    balance: Joi.number().required(),
    score: Joi.number().required(),
-   blocked: Joi.number().required(),
    updatedAt: Joi.date().required(),
 });
 
-export const create_deposit = Joi.object({
-   amount: Joi.number().required(),
-   email: Joi.string().required(),
-   document_type: Joi.string().valid("cpf", "cnpj").required(),
-   document: Joi.string().min(11).max(14).required(),
+export const create_player = Joi.object({
+   teamId: Joi.number().required(),
+   name: Joi.string().max(40).required(),
+   position: Joi.string().max(40).required(),
+   holder: Joi.boolean().required(),
 });
 
+export const update_player = Joi.object({
+   playerId: Joi.number().required(),
+   teamId: Joi.number().required(),
+   name: Joi.string().max(40).required(),
+   position: Joi.string().max(40).required(),
+   holder: Joi.boolean().required(),
+});
+
+export const multiple_bets = Joi.array().items(Joi.object({
+   oddId: Joi.number().required(),
+   amount: Joi.number().required(),
+}));

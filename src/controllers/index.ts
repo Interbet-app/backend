@@ -11,3 +11,4 @@ export * from "./odds.controller";
 export * from "./bets.controller";
 export * from "./deposits.controller";
 export * from "./withdrawals.controller";
+export * from "./players.controller";

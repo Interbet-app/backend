@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { Odds, odds } from "../repositories";
+import { odds } from "../models";
 import { IOdd } from "../interfaces";
 import AppError from "../error";
 
 export async function GetOdds(_req: Request, res: Response, next: any) {
    try {
-      const odds = await Odds.All();
-      res.status(200).json({ odds: odds });
+      const result = await odds.findAll();
+      res.status(200).json({ odds: result as IOdd[] }); 
    } catch (error) {
       next(error);
    }
@@ -14,8 +14,8 @@ export async function GetOdds(_req: Request, res: Response, next: any) {
 export async function OddsByGame(_req: Request, res: Response, next: any) {
    try {
       const gameId = parseInt(_req.params.id, 10);
-      const odds = await Odds.ByGameId(gameId);
-      res.status(200).json({ odds: odds });
+      const result = await odds.findAll({ where: { gameId } });
+      res.status(200).json({ odds: result as IOdd[] });
    } catch (error) {
       next(error);
    }
@@ -23,10 +23,9 @@ export async function OddsByGame(_req: Request, res: Response, next: any) {
 export async function GetOdd(req: Request, res: Response, next: any) {
    try {
       const id = parseInt(req.params.id, 10);
-      if (!id) throw new AppError(400, "Missing odd id!");
-      const odd = await Odds.ById(id);
-      if (!odd) throw new AppError(404, "Odd not found");
-      res.status(200).json(odd);
+      const odd = await odds.findByPk(id);
+      if (!odd) throw new AppError(404, "Opção não foi encontrada!");
+      res.status(200).json(odd as IOdd);
    } catch (error) {
       next(error);
    }
@@ -34,7 +33,7 @@ export async function GetOdd(req: Request, res: Response, next: any) {
 export async function CreateOdd(req: Request, res: Response, next: any) {
    try {
       const { gameId, teamId, name, payout, maxBetAmount, offer, status } = req.body;
-      const odd = await Odds.Create({
+      const odd = await odds.create({
          gameId,
          teamId: teamId == -1 ? 0 : teamId,
          name,
@@ -48,8 +47,8 @@ export async function CreateOdd(req: Request, res: Response, next: any) {
          createdAt: new Date(),
          updatedAt: new Date(),
       });
-      if (!odd) throw new AppError(400, "Odd not created");
-      res.status(201).json(odd);
+      if (!odd) throw new AppError(400, "Falha ao criar opção!");
+      res.status(201).json(odd as IOdd);
    } catch (error) {
       next(error);
    }
@@ -77,12 +76,12 @@ export async function UpdateOdd(req: Request, res: Response, next: any) {
 export async function DeleteOdd(req: Request, res: Response, next: any) {
    try {
       const id = parseInt(req.params.id, 10);
-      if (!id) throw new AppError(400, "Missing odd id!");
-      const deleted = await Odds.Destroy(id);
-      if (!deleted) throw new AppError(400, "Odd not deleted");
-      res.status(200).json({ message: "Odd deleted" });
+      await odds.destroy({ where: { id } });
+      res.status(200).json({ message: "Opção excluída com sucesso!" });
    } catch (error) {
       next(error);
    }
 }
+
+
 

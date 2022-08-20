@@ -11,3 +11,4 @@ export * from "./adds";
 export * from "./notification";
 export * from "./athletic";
 export * from "./maintenance";
+export * from "./player";

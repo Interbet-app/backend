@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { Athletics, athletics, odds, teams, games } from "../repositories";
+import { odds, teams, games, athletics } from "../models";
 import { IAthletic, IGame } from "../interfaces";
-import multer from "multer";
-import AppError from "../error";
 import { S3 } from "../aws";
 import { File } from "../functions";
+import multer from "multer";
+import AppError from "../error";
 
 export async function GetAthletics(_req: Request, res: Response, next: any) {
    try {
-      const athletics = await Athletics.All();
-      res.status(200).json({ athletics: athletics });
+      const data = await athletics.findAll();
+      res.status(200).json({ athletics: data as IAthletic[] });
    } catch (error) {
       next(error);
    }
@@ -18,9 +18,9 @@ export async function GetAthletics(_req: Request, res: Response, next: any) {
 export async function FindAthletics(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
-      if (!name) throw new AppError(422, "Missing search parameter!");
-      const athletics = await Athletics.ByName(name);
-      res.status(200).json({ athletics: athletics });
+      if (!name) throw new AppError(422, "Parâmetro 'name' é obrigatório!");
+      const result = await athletics.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
+      res.status(200).json({ athletics: result as IAthletic[] });
    } catch (error) {
       next(error);
    }
@@ -32,24 +32,24 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
          try {
             const { name, abbreviation, adminId } = req.body;
             if (error) throw new AppError(400, error.message);
-            if (!req.file) throw new AppError(422, "Missing file as picture!");
-            if (!name) throw new AppError(422, "Missing name parameter!");
-            if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
+            if (!req.file) throw new AppError(422, "Foto é obrigatória!");
+            if (!name) throw new AppError(422, "Nome é obrigatório!");
+            if (!abbreviation) throw new AppError(422, "Sigla é obrigatória!");
 
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
-               throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+               throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
             const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image")
-               throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+               throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
             const bucket = new S3();
             const file_bucket_name =
                `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
             const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
-            //Se o upload para o bucket na aws falhou, retorna o erro
+            //! Se o upload para o bucket na aws falhou, retorna o erro
             if (result instanceof AppError) throw result;
-            const athletic = await Athletics.Create({
+            const athletic = await athletics.create({
                name,
                abbreviation,
                picture: result.Location,
@@ -57,8 +57,8 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
                updatedAt: new Date(),
                adminId: adminId ? adminId : null,
             });
-            if (!athletic) throw new AppError(500, "Error at save the athletic!");
-            res.status(201).json(athletic);
+            if (!athletic) throw new AppError(500, "Erro ao salvar atlética!");
+            res.status(201).json(athletic as IAthletic);
          } catch (error) {
             next(error);
          }
@@ -72,20 +72,20 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
    multer({ storage }).single("picture")(req, res, async (error: any) => {
       try {
          if (error) throw new AppError(400, error.message);
-         if (!req.file) throw new AppError(422, "Missing file as picture!");
+         if (!req.file) throw new AppError(422, "Foto é obrigatória!");
          const { athleticId, name, abbreviation, adminId } = req.body;
-         if (!athleticId) throw new AppError(422, "Missing id parameter!");
-         if (!name) throw new AppError(422, "Missing name parameter!");
-         if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
+         if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
+         if (!name) throw new AppError(422, "Nome é obrigatório!");
+         if (!abbreviation) throw new AppError(422, "Sigla é obrigatória!");
 
          const athletic = await athletics.findByPk(athleticId);
          if (!athletic) throw new AppError(404, "Athletic not found!");
 
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
-            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+            throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
          const check = File.BreakMimetype(req.file.mimetype);
          if (check?.type !== "image")
-            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+            throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
          const bucket = new S3();
          const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
@@ -110,22 +110,39 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
       }
    });
 }
-export async function LastGamesResults(req: Request, res: Response, next: any) {
+export async function DeleteAthletic(req: Request, res: Response, next: any) {
    try {
       const athleticId = parseInt(req.params.id, 10);
-      if (!athleticId) throw new AppError(422, "Missing id parameter!");
-
+      if (!athleticId) throw new AppError(422, "!");
       const athletic = await athletics.findByPk(athleticId);
-      if (!athletic) throw new AppError(404, "Athletic not found!");
+      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
+      const bucket = new S3();
+      const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
+      const result = await bucket.DeleteFile(to_delete);
+      if (result instanceof AppError) throw result;
+      await athletic.destroy();
+      res.status(204).json({ message: "Atlética excluída com sucesso!" });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function LastGamesResults(req: Request, res: Response, next: any) {
+   try {
+      const { athleticId, teamId, limit } = req.body;
+      if (!athleticId && !teamId) throw new AppError(422, "Informe ao menos um parâmetro! athleticId ou teamId");
+
+      let athletic;
+      if (teamId) {
+         const team = await teams.findOne({ where: { id: teamId } });
+         if (!team) throw new AppError(404, "Time não foi encontrado!");
+         athletic = await athletics.findByPk(team.athleticId);
+      } else athletic = await athletics.findByPk(athleticId);
+      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
 
       const times = await teams.findAll({ where: { athleticId: athleticId } });
-      console.log(times);
       const teamsIds = times.map((team) => team.id!);
-      console.log(teamsIds);
       const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
-      console.log(AthleticsOdds);
       const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
-      console.log(gamesIds);
       const result = await games.findAll({
          where: {
             id: {
@@ -133,28 +150,15 @@ export async function LastGamesResults(req: Request, res: Response, next: any) {
             },
          },
          order: [["updatedAt", "DESC"]],
-         limit: 5,
+         limit: limit ? limit : 5,
       });
-
       res.status(200).json(result as IGame[]);
    } catch (error) {
       next(error);
    }
 }
-export async function DeleteAthletic(req: Request, res: Response, next: any) {
-   try {
-      const athleticId = parseInt(req.params.id, 10);
-      if (!athleticId) throw new AppError(422, "Missing id parameter!");
-      const athletic = await Athletics.ById(athleticId);
-      if (!athletic) throw new AppError(404, "Athletic not found!");
-      const bucket = new S3();
-      const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
-      const result = await bucket.DeleteFile(to_delete);
-      if (result instanceof AppError) throw result;
-      await Athletics.Destroy(athleticId);
-      res.status(204).json({ message: "Athletic deleted!" });
-   } catch (error) {
-      next(error);
-   }
-}
+
+
+
+
 

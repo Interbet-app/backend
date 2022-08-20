@@ -12,7 +12,6 @@ module.exports = {
          maxBetAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          payment: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          bets: { type: DataTypes.INTEGER, allowNull: false },
-         score: { type: DataTypes.INTEGER, allowNull: false },
          offer: { type: DataTypes.BOOLEAN, allowNull: false },
          status: { type: DataTypes.ENUM("open", "lock"), allowNull: false },
          createdAt: DataTypes.DATE,

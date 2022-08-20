@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { wallets, users, deposits } from "../models";
+import { wallets, users, deposits, notifications } from "../models";
 import { IDeposit } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { OpenPix } from "../payments";
@@ -23,7 +23,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findOne({ where: { id: token.userId } });
-      if (!user) throw new AppError(404, "User not found!");
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
 
       const { amount } = req.body;
       if (!amount) throw new AppError(400, "Forneça o valor do depósito!");
@@ -84,6 +84,16 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
          await wallet.save();
       }
 
+      //? Criar uma notificação para o usuário
+      await notifications.create({
+         userId: deposit.userId,
+         title: "Depósito confirmado",
+         message: `Seu depósito de ${deposit.amount} foi aprovado! e já foi creditado na sua carteira!`,
+         unread: true,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+
       deposit.status = "completed";
       deposit.externalId = transactionID;
       deposit.externalStatus = status;
@@ -97,3 +107,4 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+

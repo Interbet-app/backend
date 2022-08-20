@@ -23,8 +23,8 @@ export async function CreateWithdrawal(req: Request, res: Response, next: any) {
       if (!pixKeyType) throw new AppError(400, "Tipo de chave pix não informado");
 
       const wallet = await wallets.findOne({ where: { userId } });
-      if (!wallet) throw new AppError(400, "Can't find wallet!");
-      if (wallet.balance < amount) throw new AppError(400, "Not enough money!");
+      if (!wallet) throw new AppError(400, "Carteira não encontrada");
+      if (wallet.balance < amount) throw new AppError(400, "Saldo insuficiente");
 
       wallet.balance -= Number(amount);
       wallet.updatedAt = new Date();

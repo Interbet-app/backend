@@ -2,7 +2,7 @@ import Joi from "joi";
 import { Response } from "express";
 import logger from "../log";
 
-export function ValidateSchema(schema: Joi.ObjectSchema, object: any, res: Response, next: any) {
+export function ValidateSchema(schema: Joi.ObjectSchema | Joi.ArraySchema, object: any, res: Response, next: any) {
    try {
       let { error } = schema.validate(object);
       if (error == null) return next();
@@ -13,3 +13,4 @@ export function ValidateSchema(schema: Joi.ObjectSchema, object: any, res: Respo
       res.status(500).json({ message: "Internal Server Error!" });
    }
 }
+

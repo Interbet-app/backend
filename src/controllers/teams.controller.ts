@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
-import { Teams, Athletics, teams } from "../repositories";
+import { Op } from "sequelize";
+import { athletics, teams } from "../models";
 import { ITeam } from "../interfaces";
 import { S3 } from "../aws";
+import { File } from "../functions";
 import multer from "multer";
 import AppError from "../error";
-import { File } from "../functions";
 
 export async function GetTeams(_req: Request, res: Response, next: any) {
    try {
-      const teams = await Teams.All();
-      res.status(200).json({ teams: teams });
+      const data = await teams.findAll();
+      res.status(200).json({ teams: data as ITeam[] });
    } catch (error) {
       next(error);
    }
@@ -17,8 +18,8 @@ export async function GetTeams(_req: Request, res: Response, next: any) {
 export async function GetTeam(req: Request, res: Response, next: any) {
    try {
       const teamId = parseInt(req.params.id);
-      const team = await Teams.ById(teamId);
-      res.status(200).json(team);
+      const team = await teams.findByPk(teamId);
+      res.status(200).json(team as ITeam);
    } catch (error) {
       next(error);
    }
@@ -26,9 +27,9 @@ export async function GetTeam(req: Request, res: Response, next: any) {
 export async function FindTeams(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
-      if (!name) throw new AppError(422, "Missing search parameter!");
-      const teams = await Teams.ByName(name);
-      res.status(200).json({ teams: teams });
+      if (!name) throw new AppError(422, "Nome do time não informado!");
+      const data = await teams.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
+      res.status(200).json({ teams: data as ITeam[] });
    } catch (error) {
       next(error);
    }
@@ -40,20 +41,20 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
          try {
             const { name, abbreviation, athleticId, location, adminId } = req.body;
             if (error) throw new AppError(400, error.message);
-            if (!req.file) throw new AppError(422, "Missing file as picture!");
-            if (!name) throw new AppError(422, "Missing name parameter!");
-            if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
-            if (!athleticId) throw new AppError(422, "Missing athleticId parameter!");
-            if (!location) throw new AppError(422, "Missing location parameter!");
+            if (!req.file) throw new AppError(422, "Foto do time é obrigatória!");
+            if (!name) throw new AppError(422, "Nome do time é obrigatório!");
+            if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
+            if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
+            if (!location) throw new AppError(422, "Localização do time é obrigatório!");
 
-            const athletic = await Athletics.ById(athleticId);
-            if (!athletic) throw new AppError(404, "Athletic not found or invalid athleticId!");
+            const athletic = await athletics.findByPk(athleticId);
+            if (!athletic) throw new AppError(404, "Atlética informada não foi encontrada!");
 
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
-               throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+               throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
             const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image")
-               throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+               throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
 
             const bucket = new S3();
             const file_bucket_name = `teams/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
@@ -61,7 +62,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
 
             //Se o upload para o bucket na aws falhou, retorna o erro
             if (result instanceof AppError) throw result;
-            const team = await Teams.Create({
+            const team = await teams.create({
                name,
                abbreviation,
                athleticId,
@@ -71,8 +72,8 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
                createdAt: new Date(),
                updatedAt: new Date(),
             });
-            if (!athletic) throw new AppError(500, "Error at save the team!");
-            res.status(201).json({ team });
+            if (!athletic) throw new AppError(500, "Falha ao criar time!");
+            res.status(201).json(team as ITeam);
          } catch (error) {
             next(error);
          }
@@ -87,20 +88,20 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
       try {
          const { teamId, name, abbreviation, location, athleticId, adminId } = req.body;
          if (error) throw new AppError(400, error.message);
-         if (!req.file) throw new AppError(422, "Missing file as picture!");
-         if (!teamId) throw new AppError(422, "Missing teamId parameter!");
-         if (!name) throw new AppError(422, "Missing name parameter!");
-         if (!abbreviation) throw new AppError(422, "Missing abbreviation parameter!");
-         if (!location) throw new AppError(422, "Missing location parameter!");
-         if (!athleticId) throw new AppError(422, "Missing athleticId parameter!");
+         if (!req.file) throw new AppError(422, "Foto do time é obrigatória!");
+         if (!teamId) throw new AppError(422, "Id do time é obrigatório!");
+         if (!name) throw new AppError(422, "Nome do time é obrigatório!");
+         if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
+         if (!location) throw new AppError(422, "Localização do time é obrigatória!");
+         if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
          const team = await teams.findByPk(teamId);
-         if (!team) throw new AppError(404, "Team not found or invalid teamId!");
+         if (!team) throw new AppError(404, "Time não encontrado!");
 
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
-            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+            throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
          const check = File.BreakMimetype(req.file.mimetype);
          if (check?.type !== "image")
-            throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
+            throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
 
          const bucket = new S3();
          const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
@@ -128,17 +129,15 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
 export async function DeleteTeam(req: Request, res: Response, next: any) {
    try {
       const teamId = parseInt(req.params.id, 10);
-      if (!teamId) throw new AppError(422, "Missing id parameter!");
-      const team = await Teams.ById(teamId);
-      if (!team) throw new AppError(404, "Team not found or invalid teamId!");
+      const team = await teams.findByPk(teamId);
+      if (!team) throw new AppError(404, "Time não encontrado!");
       const bucket = new S3();
       const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
       const result = await bucket.DeleteFile(to_delete);
       if (result instanceof AppError) throw result;
-      await Teams.Destroy(teamId);
-      res.status(200).json({ message: "Team deleted!" });
+      await team.destroy();
+      res.status(200).json({ message: "Time excluído com sucesso!" });
    } catch (error) {
       next(error);
    }
 }
-

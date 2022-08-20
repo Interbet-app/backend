@@ -8,7 +8,7 @@ export const wallets = Database.define<IWalletModel>("wallets", {
    id: { type: Sequelize.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
    userId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: false },
    balance: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
-   blocked: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
+   bonus: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
    score: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 0 },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,

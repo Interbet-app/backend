@@ -10,6 +10,8 @@ module.exports = {
          modality: { type: DataTypes.STRING(40), allowNull: true },
          winnerOddId: { type: DataTypes.INTEGER, allowNull: true },
          result: { type: DataTypes.STRING(60), allowNull: true },
+         location: { type: DataTypes.STRING(60), allowNull: true },
+         startDate: { type: DataTypes.DATE, allowNull: true },
          createdAt: DataTypes.DATE,
          updatedAt: DataTypes.DATE,
       });

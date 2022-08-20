@@ -17,11 +17,3 @@ module.exports = {
       await queryInterface.dropTable("maintenances");
    },
 };
-
-
-
-
-
-
-
-

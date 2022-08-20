@@ -7,11 +7,11 @@ module.exports = {
          userId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
          amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          status: { type: DataTypes.ENUM, values: ["pendent", "completed", "canceled"], allowNull: false },
-         mp_id: { type: DataTypes.STRING, allowNull: true },
-         mp_status: { type: DataTypes.STRING, allowNull: true },
-         mp_ticker_url: { type: DataTypes.STRING, allowNull: true },
-         mp_qr_code: { type: DataTypes.STRING, allowNull: true },
-         mp_expires: { type: DataTypes.DATE, allowNull: true },
+         externalId: { type: DataTypes.STRING, allowNull: true },
+         externalStatus: { type: DataTypes.STRING, allowNull: true },
+         externalUrl: { type: DataTypes.STRING, allowNull: true },
+         externalQrCode: { type: DataTypes.TEXT("medium"), allowNull: true },
+         expireAt: { type: DataTypes.DATE, allowNull: true },
          createdAt: DataTypes.DATE,
          updatedAt: DataTypes.DATE,
       });
@@ -21,4 +21,3 @@ module.exports = {
       await queryInterface.dropTable("deposits");
    },
 };
-
