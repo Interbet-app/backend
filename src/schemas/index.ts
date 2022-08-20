@@ -86,6 +86,7 @@ export const update_wallet = Joi.object({
    walletId: Joi.number().required(),
    balance: Joi.number().required(),
    score: Joi.number().required(),
+   bonus: Joi.number().required(),
    updatedAt: Joi.date().required(),
 });
 
