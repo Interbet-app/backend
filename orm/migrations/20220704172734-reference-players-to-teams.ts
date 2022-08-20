@@ -5,7 +5,7 @@ module.exports = {
       await queryInterface.addConstraint("players", {
          fields: ["teamId"],
          type: "foreign key",
-         name: "FK_players.userId_to_teams.id",
+         name: "FK_players.teamId_to_teams.id",
          references: {
             table: "teams",
             field: "id",
@@ -16,6 +16,7 @@ module.exports = {
    },
 
    async down(queryInterface: QueryInterface) {
-      await queryInterface.removeConstraint("players", "FK_players.userId_to_teams.id");
+      await queryInterface.removeConstraint("players", "FK_players.teamId_to_teams.id");
    },
 };
+
