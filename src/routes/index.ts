@@ -41,7 +41,7 @@ route.delete("/teams/players/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Dele
 
 route.get("/athletics", AuthUser, Control.GetAthletics);
 route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
-route.get("/athletics/games/details/:id/", Middle.ID, AuthUser, Control.LastGamesResults);
+route.post("/athletics/games/details", AuthUser, Control.LastGamesResults);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
 route.put("/athletics", AuthUser, AuthAdmin, Control.UpdateAthletic);
 route.delete("/athletics/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAthletic);
@@ -53,7 +53,6 @@ route.delete("/events/:id/", AuthUser, AuthAdmin, Control.DeleteEvent);
 route.get("/adds", AuthUser, Control.GetAdds);
 route.post("/adds", AuthUser, AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAdds);
-
 route.get("/user", AuthUser, Control.GetUser);
 route.put("/user", AuthUser, Control.UserUpdate);
 
