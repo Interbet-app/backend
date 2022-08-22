@@ -19,6 +19,19 @@ export async function UserDeposits(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function UserDepositDetails(req: Request, res: Response, next: any) {
+   try {
+      const token = Jwt.getLocals(res, next) as Token;
+      const depositId = parseInt(req.params.id, 10);
+      const deposit = await deposits.findOne({
+         where: { userId: token.userId, id: depositId },
+      });
+      if (!deposit) throw new AppError(404, "Depósito não foi encontrado");
+      res.status(200).json(deposit as IDeposit);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function CreateDeposit(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;

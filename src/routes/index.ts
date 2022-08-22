@@ -76,6 +76,7 @@ route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Contr
 route.delete("/maintenances/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
 route.get("/deposits", AuthUser, Control.UserDeposits);
+route.get("/deposits/:id/", Middle.ID, AuthUser, Control.UserDepositDetails);
 route.post("/deposits", AuthUser, Control.CreateDeposit);
 
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
