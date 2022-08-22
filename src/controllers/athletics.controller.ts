@@ -139,7 +139,7 @@ export async function LastGamesResults(req: Request, res: Response, next: any) {
       } else athletic = await athletics.findByPk(athleticId);
       if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
 
-      const times = await teams.findAll({ where: { athleticId: athleticId } });
+      const times = await teams.findAll({ where: { athleticId: athletic.id } });
       const teamsIds = times.map((team) => team.id!);
       const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
       const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
