@@ -3,6 +3,15 @@ import { players } from "../models";
 import { IPlayer } from "../interfaces";
 import AppError from "../error";
 
+export async function GetPlayers(_req: Request, res: Response, next: any) {
+   try {
+      const data = await players.findAll();
+      const response = data.map((player: any) => player as IPlayer);
+      res.status(200).json(response);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function TeamPlayers(req: Request, res: Response, next: any) {
    try {
       const teamId = parseInt(req.params.id, 10);
@@ -12,7 +21,6 @@ export async function TeamPlayers(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function CreatePlayer(req: Request, res: Response, next: any) {
    try {
       const { name, position, teamId, holder } = req.body;
@@ -29,7 +37,6 @@ export async function CreatePlayer(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function UpdatePlayer(req: Request, res: Response, next: any) {
    try {
       const { playerId, name, position, teamId, holder } = req.body;
@@ -46,14 +53,18 @@ export async function UpdatePlayer(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function DeletePlayer(req: Request, res: Response, next: any) {
    try {
       const playerId = req.params.id;
-      await players.destroy({ where: { id: playerId } });
-      res.status(200).json({ message: "Jogador excluído com sucesso!" });
+      const player = await players.findByPk(playerId);
+      if (!player) throw new AppError(404, "Jogador não encontrado!");
+      const teamId = player.teamId;
+      await player.destroy();
+      res.status(200).json({
+         message: "Jogador excluído com sucesso!",
+         teamId,
+      });
    } catch (error) {
       next(error);
    }
 }
-

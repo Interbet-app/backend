@@ -112,6 +112,7 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       deposit.externalId = transactionID;
       deposit.externalStatus = status;
       deposit.externalQrCode = "";
+      deposit.externalQrCodeContent = "";
       deposit.externalUrl = "";
       deposit.updatedAt = new Date();
       await deposit.save();
