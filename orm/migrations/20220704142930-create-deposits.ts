@@ -11,6 +11,7 @@ module.exports = {
          externalStatus: { type: DataTypes.STRING, allowNull: true },
          externalUrl: { type: DataTypes.STRING, allowNull: true },
          externalQrCode: { type: DataTypes.TEXT("medium"), allowNull: true },
+         externalQrCodeContent: { type: DataTypes.TEXT("medium"), allowNull: true },
          expireAt: { type: DataTypes.DATE, allowNull: true },
          createdAt: DataTypes.DATE,
          updatedAt: DataTypes.DATE,
@@ -21,3 +22,5 @@ module.exports = {
       await queryInterface.dropTable("deposits");
    },
 };
+
+

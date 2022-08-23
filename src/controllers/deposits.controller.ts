@@ -58,7 +58,8 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       if (payment instanceof AppError) throw payment;
       deposit.externalStatus = payment.status;
       deposit.externalUrl = payment.paymentLinkUrl;
-      deposit.externalQrCode = payment.brCode;
+      deposit.externalQrCode = payment.qrCode;
+      deposit.externalQrCodeContent = payment.brCode;
       deposit.expireAt = expire;
       await deposit.save();
       res.status(200).json(deposit as IDeposit);

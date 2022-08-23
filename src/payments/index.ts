@@ -8,6 +8,7 @@ export type OpenPixPayment = {
    value: string;
    status: "ACTIVE" | "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
    brCode: string;
+   qrCode: string;
    expiresIn: string;
    createdAt: string;
    paymentLinkUrl: string;
@@ -58,7 +59,8 @@ export class OpenPix {
          return {
             value: response.data.charge.value,
             status: response.data.charge.status,
-            brCode: qrcode,
+            brCode: response.data.brCode,
+            qrCode: qrcode,
             expiresIn: response.data.charge.expiresIn,
             createdAt: response.data.charge.createdAt,
             paymentLinkUrl: response.data.charge.paymentLinkUrl,
