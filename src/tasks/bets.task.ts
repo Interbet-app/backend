@@ -9,19 +9,18 @@ export async function CrediteUserBets() {
          where: { paid: false, result: { [Op.not]: "pendent" }, group: "0" },
       });
 
-      console.log("unique bets: ", apostas.length);
-
       apostas.forEach(async (aposta) => {
          if (aposta.result === "win") {
+            const profit = Number(aposta.amount) * Number(aposta.payout);
             const wallet = await wallets.findOne({ where: { userId: aposta.userId } });
             if (wallet) {
-               wallet.balance += Number(aposta.amount) * Number(aposta.payout);
+               wallet.balance = Number(wallet.balance) + profit;
                wallet.updatedAt = new Date();
                await wallet.save();
             } else {
                wallets.create({
                   userId: aposta.userId,
-                  balance: aposta.amount,
+                  balance: profit,
                   bonus: 0,
                   createdAt: new Date(),
                   updatedAt: new Date(),
@@ -34,7 +33,7 @@ export async function CrediteUserBets() {
             await notifications.create({
                userId: aposta.userId,
                title: "Vitória",
-               message: `Parabéns, você ganhou ${aposta.amount} reais, na aposta em ${odd?.name}`,
+               message: `Parabéns, você ganhou ${profit} reais, na aposta em ${odd?.name}`,
                unread: true,
                createdAt: new Date(),
                updatedAt: new Date(),
@@ -119,4 +118,8 @@ export async function CrediteUserBets() {
       logger.error(error);
    }
 }
+
+
+
+
 
