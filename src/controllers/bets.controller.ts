@@ -42,6 +42,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          payout: odd.payout,
          status: "pendent",
          result: "pendent",
+         group: "0",
          paid: false,
          createdAt: new Date(),
          updatedAt: new Date(),

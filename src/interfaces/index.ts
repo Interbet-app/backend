@@ -12,3 +12,4 @@ export * from "./notification";
 export * from "./athletic";
 export * from "./maintenance";
 export * from "./player";
+export * from "./ranking";

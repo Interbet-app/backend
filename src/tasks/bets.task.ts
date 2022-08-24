@@ -6,8 +6,11 @@ export async function CrediteUserBets() {
    try {
       //% 1-> processar apostas únicas
       let apostas = await bets.findAll({
-         where: { paid: false, result: { [Op.not]: "pendent" }, group: { [Op.eq]: undefined } },
+         where: { paid: false, result: { [Op.not]: "pendent" }, group: "0" },
       });
+
+      console.log("unique bets: ", apostas.length);
+
       apostas.forEach(async (aposta) => {
          if (aposta.result === "win") {
             const wallet = await wallets.findOne({ where: { userId: aposta.userId } });
@@ -45,7 +48,7 @@ export async function CrediteUserBets() {
 
       //% -> processar apostas múltiplas
       apostas = await bets.findAll({
-         where: { paid: false, group: { [Op.not]: undefined } },
+         where: { paid: false, group: { [Op.not]: "0" } },
       });
 
       const groups = apostas.map((aposta) => aposta.group);
@@ -75,7 +78,7 @@ export async function CrediteUserBets() {
                userId = apostas[i].userId;
 
                const odd = await odds.findOne({ where: { id: apostas[i].oddId } });
-               if (odd) names += " '"+ odd.name + "' ";
+               if (odd) names += " '" + odd.name + "' ";
 
                apostas[i].paid = true;
                apostas[i].updatedAt = new Date();
@@ -116,7 +119,4 @@ export async function CrediteUserBets() {
       logger.error(error);
    }
 }
-
-
-
 
