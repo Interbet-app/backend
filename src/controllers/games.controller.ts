@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, wallets, teams, events, odds, games } from "../models";
-import { IGame, IOdd } from "../interfaces";
+import { bets, wallets, events, odds, games, teams, athletics } from "../models";
+import { IGame, IOdd, ITeam } from "../interfaces";
 import AppError from "../error";
 import logger from "../log";
 
@@ -213,7 +213,68 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function LastGamesTeam(req: Request, res: Response, next: any) {
+   try {
+      const { teamId, limit } = req.query;
+      let options = await odds.findAll({ where: { teamId: Number(teamId), status: "lock" } });
+      if (!options) throw new AppError(404, "Time ainda nao possui jogos concluídos!");
+      const jogos = await games.findAll({
+         where: { id: { [Op.in]: options.map((option) => option.gameId) }, status: "closed" },
+         limit: limit ? Number(limit) : 5,
+      });
+      if (!jogos) throw new AppError(404, "Time ainda nao possui jogos concluídos!");
 
+      options = await odds.findAll({ where: { gameId: { [Op.in]: jogos.map((jogo) => jogo.id!) } } });
+      const times = await teams.findAll({ where: { id: { [Op.in]: options.map((odd) => odd.teamId) } } });
+      const response: any = [];
+      jogos.forEach((jogo) => {
+         const game = jogo as IGame;
+         let Teams: ITeam[] = [];
+         let Winner: ITeam | null = null;
+         options.forEach((option) => {
+            if (option.gameId === game.id) {
+               const team = times.find((time) => time.id === option.teamId);
+               if (team) Teams.push(team);
+               if (option.id === game.winnerOddId) Winner = times.find((time) => time.id === option.teamId)!;
+            }
+            
+         });
+         response.push({ game: game, teams: Teams, winner: Winner });
+      });
+      res.status(200).json(response);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function LastGamesAthletic(req: Request, res: Response, next: any) {
+   try {
+      const { athleticId, teamId, limit } = req.query;
+      if (!athleticId && !teamId) throw new AppError(422, "Informe ao menos um parâmetro! athleticId ou teamId");
 
+      let athletic;
+      if (teamId) {
+         const team = await teams.findOne({ where: { id: Number(teamId) } });
+         if (!team) throw new AppError(404, "Time não foi encontrado!");
+         athletic = await athletics.findByPk(team.athleticId);
+      } else athletic = await athletics.findByPk(Number(athleticId));
+      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
 
+      const times = await teams.findAll({ where: { athleticId: athletic.id } });
+      const teamsIds = times.map((team) => team.id!);
+      const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
+      const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
+      const result = await games.findAll({
+         where: {
+            id: {
+               [Op.in]: gamesIds,
+            },
+         },
+         order: [["updatedAt", "DESC"]],
+         limit: limit ? Number(limit) : 5,
+      });
+      res.status(200).json(result as IGame[]);
+   } catch (error) {
+      next(error);
+   }
+}
 

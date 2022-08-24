@@ -65,6 +65,3 @@ export async function DeleteAdds(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
-

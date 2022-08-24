@@ -84,8 +84,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
             throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
          const check = File.BreakMimetype(req.file.mimetype);
-         if (check?.type !== "image")
-            throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
+         if (check?.type !== "image") throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
          const bucket = new S3();
          const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
@@ -126,39 +125,4 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function LastGamesResults(req: Request, res: Response, next: any) {
-   try {
-      const { athleticId, teamId, limit } = req.body;
-      if (!athleticId && !teamId) throw new AppError(422, "Informe ao menos um parâmetro! athleticId ou teamId");
-
-      let athletic;
-      if (teamId) {
-         const team = await teams.findOne({ where: { id: teamId } });
-         if (!team) throw new AppError(404, "Time não foi encontrado!");
-         athletic = await athletics.findByPk(team.athleticId);
-      } else athletic = await athletics.findByPk(athleticId);
-      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
-
-      const times = await teams.findAll({ where: { athleticId: athletic.id } });
-      const teamsIds = times.map((team) => team.id!);
-      const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
-      const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
-      const result = await games.findAll({
-         where: {
-            id: {
-               [Op.in]: gamesIds,
-            },
-         },
-         order: [["updatedAt", "DESC"]],
-         limit: limit ? limit : 5,
-      });
-      res.status(200).json(result as IGame[]);
-   } catch (error) {
-      next(error);
-   }
-}
-
-
-
-
 

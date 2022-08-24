@@ -54,7 +54,21 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       odd.updatedAt = new Date();
       await odd.save();
 
-      wallet.balance = Number(wallet.balance) - parseFloat(amount);
+      //% atualizar carteira do usuário
+      let resAmount = Number(amount);
+      //? Se o usuário tiver bonus, usar ele primeiro
+      if (wallet.bonus > 0) {
+         const rest = Number(wallet.bonus) - resAmount;
+         if (rest >= 0) {
+            wallet.bonus = rest;
+            resAmount = 0;
+         } else {
+            wallet.bonus = 0;
+            resAmount = Math.abs(rest);
+         }
+      }
+      wallet.balance = Number(wallet.balance) - resAmount;
+      wallet.updatedAt = new Date();
       await wallet.save();
 
       //! Não é odd de empate
@@ -86,7 +100,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
 
       const Bets = req.body as NewBet[];
       const sumAmount = Bets.reduce((prev, cur) => prev + cur.amount, 0);
-      if (sumAmount > Number(wallet.balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (sumAmount > (Number(wallet.balance) + Number(wallet.bonus))) throw new AppError(400, "Usuário não tem saldo suficiente!");
 
       const oddsIds = Bets.map((bet) => bet.oddId);
       const options = await odds.findAll({ where: { id: { [Op.in]: oddsIds } } });
@@ -116,7 +130,19 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          if (!odd) throw new AppError(404, "Opção não encontrada!");
 
          //% atualizar carteira do usuário
-         wallet.balance = Number(wallet.balance) - Number(bet.amount);
+         let resAmount = Number(bet.amount);
+         //? Se o usuário tiver bonus, usar ele primeiro
+         if (wallet.bonus > 0) {
+            const rest = Number(wallet.bonus) - resAmount;
+            if (rest >= 0) {
+               wallet.bonus = rest;
+               resAmount = 0;
+            } else {
+               wallet.bonus = 0;
+               resAmount = Math.abs(rest);
+            }
+         }
+         wallet.balance = Number(wallet.balance) - resAmount;
          wallet.updatedAt = new Date();
          await wallet.save();
 
@@ -189,4 +215,3 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-

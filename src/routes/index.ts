@@ -16,6 +16,8 @@ route.get("/games", AuthUser, Control.GetGames);
 route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
 route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
+route.get("/games/last/team", AuthUser, Control.LastGamesTeam);
+route.get("/games/last/athletic", AuthUser, Control.LastGamesAthletic);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
 route.post("/games/process-result/:id/", Middle.ID, AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
@@ -43,7 +45,6 @@ route.get("/players", AuthUser, AuthAdmin, Control.GetPlayers);
 
 route.get("/athletics", AuthUser, Control.GetAthletics);
 route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
-route.post("/athletics/games/details", AuthUser, Control.LastGamesResults);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
 route.put("/athletics", AuthUser, AuthAdmin, Control.UpdateAthletic);
 route.delete("/athletics/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAthletic);

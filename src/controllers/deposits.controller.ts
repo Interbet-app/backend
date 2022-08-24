@@ -93,20 +93,35 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
             );
             return res.sendStatus(200);
          }
-         wallet.balance = Number(wallet.balance) + Number(deposit.amount);
+         // % verificar se é o primeiro depósito, caso seja creditar 10% do valor como bônus
+         let bonus = 0;
+         const data = await deposits.findAll({ where: { userId: deposit.userId } });
+         if (data.length == 1) bonus = Number(deposit.amount) * 0.1; //! 10% de bonus
+         wallet.balance = Number(wallet.balance) + Number(deposit.amount) + Number(bonus);
          wallet.updatedAt = new Date();
          await wallet.save();
-      }
 
-      //? Criar uma notificação para o usuário
-      await notifications.create({
-         userId: deposit.userId,
-         title: "Depósito confirmado",
-         message: `Seu depósito de ${deposit.amount} foi aprovado! e já foi creditado na sua carteira!`,
-         unread: true,
-         createdAt: new Date(),
-         updatedAt: new Date(),
-      });
+         //? Criar uma notificação para o usuário
+         await notifications.create({
+            userId: deposit.userId,
+            title: "Depósito confirmado",
+            message: `Seu depósito de ${deposit.amount} foi aprovado! e já foi creditado na sua carteira!`,
+            unread: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+         });
+
+         if (bonus > 0) {
+            await notifications.create({
+               userId: deposit.userId,
+               title: "Bônus de depósito",
+               message: `Você recebeu um bônus de ${bonus} por ser o primeiro depósito!`,
+               unread: true,
+               createdAt: new Date(),
+               updatedAt: new Date(),
+            });
+         }
+      }
 
       deposit.status = "completed";
       deposit.externalId = transactionID;
@@ -122,4 +137,3 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
