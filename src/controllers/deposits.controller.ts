@@ -69,6 +69,9 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
 }
 export async function OpenPixCallback(req: Request, res: Response, next: any) {
    try {
+      const { evento } = req.body;
+      if (evento == "teste_webhook") return res.status(200).end(); //! Test
+
       const signature = req.headers["x-openpix-signature"] as string;
       const { value, correlationID, status } = req.body.pix.charge;
       const { transactionID } = req.body.charge;
@@ -86,12 +89,16 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       if (Number(deposit.amount) != Number(amount)) throw new AppError(400, "Valor do pagamento inválido!");
 
       if (deposit.status == "pendent") {
-         const wallet = await wallets.findOne({ where: { userId: deposit.userId } });
+         let wallet = await wallets.findOne({ where: { userId: deposit.userId } });
          if (!wallet) {
-            logger.error(
-               `Carteira do usuário nao encontrada para creditar deposito, ${deposit.userId} valor: ${deposit.amount}!`
-            );
-            return res.sendStatus(200);
+            wallet = await wallets.create({
+               userId: deposit.userId,
+               balance: Number(deposit.amount),
+               bonus: 0,
+               score: 0,
+               createdAt: new Date(),
+               updatedAt: new Date(),
+            });
          }
          // % verificar se é o primeiro depósito, caso seja creditar 10% do valor como bônus
          let bonus = 0;
