@@ -16,8 +16,8 @@
       },
       "esModuleInterop": true,
       "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
+      "forceConsistentCasingInFileNames": true
    },
-   "include": ["src/**/*.ts", "orm/sequelize.ts"],
-	"exclude": ["node_modules/**/*.ts"]
+   "include": ["src/**/*.ts", "orm/sequelize.ts", "orm/**/*.ts"],
+   "exclude": ["node_modules/**/*.ts"]
 }
