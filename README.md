@@ -19,6 +19,7 @@
   - [Projeto](https://app.clickup.com/31085808/home) - ClickUp
   - [Design](https://github.com/) - ...
   - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
+  - [Produção](https://api.v1.interbet.app/) - AWS
 
 ## ⚙️ Instalação
    Siga o passo a baixo para poder executar o projeto em sua maquina.
