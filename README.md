@@ -32,7 +32,8 @@ npm install
 npm run dev
 ```
 ## 📙 Documentação
-   Instale em seu _Vs Code_ a extensão <font color="yellow">*Swagger Viewer*</font> depois va ate o arquivo _documentation.yml_ e com o botão direito e use a opção _Preview Swagger_.
+
+   - [Postman](https://app.getpostman.com/join-team?invite_code=feb01a84713e275980499e6f07edc206&target_code=c327fc298ce47ec11da318ee2cee66a4)
 
 ## ⛏️ Linguagens e Frameworks
 

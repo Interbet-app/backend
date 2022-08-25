@@ -93,14 +93,14 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
          if (!wallet) {
             wallet = await wallets.create({
                userId: deposit.userId,
-               balance: Number(deposit.amount),
+               balance: 0,
                bonus: 0,
                score: 0,
                createdAt: new Date(),
                updatedAt: new Date(),
             });
          }
-         // % verificar se é o primeiro depósito, caso seja creditar 10% do valor como bônus
+         // % verificar se é o primeiro depósito, caso seja creditar 50% do valor como bônus
          let bonus = 0;
          const data = await deposits.findAll({ where: { userId: deposit.userId } });
          if (data.length == 1) bonus = Number(deposit.amount) * 0.5; //! 50% de bonus
