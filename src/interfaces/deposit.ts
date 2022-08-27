@@ -8,6 +8,7 @@ export interface IDeposit {
    externalId?: string;
    externalQrCode?: string;
    externalQrCodeContent?: string;
+   externalAmount?: number;
    expireAt?: Date;
    createdAt: Date;
    updatedAt: Date;

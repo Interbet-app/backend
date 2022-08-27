@@ -80,7 +80,7 @@ route.delete("/maintenances/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Delet
 
 route.get("/deposits", AuthUser, Control.UserDeposits);
 route.get("/deposits/:id/", Middle.ID, AuthUser, Control.UserDepositDetails);
-route.post("/deposits", AuthUser, Control.CreateDeposit);
+route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);

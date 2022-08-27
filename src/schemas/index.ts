@@ -105,7 +105,13 @@ export const update_player = Joi.object({
    holder: Joi.boolean().required(),
 });
 
-export const multiple_bets = Joi.array().items(Joi.object({
-   oddId: Joi.number().required(),
+export const multiple_bets = Joi.array().items(
+   Joi.object({
+      oddId: Joi.number().required(),
+      amount: Joi.number().required(),
+   })
+);
+
+export const create_deposit = Joi.object({
    amount: Joi.number().required(),
-}));
+});

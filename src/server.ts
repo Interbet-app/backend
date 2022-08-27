@@ -15,7 +15,6 @@ dotenv.config();
 
       //? iniciar tarefas recorrentes
       TaskProcessor.start();
-      logger.info("Tarefas recorrentes iniciadas com sucesso!");
 
       const port = process.env.PORT || 4000;
       api.listen(port);

@@ -277,4 +277,3 @@ export async function LastGamesAthletic(req: Request, res: Response, next: any) 
       next(error);
    }
 }
-

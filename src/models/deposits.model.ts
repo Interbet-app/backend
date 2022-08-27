@@ -14,6 +14,7 @@ export const deposits = Database.define<IDepositModel>("deposits", {
    externalUrl: { type: Sequelize.STRING, allowNull: true },
    externalQrCode: { type: Sequelize.TEXT("medium"), allowNull: true },
    externalQrCodeContent: { type: Sequelize.TEXT("medium"), allowNull: true },
+   externalAmount: { type: Sequelize.INTEGER, allowNull: true },
    expireAt: { type: Sequelize.DATE, allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,

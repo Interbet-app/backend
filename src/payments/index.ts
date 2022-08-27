@@ -43,18 +43,20 @@ export class OpenPix {
 
    public async CreatePayment(
       correlationID: number,
-      amount: number,
+      value: number,
       comment: string
    ): Promise<OpenPixPayment | AppError> {
       try {
          const payload = {
             correlationID: `${correlationID}`,
-            value: `${Number(amount) * 100}`,
+            value: value,
             comment: comment,
          };
 
          const response = await this.axios.post("/v1/charge?return_existing=true", payload);
          const qrcode = (await QRCode.toDataURL(response.data.brCode, { type: "image/jpeg" })) as string;
+
+         logger.info("Deposito criado " + JSON.stringify(response.data));
 
          return {
             value: response.data.charge.value,
@@ -72,19 +74,23 @@ export class OpenPix {
 
    public async Send(
       correlationId: number,
-      amount: number,
+      value: number,
       pixKey: string,
       pixKeyType: string
    ): Promise<OpenPixSend | AppError> {
       try {
          const payload = {
             correlationId: `${correlationId}`,
-            value: `${Number(amount) * 100}`,
+            value: value,
             pixKey,
             pixKeyType,
          };
-         await this.axios.post("/v1/pay/pix-key", payload);
+         const payment = await this.axios.post("/v1/pay/pix-key", payload);
          const confirm = await this.axios.post("/v1/pay/confirm", { correlationId: `${correlationId}` });
+
+         logger.info("Pagamento criado " + JSON.stringify(payment.data));
+         logger.info("Pagamento confirmado " + JSON.stringify(confirm.data));
+
          return {
             externalId: confirm.data.payment.correlationID,
             externalStatus: confirm.data.payment.destination.status,
@@ -105,4 +111,5 @@ export class OpenPix {
       }
    }
 }
+
 
