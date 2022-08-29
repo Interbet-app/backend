@@ -1,11 +1,12 @@
 export interface IDeposit {
    id?: number;
+   uniqueId: string;
    userId: number;
    amount: number;
    status: "pendent" | "completed" | "canceled";
    externalUrl?: string;
    externalStatus?: string;
-   externalId?: string;
+   externalTransactionId?: string;
    externalQrCode?: string;
    externalQrCodeContent?: string;
    externalAmount?: number;

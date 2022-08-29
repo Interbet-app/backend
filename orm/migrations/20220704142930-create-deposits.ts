@@ -4,6 +4,7 @@ module.exports = {
    async up(queryInterface: QueryInterface) {
       await queryInterface.createTable("deposits", {
          id: { type: DataTypes.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
+         uniqueId: { type: DataTypes.STRING, unique: true, allowNull: false },
          userId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
          amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          status: { type: DataTypes.ENUM, values: ["pendent", "completed", "canceled"], allowNull: false },
@@ -23,3 +24,4 @@ module.exports = {
       await queryInterface.dropTable("deposits");
    },
 };
+

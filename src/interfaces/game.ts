@@ -6,9 +6,11 @@ export interface IGame {
    status: "open" | "pendent" | "closed";
    modality: string;
    location: string;
-   result?: string;
+   winnerCommission?: number;
+   goalsA?: number;
+   goalsB?: number;
    startDate: Date;
+   endDate: Date;
    createdAt: Date;
    updatedAt: Date;
 }
-

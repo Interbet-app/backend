@@ -47,3 +47,6 @@ export function MultipleBets(req: Request, res: Response, next: any) {
 export function CreateDeposit(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.create_deposit, req.body, res, next);
 }
+export function ProcessGame(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.process_game, req.body, res, next);
+}

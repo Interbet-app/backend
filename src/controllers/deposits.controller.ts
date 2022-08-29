@@ -49,6 +49,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
 
       const deposit = await deposits.create({
          userId: token.userId,
+         uniqueId: `DEP-${token.userId}-${new Date().getTime()}`,
          amount: value,
          externalAmount: amountInCents,
          status: "pendent",
@@ -57,7 +58,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       });
 
       const Pix = new OpenPix();
-      const payment = await Pix.CreatePayment(deposit.id!, amountInCents, "Depósito Interbet");
+      const payment = await Pix.CreatePayment(deposit.uniqueId, amountInCents, "Depósito Interbet");
       if (payment instanceof AppError) throw payment;
       deposit.externalStatus = payment.status;
       deposit.externalUrl = payment.paymentLinkUrl;
@@ -84,12 +85,12 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
       
-      const deposit = await deposits.findOne({ where: { id: correlationID } });
+      const deposit = await deposits.findOne({ where: { uniqueId: correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${correlationID}`);
       if (status !== "COMPLETED") throw new AppError(400, `Status do pagamento é inválido! ${status}`);
       if (value != deposit.externalAmount!) throw new AppError(400, `Valor do pagamento inválido, ${value} deve ser igual a salvo no banco ${deposit.externalAmount}`);
       
-      deposit.externalId = transactionID;
+      deposit.externalTransactionId = transactionID;
       deposit.externalStatus = status;
       deposit.updatedAt = new Date();
       await deposit.save();
@@ -99,3 +100,4 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+

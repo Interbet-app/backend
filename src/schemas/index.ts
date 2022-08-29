@@ -115,3 +115,15 @@ export const multiple_bets = Joi.array().items(
 export const create_deposit = Joi.object({
    amount: Joi.number().required(),
 });
+
+export const process_game = Joi.object({
+   winnerOddId: Joi.number().required(),
+   teamA: Joi.object({
+      id: Joi.number().required(),
+      goals: Joi.number().required(),
+   }),
+   teamB: Joi.object({
+      id: Joi.number().required(),
+      goals: Joi.number().required(),
+   }),
+});

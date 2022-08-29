@@ -19,7 +19,7 @@ route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
 route.get("/games/last/team", AuthUser, Control.LastGamesTeam);
 route.get("/games/last/athletic", AuthUser, Control.LastGamesAthletic);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
-route.post("/games/process-result/:id/", Middle.ID, AuthUser, AuthAdmin, Control.ProcessGame);
+route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
 
@@ -84,6 +84,8 @@ route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
+
+route.get("/ranking/:eventId/", Middle.ID, AuthUser, Control.EventRanking);
 
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);

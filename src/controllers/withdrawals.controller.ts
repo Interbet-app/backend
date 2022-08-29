@@ -43,7 +43,7 @@ export async function CreateWithdrawal(req: Request, res: Response, next: any) {
       });
 
       const pix = new OpenPix();
-      const result = await pix.Send(withdrawal.id!, value, pixKey, pixKeyType);
+      const result = await pix.Send(`${withdrawal.id}`, value, pixKey, pixKeyType);
       if (result instanceof AppError) throw result;
 
       withdrawal.externalStatus = result.externalStatus;
@@ -57,7 +57,4 @@ export async function CreateWithdrawal(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
-
 

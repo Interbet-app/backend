@@ -18,7 +18,7 @@ export async function GetAthletics(_req: Request, res: Response, next: any) {
 export async function FindAthletics(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
-      if (!name) throw new AppError(422, "Parâmetro 'name' é obrigatório!");
+      if (!name) throw new AppError(422, "Informe o nome pelo qual deseja pesquisar!");
       const result = await athletics.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
       res.status(200).json({ athletics: result as IAthletic[] });
    } catch (error) {
@@ -34,7 +34,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Foto é obrigatória!");
             if (!name) throw new AppError(422, "Nome é obrigatório!");
-            if (!abbreviation) throw new AppError(422, "Sigla é obrigatória!");
+            if (!abbreviation) throw new AppError(422, "Parâmetro abbreviation é obrigatório!");
 
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
                throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
@@ -76,7 +76,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          const { athleticId, name, abbreviation, adminId } = req.body;
          if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
          if (!name) throw new AppError(422, "Nome é obrigatório!");
-         if (!abbreviation) throw new AppError(422, "Sigla é obrigatória!");
+         if (!abbreviation) throw new AppError(422, "Parâmetro abbreviation é obrigatório!");
 
          const athletic = await athletics.findByPk(athleticId);
          if (!athletic) throw new AppError(404, "Athletic not found!");
@@ -114,7 +114,7 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       const athleticId = parseInt(req.params.id, 10);
       if (!athleticId) throw new AppError(422, "!");
       const athletic = await athletics.findByPk(athleticId);
-      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
+      if (!athletic) return res.status(404).json({ message: "Atlética não foi encontrada" });
       const bucket = new S3();
       const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
       const result = await bucket.DeleteFile(to_delete);
@@ -125,4 +125,5 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 

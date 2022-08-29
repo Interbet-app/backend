@@ -2,19 +2,23 @@ import CronJob from "cron";
 import logger from "../log";
 import { CrediteUserBets } from "./bets.task";
 import { CrediteCompletedDeposits } from "./deposits.task";
+import { CrediteCommissions } from "./game.task";
 
-function FiveTasks() {
+async function FiveTasks() {
    //? creditar apostas vencedoras aos usuários
-   CrediteUserBets();
+   await CrediteUserBets();
+
+   //? creditar comissões aos administradores de times
+   await CrediteCommissions();
 }
-function OneTasks() {
+async function OneTasks() {
    //? creditar depósitos concluídos aos usuários
-   CrediteCompletedDeposits();
+   await CrediteCompletedDeposits();
 }
 
 export class TaskProcessor {
    private static five = new CronJob.CronJob("0,5,10,15,20,25,30,35,40,45,50,55 * * * *", FiveTasks);
-   private static one = new CronJob.CronJob("0 * * * *", OneTasks);
+   private static one = new CronJob.CronJob("* * * * *", OneTasks);
 
    public static start() {
       this.one.start();

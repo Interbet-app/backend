@@ -13,7 +13,7 @@ export async function CrediteCompletedDeposits() {
       result.forEach(async (deposit: IDepositModel) => {
          let bonus = 0;
          let wallet = await wallets.findOne({ where: { userId: deposit.userId } });
-         if (!wallet) {
+         if (wallet == null) {
             wallet = await wallets.create({
                userId: deposit.userId,
                balance: 0,
@@ -25,8 +25,8 @@ export async function CrediteCompletedDeposits() {
          }
          // % verificar se é o primeiro depósito concluído, caso seja creditar 50% do valor como bônus
          const data = await deposits.count({ where: { userId: deposit.userId, status: "completed" } });
-         if (data <= 0) bonus = deposit.amount * 0.5; //! 50% de bonus
-         wallet.balance += deposit.amount + bonus;
+         if (data < 1) bonus = Number(deposit.amount) * 0.5; //! 50% de bonus
+         wallet.balance = Number(wallet.balance) + Number(deposit.amount) + Number(bonus);
          wallet.updatedAt = new Date();
          await wallet.save();
 
@@ -63,6 +63,7 @@ export async function CrediteCompletedDeposits() {
       logger.error(error);
    }
 }
+
 
 
 
