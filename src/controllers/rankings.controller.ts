@@ -4,7 +4,7 @@ import { IRanking } from "../interfaces";
 
 export async function EventRanking(req: Request, res: Response, next: any) {
    try {
-      const eventId = parseInt(req.params.eventId, 10);
+      const eventId = parseInt(req.params.id, 10);
       const { limit, offset } = req.query;
 
       const ranking = await rankings.findAll({

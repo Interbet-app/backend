@@ -85,7 +85,7 @@ route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
-route.get("/ranking/:eventId/", Middle.ID, AuthUser, Control.EventRanking);
+route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
