@@ -11,7 +11,7 @@ export async function EventRanking(req: Request, res: Response, next: any) {
          where: { eventId },
          limit: limit ? Number(limit) : 10,
          offset: offset ? Number(offset) : 0,
-         order: [["points", "DESC"]],
+         order: [["score", "DESC"]],
       });
       const response = ranking.map((pos) => pos as IRanking);
       res.status(200).json(response);
