@@ -56,8 +56,10 @@ route.delete("/events/:id/", AuthUser, AuthAdmin, Control.DeleteEvent);
 route.get("/adds", AuthUser, Control.GetAdds);
 route.post("/adds", AuthUser, AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAdds);
+
 route.get("/user", AuthUser, Control.GetUser);
 route.put("/user", AuthUser, Control.UserUpdate);
+route.put("/user/profile", AuthUser, Control.UserProfile);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
 route.post("/wallet", AuthUser, AuthAdmin, Control.CreateWallet);

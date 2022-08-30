@@ -172,13 +172,37 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
       const { name, email, picture, teamId } = req.body;
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findByPk(token.userId);
-      if (!user) throw new AppError(404, "Usuário não encontrado");
+      if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
       if (name) user.name = name;
       if (email) user.email = email;
       if (picture) user.picture = picture;
       if (teamId) user.teamId = teamId;
       user.updatedAt = new Date();
       await user.save();
+      res.status(200).json(user as IUser);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function UserProfile(req: Request, res: Response, next: any) {
+   try {
+      const token = Jwt.getLocals(res, next) as Token;
+      const { document, pixAddress, pixKeyType, name } = req.body;
+      const user = await users.findByPk(token.userId);
+      if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
+
+      if (document && user.document != null) return res.status(401).json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
+      if (document) {
+         const search = await users.findOne({ where: { document } });
+         if (search) return res.status(401).json({ message: "CPF já informado ja esta cadastrado!" });
+         user.document = document;
+      }
+      user.pixAddress = pixAddress;
+      user.pixKeyType = pixKeyType;
+      user.name = name;
+      user.updatedAt = new Date();
+      await user.save();
+
       res.status(200).json(user as IUser);
    } catch (error) {
       next(error);
@@ -235,4 +259,5 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       next(error);
    }
 }
+
 
