@@ -12,6 +12,9 @@ module.exports = {
          level: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
          oauth: { type: DataTypes.ENUM, values: ["google", "instagram", "facebook"], allowNull: true },
          picture: { type: DataTypes.STRING, allowNull: true },
+         document: { type: DataTypes.STRING, allowNull: true },
+         pixAddress: { type: DataTypes.STRING, allowNull: true },
+         pixKeyType: { type: DataTypes.ENUM, values: ["CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"], allowNull: true },
          createdAt: DataTypes.DATE,
          updatedAt: DataTypes.DATE,
       });
@@ -21,6 +24,9 @@ module.exports = {
       await queryInterface.dropTable("users");
    },
 };
+
+
+
 
 
 

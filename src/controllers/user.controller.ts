@@ -190,9 +190,11 @@ export async function UserProfile(req: Request, res: Response, next: any) {
       const { document, pixAddress, pixKeyType, name } = req.body;
       const user = await users.findByPk(token.userId);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
-
+       
       if (document && user.document != null) return res.status(401).json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
       if (document) {
+         const validator = new RegExp(/^[0-9]{11}$/);
+         if (!validator.test(document)) return res.status(401).json({ message: "CPF inválido" });
          const search = await users.findOne({ where: { document } });
          if (search) return res.status(401).json({ message: "CPF já informado ja esta cadastrado!" });
          user.document = document;
@@ -217,7 +219,6 @@ export async function Logout(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 async function CrediteBonus(next: any, affiliateId: number, userId: number, userEmail: string) {
    try {
       //% creditar os bonus de indicação para o afiliado e o novo usuário
@@ -259,5 +260,6 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       next(error);
    }
 }
+
 
 
