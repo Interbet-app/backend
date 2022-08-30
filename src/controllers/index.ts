@@ -13,3 +13,4 @@ export * from "./deposits.controller";
 export * from "./withdrawals.controller";
 export * from "./players.controller";
 export * from "./rankings.controller";
+export * from "./games-history.controller";

@@ -127,3 +127,12 @@ export const process_game = Joi.object({
       goals: Joi.number().required(),
    }),
 });
+
+export const create_game_history = Joi.object({
+   gameEvent: Joi.string().required(),
+   nameTeamA: Joi.string().required(),
+   nameTeamB: Joi.string().required(),
+   scoreTeamA: Joi.number().required(),
+   scoreTeamB: Joi.number().required(),
+   gameDate: Joi.date().required(),
+});

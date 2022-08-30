@@ -13,3 +13,4 @@ export * from "./deposits.model";
 export * from "./withdrawals.model";
 export * from "./players.model";
 export * from "./rankings.model";
+export * from "./games-history.model";
