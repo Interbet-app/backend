@@ -12,6 +12,11 @@ route.get("/bets/me", AuthUser, Control.GetUserBets);
 route.get("/bets/game/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GetBetsByGame);
 route.delete("/bets/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteBet);
 
+route.get("/games/history", AuthUser, Control.GamesHistory);
+route.get("/games/history/search", AuthUser, Control.GamesHistorySearch);
+route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
+route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
+
 route.get("/games", AuthUser, Control.GetGames);
 route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
@@ -22,11 +27,6 @@ route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame)
 route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
-
-route.get("/games/history", AuthUser, Control.GamesHistory);
-route.get("/games/history/search", AuthUser, Control.GamesHistorySearch);
-route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
-route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/odds", AuthUser, Control.GetOdds);
 route.get("/odds/:id/", Middle.ID, AuthUser, Control.GetOdd);
@@ -98,4 +98,5 @@ route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 
 export default route;
+
 

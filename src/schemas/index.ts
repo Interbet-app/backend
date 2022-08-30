@@ -129,10 +129,10 @@ export const process_game = Joi.object({
 });
 
 export const create_game_history = Joi.object({
-   gameEvent: Joi.string().required(),
-   nameTeamA: Joi.string().required(),
-   nameTeamB: Joi.string().required(),
-   scoreTeamA: Joi.number().required(),
-   scoreTeamB: Joi.number().required(),
-   gameDate: Joi.date().required(),
+   event: Joi.string().required(),
+   teamA: Joi.string().required(),
+   teamB: Joi.string().required(),
+   scoreA: Joi.number().required(),
+   scoreB: Joi.number().required(),
+   date: Joi.date().required(),
 });
