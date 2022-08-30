@@ -23,7 +23,7 @@ route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
 
-route.get("/games/history/", AuthUser, Control.GamesHistory);
+route.get("/games/history", AuthUser, Control.GamesHistory);
 route.get("/games/history/search", AuthUser, Control.GamesHistorySearch);
 route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
 route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
