@@ -15,5 +15,4 @@ export interface IBet {
 export interface NewBet {
    oddId: number;
    amount: number;
-
 }
