@@ -18,3 +18,4 @@ export const bets = Database.define<IBetModel>("bets", {
    updatedAt: Sequelize.DATE,
 });
 
+bets.hasMany(bets, { as: "bets", foreignKey: "userId" });
