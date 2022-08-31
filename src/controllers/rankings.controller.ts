@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import sequelize from "sequelize";
-import { bets, rankings } from "../models";
+import { bets, rankings, users } from "../models";
 import { IRanking } from "../interfaces";
 
 export async function EventRanking(req: Request, res: Response, next: any) {
@@ -25,6 +25,12 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
    try {
       const ranking = await bets.findAll({
          attributes: ["userId", [sequelize.fn("sum", sequelize.col("amount")), "amount"]],
+         include: [
+            {
+               model: users,
+               attributes: ["picture", "username"],
+            },
+         ],
          group: ["userId"],
          order: [[sequelize.fn("sum", sequelize.col("amount")), "DESC"]],
       });
