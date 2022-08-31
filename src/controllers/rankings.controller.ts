@@ -28,7 +28,7 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
          include: [
             {
                model: users,
-               attributes: ["picture", "username"],
+               attributes: ["picture", "name"],
             },
          ],
          group: ["userId"],
@@ -47,4 +47,5 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
       next(error);
    }
 }
+
 
