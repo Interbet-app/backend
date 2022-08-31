@@ -9,7 +9,7 @@ export function ValidateSchema(schema: Joi.ObjectSchema | Joi.ArraySchema, objec
       let message = error?.details.map((item) => item.message).join(",");
       res.status(422).json({ message: message });
    } catch (error) {
-      logger.error(error);
+      if (error instanceof Error) logger.error(error.message);
       res.status(500).json({ message: "Internal Server Error!" });
    }
 }

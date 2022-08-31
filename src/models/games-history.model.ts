@@ -12,6 +12,7 @@ export const gamesHistory = Database.define<IGameHistoryModel>(
       teamB: { type: DataTypes.STRING(40), allowNull: false },
       scoreA: { type: DataTypes.INTEGER, allowNull: false },
       scoreB: { type: DataTypes.INTEGER, allowNull: false },
+      ref_table: { type: DataTypes.STRING(60), allowNull: true },
       date: { type: DataTypes.DATE, allowNull: false },
    },
    {
@@ -19,4 +20,5 @@ export const gamesHistory = Database.define<IGameHistoryModel>(
       freezeTableName: true,
    }
 );
+
 

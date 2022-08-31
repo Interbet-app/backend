@@ -16,9 +16,8 @@
 </p>
 
 ## 📡 Links para referencia
-  - [Projeto](https://app.clickup.com/31085808/home) - ClickUp
-  - [Design](https://github.com/) - ...
   - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
+  - [Produção](https://api.v1.interbet.app/) - AWS
 
 ## ⚙️ Instalação
    Siga o passo a baixo para poder executar o projeto em sua maquina.
@@ -26,13 +25,18 @@
 ```
 npm install
 ```
-   Após rode o comando para iniciar o projeto em sua maquina:
+   Configure o arquivo .env com as variáveis de ambiente necessárias para o projeto, após isso execute o comando abaixo para criar o banco de dados:
 ```
-npm run dev
+npm run database
 ```
-## 📙 Documentação
-   Instale em seu _Vs Code_ a extensão <font color="yellow">*Swagger Viewer*</font> depois va ate o arquivo _documentation.yml_ e com o botão direito e use a opção _Preview Swagger_.
-
+   Para criar as tabelas execute o comando abaixo:
+```
+npm run migrate
+```
+   Após isso execute o comando abaixo para iniciar o projeto:
+```
+npm start
+```
 ## ⛏️ Linguagens e Frameworks
 
 -  [NodeJs](https://nodejs.org/en/) - ....
