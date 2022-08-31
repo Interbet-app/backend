@@ -21,12 +21,11 @@ export async function EventRanking(req: Request, res: Response, next: any) {
    }
 }
 
-export async function UsersBetsRanking(_req: Request, res: Response, next: any) {
+export async function UsersBetRanking(_req: Request, res: Response, next: any) {
    try {
       const ranking = await bets.findAll({
          attributes: ["userId", [sequelize.fn("sum", sequelize.col("amount")), "amount"]],
          group: ["userId"],
-         order: ["amount", "DESC"],
       });
 
       const response = ranking.map((pos) => {
