@@ -1,4 +1,5 @@
 import Sequelize, { Model, Optional } from "sequelize";
+import { users } from "./user.model";
 import Database from "../../orm/sequelize";
 import { IBet } from "../interfaces";
 
@@ -18,4 +19,4 @@ export const bets = Database.define<IBetModel>("bets", {
    updatedAt: Sequelize.DATE,
 });
 
-bets.hasMany(bets, { as: "bets", foreignKey: "userId" });
+users.hasMany(bets, { foreignKey: "userId" });
