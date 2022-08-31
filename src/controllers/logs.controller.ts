@@ -8,6 +8,8 @@ export async function ShowLogs(req: Request, res: Response, next: any) {
       if (!level) return res.status(400).json({ message: "Nível inexistente!" });
       if (level !== "error" && level !== "info") return res.status(400).json({ message: "Nível inexistente!" });
 
+      console.log(path.join(__dirname, `./logs/${level}.log`));
+
       fs.open(path.join(__dirname, `./logs/${level}.log`), "r", (err, fd) => {
          if (err?.code === "ENOENT") return res.status(400).json({ message: "Nível inexistente!" });
        const log = fs.readFileSync(fd, "utf-8");
@@ -33,6 +35,7 @@ export async function FlushLogs(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 
 
 
