@@ -18,5 +18,3 @@ export const bets = Database.define<IBetModel>("bets", {
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
-
-users.hasMany(bets, { foreignKey: "userId" });
