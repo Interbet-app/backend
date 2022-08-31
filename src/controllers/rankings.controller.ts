@@ -34,7 +34,7 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
          group: ["userId"],
          order: [[sequelize.fn("sum", sequelize.col("amount")), "DESC"]],
       });
-
+      console.log(ranking);
       const response = ranking.map((pos) => {
          return {
             userId: pos.userId,
