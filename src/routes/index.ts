@@ -94,6 +94,9 @@ route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
 route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 
+route.get("/logs/:level", AuthUser, AuthAdmin, Control.ShowLogs);
+route.post("/logs/flush/:level", AuthUser, AuthAdmin, Control.FlushLogs);
+
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 
