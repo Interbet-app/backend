@@ -80,8 +80,6 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       const { value, correlationID, status } = req.body.pix.charge;
       const { transactionID } = req.body.charge;
 
-      logger.info(`OpenPixCallback: ${JSON.stringify(req.body)}`);
-
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
       
