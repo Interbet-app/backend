@@ -39,7 +39,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const game = await games.findByPk(odd.gameId);
       if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
       if (game.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
-      if (game.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+      if (game.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
 
       const bet = await bets.create({
          userId: token.userId,
@@ -135,7 +135,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       const jogos = await games.findAll({ where: { id: { [Op.in]: gameIds } } });
       jogos.forEach((jogo) => {
          if (jogo.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
-         if (jogo.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+         if (jogo.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
       });
 
       //! Verificar se os valores das apostas são menores que o valor máximo de opção

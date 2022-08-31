@@ -56,7 +56,7 @@ export async function GamesAndOdds(req: Request, res: Response, next: any) {
 }
 export async function CreateGame(req: Request, res: Response, next: any) {
    try {
-      const { eventId, name, status, modality, location, startDate, endDate, winnerCommission } = req.body;
+      const { eventId, name, status, modality, location, startDate, winnerCommission } = req.body;
       const event = await events.findByPk(eventId);
       if (!event) return res.status(404).json({ message: `Evento '${eventId}' não foi encontrado!` });
       const game = await games.create({
@@ -67,7 +67,6 @@ export async function CreateGame(req: Request, res: Response, next: any) {
          location: location,
          winnerCommission: winnerCommission > 0 ? winnerCommission : -1,
          startDate: new Date(startDate),
-         endDate: new Date(endDate),
          createdAt: new Date(),
          updatedAt: new Date(),
       });
@@ -88,7 +87,7 @@ export async function GetGame(req: Request, res: Response, next: any) {
 }
 export async function UpdateGame(req: Request, res: Response, next: any) {
    try {
-      const { gameId, name, eventId, status, modality, location, startDate, endDate } = req.body;
+      const { gameId, name, eventId, status, modality, location, startDate } = req.body;
       const game = await games.findByPk(gameId);
       if (!game) return res.status(404).json({ message: `Jogo '${gameId}' não foi encontrado!` });
 
@@ -98,7 +97,6 @@ export async function UpdateGame(req: Request, res: Response, next: any) {
       game.modality = modality;
       game.location = location;
       game.startDate = new Date(startDate);
-      game.endDate = new Date(endDate);
       game.updatedAt = new Date();
       await game.save();
       res.status(200).json(game as IGame);

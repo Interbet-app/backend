@@ -16,7 +16,6 @@ export const games = Database.define<IGameModel>("games", {
    goalsB: { type: Sequelize.INTEGER, allowNull: true, defaultValue: 0 },
    location: { type: Sequelize.STRING(60), allowNull: true },
    startDate: { type: Sequelize.DATE, allowNull: false },
-   endDate: { type: Sequelize.DATE, allowNull: false },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
