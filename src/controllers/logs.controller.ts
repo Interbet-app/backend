@@ -8,11 +8,11 @@ export async function ShowLogs(req: Request, res: Response, next: any) {
       if (!level) return res.status(400).json({ message: "Nível inexistente!" });
       if (level !== "error" && level !== "info") return res.status(400).json({ message: "Nível inexistente!" });
 
-      console.log(`${__dirname}/logs/${level}.log`);
+      console.log(path.join(__dirname, "..", "..", "..", "logs", `${level}.log`));
 
-      fs.open(`${__dirname}/logs/${level}.log`, "r", (err, fd) => {
+      fs.open(path.join(__dirname, "..", "..", "..", "logs", `${level}.log`), "r", (err, fd) => {
          if (err?.code === "ENOENT") return res.status(400).json({ message: "Nível inexistente!" });
-       const log = fs.readFileSync(fd, "utf-8");
+         const log = fs.readFileSync(fd, "utf-8");
          res.status(200).json({ log });
       });
    } catch (error) {
@@ -30,12 +30,9 @@ export async function FlushLogs(req: Request, res: Response, next: any) {
          fs.writeFileSync(fd, "");
          res.status(200).json({ message: "Logs limpos com sucesso!" });
       });
-
    } catch (error) {
       next(error);
    }
 }
-
-
 
 
