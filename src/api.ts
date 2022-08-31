@@ -26,21 +26,28 @@ api.use("/", (_req: Request, res: Response) => {
 
 //Captura e processa os erros
 api.use((error: Error, _req: Request, res: Response, _next: any) => {
-   if (error instanceof AppError) {
-      logger.error(error.message);
-      res.status(error.statusCode).json({
-         message: error.message,
-         error: error.error?.message,
-      });
-   } else {
-      if (error.message.includes("jwt expired")) {
-         res.status(403).json({ message: "Authorization token is expired!" });
+   try {
+      if (error instanceof AppError) {
+         if (typeof error.message === "string") logger.error(error.message);
+         else logger.error(JSON.stringify(error.message));
+         res.status(error.statusCode).json({
+            message: error.message,
+            error: error.error?.message,
+         });
       } else {
-         logger.error(error.message);
-         res.status(500).json({ message: "Internal Server Error!" });
+         if (error.message.includes("jwt expired")) {
+            res.status(403).json({ message: "Authorization token is expired!" });
+         } else {
+            if (typeof error.message === "string") logger.error(error.message);
+            else logger.error(JSON.stringify(error.message));
+            res.status(500).json({ message: "Internal Server Error!" });
+         }
       }
+   } catch (error) {
+      logger.error(error);
    }
 });
 
 export default api;
+
 

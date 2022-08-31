@@ -16,8 +16,6 @@
 </p>
 
 ## 📡 Links para referencia
-  - [Projeto](https://app.clickup.com/31085808/home) - ClickUp
-  - [Design](https://github.com/) - ...
   - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
   - [Produção](https://api.v1.interbet.app/) - AWS
 
@@ -27,14 +25,18 @@
 ```
 npm install
 ```
-   Após rode o comando para iniciar o projeto em sua maquina:
+   Configure o arquivo .env com as variáveis de ambiente necessárias para o projeto, após isso execute o comando abaixo para criar o banco de dados:
 ```
-npm run dev
+npm run database
 ```
-## 📙 Documentação
-
-   - [Postman](https://app.getpostman.com/join-team?invite_code=feb01a84713e275980499e6f07edc206&target_code=c327fc298ce47ec11da318ee2cee66a4)
-
+   Para criar as tabelas execute o comando abaixo:
+```
+npm run migrate
+```
+   Após isso execute o comando abaixo para iniciar o projeto:
+```
+npm start
+```
 ## ⛏️ Linguagens e Frameworks
 
 -  [NodeJs](https://nodejs.org/en/) - ....

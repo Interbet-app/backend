@@ -29,9 +29,7 @@ export class OpenPix {
       this.authorization = process.env.OPEN_PIX_APP_ID as string;
       this.axios = axios.create({
          baseURL: "https://api.openpix.com.br/api/openpix",
-         headers: {
-            Authorization: this.authorization,
-         },
+         headers: { Authorization: this.authorization },
       });
       this.HMAC_COMPLETE = process.env.OPEN_PIX_HOOK_COMPLETE_KEY as string;
       this.HMAC_EXPIRE = process.env.OPEN_PIX_HOOK_EXPIRE_KEY as string;
@@ -41,21 +39,10 @@ export class OpenPix {
       if (action === "expire") return this.HMAC_EXPIRE;
    }
 
-   public async CreatePayment(
-      correlationID: number,
-      amount: number,
-      comment: string
-   ): Promise<OpenPixPayment | AppError> {
+   public async CreatePayment(correlationID: string,value: number,comment: string): Promise<OpenPixPayment | AppError> {
       try {
-         const payload = {
-            correlationID: `${correlationID}`,
-            value: `${Number(amount) * 100}`,
-            comment: comment,
-         };
-
-         const response = await this.axios.post("/v1/charge?return_existing=true", payload);
+         const response = await this.axios.post("/v1/charge", { correlationID, value, comment });
          const qrcode = (await QRCode.toDataURL(response.data.brCode, { type: "image/jpeg" })) as string;
-
          return {
             value: response.data.charge.value,
             status: response.data.charge.status,
@@ -66,31 +53,20 @@ export class OpenPix {
             paymentLinkUrl: response.data.charge.paymentLinkUrl,
          } as OpenPixPayment;
       } catch (error: any) {
-         return new AppError(500, "Falha ao criar pix", error);
+         return new AppError(500, "Falha ao criar depósito via pix ", error);
       }
    }
 
-   public async Send(
-      correlationId: number,
-      amount: number,
-      pixKey: string,
-      pixKeyType: string
-   ): Promise<OpenPixSend | AppError> {
+   public async Send(correlationId: string,value: number,pixKey: string,pixKeyType: string): Promise<OpenPixSend | AppError> {
       try {
-         const payload = {
-            correlationId: `${correlationId}`,
-            value: `${Number(amount) * 100}`,
-            pixKey,
-            pixKeyType,
-         };
-         await this.axios.post("/v1/pay/pix-key", payload);
-         const confirm = await this.axios.post("/v1/pay/confirm", { correlationId: `${correlationId}` });
+         const payment = await this.axios.post("/v1/pay/pix-key", { correlationId, value, pixKey, pixKeyType });
+         const confirm = await this.axios.post("/v1/pay/confirm", { correlationId });
          return {
             externalId: confirm.data.payment.correlationID,
             externalStatus: confirm.data.payment.destination.status,
          };
       } catch (error: any) {
-         return new AppError(500, "Falha ao enviar pix", error);
+         return new AppError(500, "Falha ao criar retirada via pix!", error);
       }
    }
 
@@ -105,4 +81,5 @@ export class OpenPix {
       }
    }
 }
+
 

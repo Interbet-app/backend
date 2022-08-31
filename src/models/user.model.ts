@@ -14,6 +14,9 @@ export const users = Database.define<IUserModel>("users", {
    level: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 1 },
    oauth: { type: Sequelize.ENUM, values: ["google", "instagram", "facebook"], allowNull: true },
    picture: { type: Sequelize.STRING, allowNull: true },
+   document: { type: Sequelize.STRING, allowNull: true },
+   pixAddress: { type: Sequelize.STRING, allowNull: true },
+   pixKeyType: { type: Sequelize.ENUM, values: ["CPF", "CNPJ", "EMAIL", "PHONE", "RANDOM"], allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });

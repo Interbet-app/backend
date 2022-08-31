@@ -44,3 +44,12 @@ export function UpdatePlayer(req: Request, res: Response, next: any) {
 export function MultipleBets(req: Request, res: Response, next: any) {
    return ValidateSchema(Schemas.multiple_bets, req.body, res, next);
 }
+export function CreateDeposit(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_deposit, req.body, res, next);
+}
+export function ProcessGame(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.process_game, req.body, res, next);
+}
+export function CreateGameHistory(req: Request, res: Response, next: any) {
+   return ValidateSchema(Schemas.create_game_history, req.body, res, next);
+}

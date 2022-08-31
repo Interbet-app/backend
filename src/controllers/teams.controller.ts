@@ -27,7 +27,7 @@ export async function GetTeam(req: Request, res: Response, next: any) {
 export async function FindTeams(req: Request, res: Response, next: any) {
    try {
       const name = req.params.name as string;
-      if (!name) throw new AppError(422, "Nome do time não informado!");
+      if (!name) return res.status(422).json({message:"Informe o nome pelo qual deseja pesquisar!"});
       const data = await teams.findAll({ where: { name: { [Op.like]: `%${name}%` } } });
       res.status(200).json({ teams: data as ITeam[] });
    } catch (error) {
@@ -94,8 +94,9 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
          if (!location) throw new AppError(422, "Localização do time é obrigatória!");
          if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
+         
          const team = await teams.findByPk(teamId);
-         if (!team) throw new AppError(404, "Time não encontrado!");
+         if (!team) return res.status(404).json({ message: "Time não encontrado!" });
 
          if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
             throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
@@ -130,7 +131,7 @@ export async function DeleteTeam(req: Request, res: Response, next: any) {
    try {
       const teamId = parseInt(req.params.id, 10);
       const team = await teams.findByPk(teamId);
-      if (!team) throw new AppError(404, "Time não encontrado!");
+      if (!team) return res.status(404).json({ message: "Time não encontrado!" });
       const bucket = new S3();
       const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
       const result = await bucket.DeleteFile(to_delete);

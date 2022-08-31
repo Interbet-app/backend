@@ -12,6 +12,11 @@ route.get("/bets/me", AuthUser, Control.GetUserBets);
 route.get("/bets/game/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GetBetsByGame);
 route.delete("/bets/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteBet);
 
+route.get("/games/history", AuthUser, Control.GamesHistory);
+route.get("/games/history/search", AuthUser, Control.GamesHistorySearch);
+route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
+route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
+
 route.get("/games", AuthUser, Control.GetGames);
 route.get("/games/full", AuthUser, Control.GamesAndOdds);
 route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
@@ -19,7 +24,7 @@ route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
 route.get("/games/last/team", AuthUser, Control.LastGamesTeam);
 route.get("/games/last/athletic", AuthUser, Control.LastGamesAthletic);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
-route.post("/games/process-result/:id/", Middle.ID, AuthUser, AuthAdmin, Control.ProcessGame);
+route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
 
@@ -56,8 +61,10 @@ route.delete("/events/:id/", AuthUser, AuthAdmin, Control.DeleteEvent);
 route.get("/adds", AuthUser, Control.GetAdds);
 route.post("/adds", AuthUser, AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAdds);
+
 route.get("/user", AuthUser, Control.GetUser);
 route.put("/user", AuthUser, Control.UserUpdate);
+route.put("/user/profile", AuthUser, Control.UserProfile);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
 route.post("/wallet", AuthUser, AuthAdmin, Control.CreateWallet);
@@ -80,13 +87,16 @@ route.delete("/maintenances/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Delet
 
 route.get("/deposits", AuthUser, Control.UserDeposits);
 route.get("/deposits/:id/", Middle.ID, AuthUser, Control.UserDepositDetails);
-route.post("/deposits", AuthUser, Control.CreateDeposit);
+route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
+
+route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 
 export default route;
+
 

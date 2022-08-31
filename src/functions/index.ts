@@ -20,7 +20,7 @@ export class File {
    }
 }
 
-export const RefreshOddsPlayout = (balance: number[]) => {
+export const RefreshOddsPayout = (balance: number[]) => {
    const equilibriumConst = balance[0] + balance[1] + 100;
    const marginHouse = 0.1;
    const balanceListDuplicate = [...balance, ...balance];

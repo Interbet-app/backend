@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== "production") {
             winston.format.timestamp({
                format: "YYYY-MM-DD HH:mm:ss",
             }),
-            winston.format.printf((info) => `@interbet_${info.level} - ${info.timestamp} -> ${info.message}`)
+            winston.format.printf((info) => `@interbet-${info.level} - ${info.timestamp} -> ${info.message}`)
          ),
       })
    );

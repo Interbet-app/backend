@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, wallets, events, odds, games, teams, athletics } from "../models";
-import { IGame, IOdd, ITeam } from "../interfaces";
+import { bets, events, odds, games, teams, athletics, rankings } from "../models";
+import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
-import logger from "../log";
 
 export async function GetGames(_req: Request, res: Response, next: any) {
    try {
@@ -18,7 +17,7 @@ export async function GameDetails(req: Request, res: Response, next: any) {
       const gameId = parseInt(req.params.id, 10);
       const game = await games.findByPk(gameId);
       const options = await odds.findAll({ where: { gameId } });
-      if (!game) throw new AppError(404, "Jogo não foi encontrado!");
+      if (!game) return res.status(404).json({ message: `Jogo '${gameId}' não foi encontrado!` });
       res.status(200).json({ game: game as IGame, odds: options as IOdd[] });
    } catch (error) {
       next(error);
@@ -42,7 +41,8 @@ export async function GamesAndOdds(req: Request, res: Response, next: any) {
             modality: game.modality,
             location: game.location,
             winnerOddId: game.winnerOddId,
-            result: game.result,
+            goalsA: game.goalsA,
+            goalsB: game.goalsB,
             createdAt: game.createdAt,
             updatedAt: game.updatedAt,
             odds: result.filter((odd) => odd.gameId === game.id) as IOdd[],
@@ -56,16 +56,18 @@ export async function GamesAndOdds(req: Request, res: Response, next: any) {
 }
 export async function CreateGame(req: Request, res: Response, next: any) {
    try {
-      const { eventId, name, status, modality, location, startDate } = req.body;
+      const { eventId, name, status, modality, location, startDate, endDate, winnerCommission } = req.body;
       const event = await events.findByPk(eventId);
-      if (!event) throw new AppError(404, "Evento não foi encontrado!");
+      if (!event) return res.status(404).json({ message: `Evento '${eventId}' não foi encontrado!` });
       const game = await games.create({
          eventId: eventId,
          name: name,
          status: status,
          modality: modality,
          location: location,
+         winnerCommission: winnerCommission > 0 ? winnerCommission : -1,
          startDate: new Date(startDate),
+         endDate: new Date(endDate),
          createdAt: new Date(),
          updatedAt: new Date(),
       });
@@ -78,7 +80,7 @@ export async function GetGame(req: Request, res: Response, next: any) {
    try {
       const id = parseInt(req.params.id, 10);
       const game = await games.findByPk(id);
-      if (!game) throw new AppError(404, "Jogo não foi encontrado!");
+      if (!game) return res.status(404).json({ message: `Jogo '${id}' não foi encontrado!` });
       res.status(200).json(game as IGame);
    } catch (error) {
       next(error);
@@ -86,9 +88,9 @@ export async function GetGame(req: Request, res: Response, next: any) {
 }
 export async function UpdateGame(req: Request, res: Response, next: any) {
    try {
-      const { gameId, name, eventId, status, modality, location, startDate } = req.body;
+      const { gameId, name, eventId, status, modality, location, startDate, endDate } = req.body;
       const game = await games.findByPk(gameId);
-      if (!game) throw new AppError(404, "Jogo não foi encontrado!");
+      if (!game) return res.status(404).json({ message: `Jogo '${gameId}' não foi encontrado!` });
 
       game.name = name;
       game.eventId = eventId;
@@ -96,6 +98,7 @@ export async function UpdateGame(req: Request, res: Response, next: any) {
       game.modality = modality;
       game.location = location;
       game.startDate = new Date(startDate);
+      game.endDate = new Date(endDate);
       game.updatedAt = new Date();
       await game.save();
       res.status(200).json(game as IGame);
@@ -107,7 +110,7 @@ export async function DeleteGame(req: Request, res: Response, next: any) {
    try {
       const id = parseInt(req.params.id, 10);
       await games.destroy({ where: { id } });
-      res.status(204).json({ message: "Jogo excluído com sucesso" });
+      res.status(204).json({ message: `Jogo '${id}' foi excluído com sucesso!` });
    } catch (error) {
       next(error);
    }
@@ -115,21 +118,23 @@ export async function DeleteGame(req: Request, res: Response, next: any) {
 export async function ProcessGame(req: Request, res: Response, next: any) {
    try {
       const gameId = parseInt(req.params.id, 10);
-      const { winnerOddId, result } = req.body;
-
-      if (!winnerOddId) throw new AppError(422, "Parâmetro winnerOddId é obrigatório!");
-      if (!result) throw new AppError(422, "Parâmetro result é obrigatório!");
-      if (!gameId) throw new AppError(422, "Parâmetro gameId é obrigatório!");
+      const { winnerOddId, teamA, teamB } = req.body;
 
       const game = await games.findByPk(gameId);
-      if (!game) throw new AppError(404, "Jogo não foi encontrado!");
+      if (!game) return res.status(404).json({ message: `Jogo '${gameId}' não foi encontrado!` });
+      if (game.winnerOddId) return res.status(400).json({ message: `Jogo '${gameId}' já foi processado!` });
 
       let options = await odds.findAll({ where: { gameId: gameId } });
-      if (!options) throw new AppError(404, "Nenhuma opção foi encontrada!");
+      if (!options) return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${gameId}'!` });
+      
+      //? processar a classificação dos times do evento do jogo
+      const oddTeams = options.filter((odd) => odd.teamId === teamA.id || odd.teamId === teamB.id);
+      if (oddTeams.length < 2) throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
+      await UpdateRanking(game.eventId, teamA, teamB, next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
-      if (!winnerOdd) throw new AppError(404, "Odd ganhadora não foi encontrada!");
+      if (!winnerOdd) return res.status(404).json({ message: `Opção de aposta vencedora '${winnerOddId}' não foi encontrada!` });
 
       //% 2 -> Percorrer todas as opções de aposta do jogo e proibir novas apostas
       options.forEach(async (option) => {
@@ -141,74 +146,29 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       //% 3 -> Atualizar o jogo com os dados do resultado
       game.status = "closed";
       game.winnerOddId = winnerOddId;
-      game.result = result;
+      game.goalsA = teamA.goals;
+      game.goalsB = teamB.goals;
       game.updatedAt = new Date();
       await game.save();
 
-      //% 4 -> Atualizar opções de aposta do jogo caso tenha ocorrido alguma mudança entre a busca inicial e a atualização que proibi novas apostas
+      //% 4 -> Atualizar opções de aposta do jogo caso tenha ocorrido alguma mudança
       options = await odds.findAll({ where: { gameId: gameId } });
-      winnerOdd = options.find((option) => option.id === winnerOddId);
-      if (!winnerOdd) throw new AppError(404, "Odd ganhadora informada não pertence a este jogo!");
-
-      //% 5 -> Preparar armazenamento de estatísticas dos resultados das apostas no jogo
-      const Statistics = {
-         sumBets: 0,
-         betAmount: 0,
-         winnersAmount: 0,
-         lossesAmount: 0,
-         profit: 0,
-         commission: 0,
-      };
-
-      //% 6 -> Processar comissões do time ganhador caso nao seja empate
-      if (winnerOdd.teamId != 0) {
-         const winTeam = await teams.findOne({ where: { id: winnerOdd.teamId } });
-         const commission = Number(winnerOdd.amount) * 0.01; //? 1% de comissão
-         if (winTeam) {
-            if (winTeam.adminId != null) {
-               const wallet = await wallets.findOne({ where: { userId: winTeam.adminId } });
-               Statistics.commission = commission;
-               if (!wallet) {
-                  await wallets.create({
-                     userId: winTeam.adminId,
-                     balance: commission,
-                     bonus: 0,
-                     score: 0,
-                     createdAt: new Date(),
-                     updatedAt: new Date(),
-                  });
-               } else {
-                  wallet.balance += commission;
-                  wallet.updatedAt = new Date();
-                  await wallet.save();
-               }
-            }
-         } else
-            logger.error(`Não foi possível encontrar o time ${winnerOdd.teamId} para o jogo ${gameId},
-                para pagamento de comissão.`);
-      }
 
       //% 7 -> Obter todas as apostas do jogo
       const searchOdds = options.map((option) => option.id!);
-      if (!searchOdds || searchOdds.length === 0) throw new AppError(200, "Jogo não possui apostas!");
-      const apostas = await bets.findAll({ where: { oddId: { [Op.in]: searchOdds } } });
+      if (searchOdds.length > 0) {
+         const apostas = await bets.findAll({ where: { oddId: { [Op.in]: searchOdds } } });
 
-      //% 8 -> Processar resultados das apostas
-      for (let i = 0; i < apostas.length; i++) {
-         const aposta = apostas[i];
-         aposta.status = "completed";
-         aposta.result = aposta.oddId === winnerOddId ? "win" : "lose";
-         aposta.updatedAt = new Date();
-         await aposta.save();
-
-         Statistics.sumBets++;
-         Statistics.betAmount += aposta.amount;
-         Statistics.winnersAmount += aposta.result === "win" ? Number(aposta.amount) * Number(aposta.payout) : 0;
-         Statistics.lossesAmount += aposta.result === "lose" ? aposta.amount : 0;
+         //% 8 -> Processar resultados das apostas
+         for (let i = 0; i < apostas.length; i++) {
+            const aposta = apostas[i];
+            aposta.status = "completed";
+            aposta.result = aposta.oddId === winnerOddId ? "win" : "lose";
+            aposta.updatedAt = new Date();
+            await aposta.save();
+         }
       }
-
-      Statistics.profit = Statistics.winnersAmount - Statistics.lossesAmount;
-      res.status(200).json({ message: "Resultado do jogo processado com sucesso!", statistics: Statistics });
+      res.status(200).json({ message: "Resultado do jogo processado com sucesso!" });
    } catch (error) {
       next(error);
    }
@@ -217,12 +177,12 @@ export async function LastGamesTeam(req: Request, res: Response, next: any) {
    try {
       const { teamId, limit } = req.query;
       let options = await odds.findAll({ where: { teamId: Number(teamId), status: "lock" } });
-      if (!options) throw new AppError(404, "Time ainda nao possui jogos concluídos!");
+      if (!options) throw new AppError(404, "Time ainda não possui jogos concluídos!");
       const jogos = await games.findAll({
          where: { id: { [Op.in]: options.map((option) => option.gameId) }, status: "closed" },
          limit: limit ? Number(limit) : 5,
       });
-      if (!jogos) throw new AppError(404, "Time ainda nao possui jogos concluídos!");
+      if (!jogos) throw new AppError(404, "Time ainda não possui jogos concluídos!");
 
       options = await odds.findAll({ where: { gameId: { [Op.in]: jogos.map((jogo) => jogo.id!) } } });
       const times = await teams.findAll({ where: { id: { [Op.in]: options.map((odd) => odd.teamId) } } });
@@ -237,7 +197,6 @@ export async function LastGamesTeam(req: Request, res: Response, next: any) {
                if (team) Teams.push(team);
                if (option.id === game.winnerOddId) Winner = times.find((time) => time.id === option.teamId)!;
             }
-            
          });
          response.push({ game: game, teams: Teams, winner: Winner });
       });
@@ -254,10 +213,10 @@ export async function LastGamesAthletic(req: Request, res: Response, next: any) 
       let athletic;
       if (teamId) {
          const team = await teams.findOne({ where: { id: Number(teamId) } });
-         if (!team) throw new AppError(404, "Time não foi encontrado!");
+         if (!team) return res.status(404).json({ message: `Time '${teamId}' não foi encontrado!` });
          athletic = await athletics.findByPk(team.athleticId);
       } else athletic = await athletics.findByPk(Number(athleticId));
-      if (!athletic) throw new AppError(404, "Atlética nao foi encontrada!");
+      if (!athletic) return res.status(404).json({ message: `Atlética '${athleticId}' não foi encontrada!` });
 
       const times = await teams.findAll({ where: { athleticId: athletic.id } });
       const teamsIds = times.map((team) => team.id!);
@@ -278,3 +237,66 @@ export async function LastGamesAthletic(req: Request, res: Response, next: any) 
    }
 }
 
+async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, next: any) {
+   try {
+      const event = await events.findByPk(eventId);
+      if (!event) throw new AppError(404, "Evento não foi encontrado!");
+
+      const teamA = await teams.findByPk(A.id);
+      const teamB = await teams.findByPk(B.id);
+      if (!teamA || !teamB) throw new AppError(404, "Times não foram encontrados!");
+
+      const rankingA = await rankings.findOne({ where: { eventId, teamId: A.id } });
+      const rankingB = await rankings.findOne({ where: { eventId, teamId: B.id } });
+
+      if (!rankingA) {
+         await rankings.create({
+            eventId,
+            name: teamA.name,
+            teamId: A.id,
+            score: A.goals > B.goals ? 3 : A.goals === B.goals ? 1 : 0,
+            wins: A.goals > B.goals ? 1 : 0,
+            draws: A.goals === B.goals ? 1 : 0,
+            losses: A.goals < B.goals ? 1 : 0,
+            goalFor: A.goals,
+            goalAgainst: B.goals,
+            goalDifference: A.goals - B.goals,
+         });
+      } else {
+         rankingA.score += A.goals > B.goals ? 3 : A.goals === B.goals ? 1 : 0;
+         rankingA.wins += A.goals > B.goals ? 1 : 0;
+         rankingA.draws += A.goals === B.goals ? 1 : 0;
+         rankingA.losses += A.goals < B.goals ? 1 : 0;
+         rankingA.goalFor += A.goals;
+         rankingA.goalAgainst += B.goals;
+         rankingA.goalDifference += A.goals - B.goals;
+         await rankingA.save();
+      }
+
+      if (!rankingB) {
+         await rankings.create({
+            eventId,
+            name: teamB.name,
+            teamId: B.id,
+            score: B.goals > A.goals ? 3 : B.goals === A.goals ? 1 : 0,
+            wins: B.goals > A.goals ? 1 : 0,
+            draws: B.goals === A.goals ? 1 : 0,
+            losses: B.goals < A.goals ? 1 : 0,
+            goalFor: B.goals,
+            goalAgainst: A.goals,
+            goalDifference: B.goals - A.goals,
+         });
+      } else {
+         rankingB.score += B.goals > A.goals ? 3 : B.goals === A.goals ? 1 : 0;
+         rankingB.wins += B.goals > A.goals ? 1 : 0;
+         rankingB.draws += B.goals === A.goals ? 1 : 0;
+         rankingB.losses += B.goals < A.goals ? 1 : 0;
+         rankingB.goalFor += B.goals;
+         rankingB.goalAgainst += A.goals;
+         rankingB.goalDifference += B.goals - A.goals;
+         await rankingB.save();
+      }
+   } catch (error) {
+      next(error);
+   }
+}

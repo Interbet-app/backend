@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { athletics, wallets, teams, odds, bets } from "../models";
+import { athletics, wallets, teams, odds, bets, games } from "../models";
 import { IBet, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
-import { RefreshOddsPlayout } from "../functions";
+import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
 
 export async function GetUserBets(_req: Request, res: Response, next: any) {
@@ -35,6 +35,11 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
       if (parseFloat(amount) > Number(wallet.balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
+
+      const game = await games.findByPk(odd.gameId);
+      if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
+      if (game.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
+      if (game.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
 
       const bet = await bets.create({
          userId: token.userId,
@@ -77,8 +82,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
       const balances = oddToUpdate.map((odd) => Number(odd.payment));
       if (balances.length == 2) {
-         const newPayout = RefreshOddsPlayout(balances);
-         console.log("new payout", newPayout);
+         const newPayout = RefreshOddsPayout(balances);
          oddToUpdate.forEach((odd, index) => {
             odd.payout = newPayout[index];
             odd.updatedAt = new Date();
@@ -127,6 +131,13 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       if (gameIds.length != removeDuplicateGames.length)
          throw new AppError(400, "Voce não pode apostar em duas opções do mesmo jogo!");
 
+      //! Verificar se os jogos estão abertos
+      const jogos = await games.findAll({ where: { id: { [Op.in]: gameIds } } });
+      jogos.forEach((jogo) => {
+         if (jogo.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
+         if (jogo.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+      });
+
       //! Verificar se os valores das apostas são menores que o valor máximo de opção
       Bets.forEach((bet) => {
          const odd = options.find((option) => option.id === bet.oddId);
@@ -173,7 +184,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
          const balances = oddToUpdate.map((odd) => Number(odd.payment));
          if (balances.length == 2) {
-            const newPayout = RefreshOddsPlayout(balances);
+            const newPayout = RefreshOddsPayout(balances);
             console.log("new payout", newPayout);
             oddToUpdate.forEach((odd, index) => {
                odd.payout = newPayout[index];
@@ -244,5 +255,6 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 
 

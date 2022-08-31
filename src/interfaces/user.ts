@@ -8,6 +8,9 @@ export interface IUser {
    email: string;
    level: number;
    picture?: string;
+   document?: string;
+   pixAddress?: string;
+   pixKeyType?: string;
    createdAt: Date;
    updatedAt: Date;
 }

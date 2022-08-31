@@ -9,3 +9,8 @@ export interface ITeam {
    createdAt: Date;
    updatedAt: Date;
 }
+
+export interface TeamResult {
+   id: number;
+   goals: number;
+}

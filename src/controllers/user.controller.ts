@@ -41,40 +41,7 @@ export async function GoogleOAuth(req: Request, res: Response, next: any) {
          if (!user) throw new AppError(500, "Internal server error");
 
          //% creditar os bonus de indicação para o afiliado e o novo usuário
-         if (affiliateId) {
-            wallets.create({
-               userId: user.id!,
-               balance: 0,
-               bonus: 10,
-               score: 0,
-               createdAt: new Date(),
-               updatedAt: new Date(),
-            });
-            const wallet = await wallets.findOne({ where: { userId: affiliateId } });
-            if (wallet) {
-               wallet.bonus += 10;
-               wallet.updatedAt = new Date();
-               await wallet.save();
-            }
-            await notifications.bulkCreate([
-               {
-                  userId: user.id!,
-                  title: "Bônus de cadastro",
-                  message: "Parabéns, você ganhou R$ 10,00 de bônus pelo cadastro pelo link do seu amigo!",
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                  unread: true,
-               },
-               {
-                  userId: affiliateId,
-                  title: "Bônus de indicação",
-                  message: `Parabéns, você ganhou R$ 10,00 de bônus por indicar o usuário ${user.email}!`,
-                  unread: true,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-               },
-            ]);
-         }
+         if (affiliateId) await CrediteBonus(next, affiliateId, user.id!, user.email);
       }
       const token = await Jwt.sign(user.id!, next);
       res.status(200).json({
@@ -113,41 +80,9 @@ export async function FacebookOAuth(req: Request, res: Response, next: any) {
       //    });
       //    if (!user) throw new AppError(500, "Internal server error");
 
-      // //% creditar os bonus de indicação para o afiliado e o novo usuário
-      // if (affiliateId) {
-      //    wallets.create({
-      //       userId: user.id!,
-      //       balance: 0,
-      //       bonus: 10,
-      //       score: 0,
-      //       createdAt: new Date(),
-      //       updatedAt: new Date(),
-      //    });
-      //    const wallet = await wallets.findOne({ where: { userId: affiliateId } });
-      //    if (wallet) {
-      //       wallet.bonus += 10;
-      //       wallet.updatedAt = new Date();
-      //       await wallet.save();
-      //    }
-      //    await notifications.bulkCreate([
-      //       {
-      //          userId: user.id!,
-      //          title: "Bonus de indicação",
-      //          message: "Parabéns, você ganhou R$ 10,00 de bonus de indicação!",
-      //          createdAt: new Date(),
-      //          updatedAt: new Date(),
-      //          unread: true,
-      //       },
-      //       {
-      //          userId: affiliateId,
-      //          title: "Bônus de indicação",
-      //          message: `Parabéns, você ganhou R$ 10,00 de bônus por indicar o usuário ${user.email}!`,
-      //          unread: true,
-      //          createdAt: new Date(),
-      //          updatedAt: new Date(),
-      //       },
-      //    ]);
-      //}
+      //% creditar os bonus de indicação para o afiliado e o novo usuário
+      //if (affiliateId) await CrediteBonus(next, affiliateId, user.id!, user.email);
+
       // const token = await Jwt.sign(user.id!, next);
       // res.status(200).json({
       //    token,
@@ -204,41 +139,9 @@ export async function InstagramOAuth(req: Request, res: Response, next: any) {
       //                   createdAt: new Date(),
       //                   updatedAt: new Date(),
       //                });
-      // //% creditar os bonus de indicação para o afiliado e o novo usuário
-      // if (affiliateId) {
-      //    wallets.create({
-      //       userId: user.id!,
-      //       balance: 0,
-      //       bonus: 10,
-      //       score: 0,
-      //       createdAt: new Date(),
-      //       updatedAt: new Date(),
-      //    });
-      //    const wallet = await wallets.findOne({ where: { userId: affiliateId } });
-      //    if (wallet) {
-      //       wallet.bonus += 10;
-      //       wallet.updatedAt = new Date();
-      //       await wallet.save();
-      //    }
-      //    await notifications.bulkCreate([
-      //       {
-      //          userId: user.id!,
-      //          title: "Bonus de indicação",
-      //          message: "Parabéns, você ganhou R$ 10,00 de bonus de indicação!",
-      //          createdAt: new Date(),
-      //          updatedAt: new Date(),
-      //          unread: true,
-      //       },
-      //       {
-      //          userId: affiliateId,
-      //          title: "Bônus de indicação",
-      //          message: `Parabéns, você ganhou R$ 10,00 de bônus por indicar o usuário ${user.email}!`,
-      //          unread: true,
-      //          createdAt: new Date(),
-      //          updatedAt: new Date(),
-      //       },
-      //    ]);
-      // }
+      //% creditar os bonus de indicação para o afiliado e o novo usuário
+      //if (affiliateId) await CrediteBonus(next, affiliateId, user.id!, user.email);
+
       //             const token = await Jwt.sign(user.id!, next);
       //             res.status(200).json({
       //                token,
@@ -269,13 +172,39 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
       const { name, email, picture, teamId } = req.body;
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findByPk(token.userId);
-      if (!user) throw new AppError(404, "Usuário não encontrado");
+      if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
       if (name) user.name = name;
       if (email) user.email = email;
       if (picture) user.picture = picture;
       if (teamId) user.teamId = teamId;
       user.updatedAt = new Date();
       await user.save();
+      res.status(200).json(user as IUser);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function UserProfile(req: Request, res: Response, next: any) {
+   try {
+      const token = Jwt.getLocals(res, next) as Token;
+      const { document, pixAddress, pixKeyType, name } = req.body;
+      const user = await users.findByPk(token.userId);
+      if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
+       
+      if (document && user.document != null) return res.status(401).json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
+      if (document) {
+         const validator = new RegExp(/^[0-9]{11}$/);
+         if (!validator.test(document)) return res.status(401).json({ message: "CPF inválido" });
+         const search = await users.findOne({ where: { document } });
+         if (search) return res.status(401).json({ message: "CPF já informado ja esta cadastrado!" });
+         user.document = document;
+      }
+      user.pixAddress = pixAddress;
+      user.pixKeyType = pixKeyType;
+      user.name = name;
+      user.updatedAt = new Date();
+      await user.save();
+
       res.status(200).json(user as IUser);
    } catch (error) {
       next(error);
@@ -290,4 +219,44 @@ export async function Logout(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+async function CrediteBonus(next: any, affiliateId: number, userId: number, userEmail: string) {
+   try {
+      //% creditar os bonus de indicação para o afiliado e o novo usuário
+      wallets.create({
+         userId: userId,
+         balance: 0,
+         bonus: 10,
+         score: 0,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+      const wallet = await wallets.findOne({ where: { userId: affiliateId } });
+      if (wallet) {
+         wallet.bonus += 10;
+         wallet.updatedAt = new Date();
+         await wallet.save();
+      }
 
+      //% notificar o afiliado e o novo usuário
+      await notifications.bulkCreate([
+         {
+            userId: userId,
+            title: "Bonus de indicação",
+            message: "Parabéns, você ganhou R$ 10,00 de bonus por se cadastrar com o link de indicação de um amigo.",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            unread: true,
+         },
+         {
+            userId: affiliateId,
+            title: "Bônus de indicação",
+            message: `Parabéns, você ganhou R$ 10,00 de bônus por indicar o usuário ${userEmail}!`,
+            unread: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+         },
+      ]);
+   } catch (error) {
+      next(error);
+   }
+}

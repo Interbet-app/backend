@@ -3,6 +3,8 @@ import Database from "../orm/sequelize";
 import logger from "./log";
 import dotenv from "dotenv";
 import { TaskProcessor } from "./tasks/processor";
+import { WsSocket } from "./api-ws";
+import { setInterval } from "timers";
 
 //Carregar variáveis de ambiente
 dotenv.config();
@@ -15,13 +17,21 @@ dotenv.config();
 
       //? iniciar tarefas recorrentes
       TaskProcessor.start();
-      logger.info("Tarefas recorrentes iniciadas com sucesso!");
 
       const port = process.env.PORT || 4000;
-      api.listen(port);
-      logger.info(`Servidor iniciado na porta ${port}!`);
+      const server = api.listen(port, () => {
+         logger.info(`Servidor iniciado na porta ${port}!`);
+      });
+
+      //? iniciar websocket
+      //const wss = new WsSocket(server);
    } catch (error) {
       logger.error(error);
    }
 })();
+
+
+
+
+
 

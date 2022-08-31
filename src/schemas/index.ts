@@ -105,7 +105,36 @@ export const update_player = Joi.object({
    holder: Joi.boolean().required(),
 });
 
-export const multiple_bets = Joi.array().items(Joi.object({
-   oddId: Joi.number().required(),
+export const multiple_bets = Joi.array().items(
+   Joi.object({
+      oddId: Joi.number().required(),
+      amount: Joi.number().required(),
+   })
+);
+
+export const create_deposit = Joi.object({
    amount: Joi.number().required(),
-}));
+});
+
+export const process_game = Joi.object({
+   winnerOddId: Joi.number().required(),
+   teamA: Joi.object({
+      id: Joi.number().required(),
+      goals: Joi.number().required(),
+   }),
+   teamB: Joi.object({
+      id: Joi.number().required(),
+      goals: Joi.number().required(),
+   }),
+});
+
+export const create_game_history = Joi.object({
+   event: Joi.string().required(),
+   teamA: Joi.string().required(),
+   teamB: Joi.string().required(),
+   scoreA: Joi.number().required(),
+   scoreB: Joi.number().required(),
+   ref_table: Joi.string().optional(),
+   date: Joi.date().optional(),
+
+});
