@@ -1,10 +1,11 @@
 import { Telegraf } from "telegraf";
 import { Withdrawals } from "../models";
 
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+ 
 export async function TelegramTasks() {
    try {
-      const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
-      const withdrawals = await Withdrawals.findAll({ where: { status: "pending" } });
+      const withdrawals = await Withdrawals.findAll({ where: { status: "pendent" } });
       for (const withdrawal of withdrawals) {
          bot.telegram.sendMessage(
             process.env.TELEGRAM_CHAT_ID!,
@@ -17,4 +18,6 @@ export async function TelegramTasks() {
       console.log(error);
    }
 }
+
+
 
