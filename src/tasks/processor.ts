@@ -3,6 +3,7 @@ import logger from "../log";
 import { CrediteUserBets } from "./bets.task";
 import { CrediteCompletedDeposits } from "./deposits.task";
 import { CrediteCommissions } from "./game.task";
+import { TelegramTasks } from "./telegram.task";
 
 async function FiveTasks() {
    //? creditar apostas vencedoras aos usuários
@@ -14,6 +15,9 @@ async function FiveTasks() {
 async function OneTasks() {
    //? creditar depósitos concluídos aos usuários
    await CrediteCompletedDeposits();
+
+   //? enviar notificações de retiradas solicitadas para o Chat do Telegram
+   await TelegramTasks();
 }
 
 export class TaskProcessor {

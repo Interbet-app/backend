@@ -42,15 +42,15 @@ export async function CreateWithdrawal(req: Request, res: Response, next: any) {
          updatedAt: new Date(),
       });
 
-      const pix = new OpenPix();
-      const result = await pix.Send(`${withdrawal.id}`, value, pixKey, pixKeyType);
-      if (result instanceof AppError) throw result;
+      // const pix = new OpenPix();
+      // const result = await pix.Send(`${withdrawal.id}`, value, pixKey, pixKeyType);
+      // if (result instanceof AppError) throw result;
 
-      withdrawal.externalStatus = result.externalStatus;
-      withdrawal.externalId = result.externalId;
-      withdrawal.status = result.externalStatus == "CONFIRMED" ? "completed" : "pendent";
-      withdrawal.updatedAt = new Date();
-      await withdrawal.save();
+      // withdrawal.externalStatus = result.externalStatus;
+      // withdrawal.externalId = result.externalId;
+      // withdrawal.status = result.externalStatus == "CONFIRMED" ? "completed" : "pendent";
+      // withdrawal.updatedAt = new Date();
+      // await withdrawal.save();
 
       res.status(200).json(withdrawal as IWithdrawal);
    } catch (error) {
