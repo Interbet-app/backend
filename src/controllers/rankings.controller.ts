@@ -55,8 +55,8 @@ export async function AthleticsRanking(_req: Request, res: Response, next: any) 
          const teamsAffiliated = teamsAll.filter((team) => team.athleticId === athletic.id);
          const teamsIds = teamsAffiliated.map((pos) => pos.id!);
          const amount = oddsAll.reduce((prev, odd) => {
-            if (teamsIds.includes(odd.teamId)) return prev + odd.amount;
-            else return prev;
+            if (teamsIds.includes(odd.teamId)) return Number(prev) + Number(odd.amount);
+            else return Number(prev);
          }, 0);
 
          return {
@@ -73,4 +73,5 @@ export async function AthleticsRanking(_req: Request, res: Response, next: any) 
       next(error);
    }
 }
+
 
