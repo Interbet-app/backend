@@ -190,8 +190,11 @@ export async function UserProfile(req: Request, res: Response, next: any) {
       const { document, pixAddress, pixKeyType, name } = req.body;
       const user = await users.findByPk(token.userId);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
-       
-      if (document && user.document != null) return res.status(401).json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
+
+      if (document && user.document != null)
+         return res
+            .status(401)
+            .json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
       if (document) {
          const validator = new RegExp(/^[0-9]{11}$/);
          if (!validator.test(document)) return res.status(401).json({ message: "CPF inválido" });
@@ -222,7 +225,7 @@ export async function Logout(_req: Request, res: Response, next: any) {
 async function CrediteBonus(next: any, affiliateId: number, userId: number, userEmail: string) {
    try {
       //% creditar os bonus de indicação para o afiliado e o novo usuário
-      wallets.create({
+      await wallets.create({
          userId: userId,
          balance: 0,
          bonus: 10,
@@ -232,11 +235,11 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       });
       const wallet = await wallets.findOne({ where: { userId: affiliateId } });
       if (wallet) {
-         wallet.bonus += 10;
+         wallet.bonus = Number(wallet.bonus) + 10;
          wallet.updatedAt = new Date();
          await wallet.save();
       } else {
-         wallets.create({
+         await wallets.create({
             userId: affiliateId,
             balance: 0,
             bonus: 10,
@@ -269,3 +272,4 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       next(error);
    }
 }
+
