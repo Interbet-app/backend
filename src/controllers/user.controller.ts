@@ -5,6 +5,7 @@ import { users, wallets, notifications } from "../models";
 import { IUser } from "../interfaces";
 //import axios from "axios";
 import AppError from "../error";
+import logger from "../log";
 
 // const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
 // const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET as string;
@@ -41,6 +42,7 @@ export async function GoogleOAuth(req: Request, res: Response, next: any) {
          if (!user) throw new AppError(500, "Internal server error");
 
          //% creditar os bonus de indicação para o afiliado e o novo usuário
+         logger.info(`User ${user.id} created with affiliateId ${affiliateId}`);
          if (affiliateId) await CrediteBonus(next, affiliateId, user.id!, user.email);
       }
       const token = await Jwt.sign(user.id!, next);
