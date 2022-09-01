@@ -37,6 +37,7 @@ export async function CreateOdd(req: Request, res: Response, next: any) {
          gameId,
          teamId: teamId == -1 ? 0 : teamId,
          name,
+         startPayOut: payout,
          payout,
          maxBetAmount,
          offer,
@@ -62,6 +63,7 @@ export async function UpdateOdd(req: Request, res: Response, next: any) {
       odd.gameId = gameId;
       odd.name = name;
       odd.teamId = teamId;
+      odd.startPayOut = payout;
       odd.payout = payout;
       odd.maxBetAmount = maxBetAmount;
       odd.offer = offer;

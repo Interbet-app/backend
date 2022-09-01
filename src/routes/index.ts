@@ -93,6 +93,7 @@ route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
 route.get("/ranking/bets", AuthUser, Control.UsersBetsRanking);
+route.get("/ranking/athletics", AuthUser, Control.AthleticsRanking);
 route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 
 route.get("/logs", AuthUser, AuthAdmin, Control.ShowLogs);

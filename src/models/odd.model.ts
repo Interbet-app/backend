@@ -9,6 +9,7 @@ export const odds = Database.define<IOddModel>("odds", {
    gameId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: false },
    teamId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
    name: { type: Sequelize.STRING(60), allowNull: false },
+   startPayOut: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
    payout: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    amount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    maxBetAmount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },

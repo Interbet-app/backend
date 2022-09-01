@@ -235,6 +235,15 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
          wallet.bonus += 10;
          wallet.updatedAt = new Date();
          await wallet.save();
+      } else {
+         wallets.create({
+            userId: affiliateId,
+            balance: 0,
+            bonus: 10,
+            score: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+         });
       }
 
       //% notificar o afiliado e o novo usuário
