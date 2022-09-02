@@ -18,14 +18,14 @@ route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Cont
 route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/games", AuthUser, Control.GetGames);
+route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
+route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", AuthUser, Control.GamesAndOdds);
-route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
+route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
 route.get("/games/last/team", AuthUser, Control.TeamLastGames);
 route.get("/games/last/athletic", AuthUser, Control.AthleticLastGames);
-route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
-route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
-route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
+route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
 
 route.get("/odds", AuthUser, Control.GetOdds);
