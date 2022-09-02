@@ -33,7 +33,8 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus))
+         throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
 
       const game = await games.findByPk(odd.gameId);
@@ -48,7 +49,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          const rest = Number(wallet.bonus) - Number(amount);
          if (rest >= 0) {
             percent = 100;
-            wallet.bonus = Number(res);
+            wallet.bonus = Number(wallet.bonus) - Number(amount);
             resAmount = 0;
          } else {
             percent = (Number(wallet.bonus) * 100) / Number(amount);
@@ -122,7 +123,8 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
 
       const Bets = req.body as NewBet[];
       const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
-      if (sumAmount > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (sumAmount > Number(wallet.balance) + Number(wallet.bonus))
+         throw new AppError(400, "Usuário não tem saldo suficiente!");
 
       const oddsIds = Bets.map((bet) => bet.oddId);
       const options = await odds.findAll({ where: { id: { [Op.in]: oddsIds } } });
@@ -165,7 +167,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             const rest = Number(wallet.bonus) - Number(bet.amount);
             if (rest >= 0) {
                percent = 100;
-               wallet.bonus = Number(res);
+               wallet.bonus = Number(wallet.bonus) - Number(bet.amount);
                resAmount = 0;
             } else {
                percent = (Number(wallet.bonus) * 100) / Number(bet.amount);
