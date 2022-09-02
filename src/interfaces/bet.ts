@@ -6,6 +6,7 @@ export interface IBet {
    amount: number;
    status: "pendent" | "completed";
    result: "pendent" | "win" | "lose";
+   bonusPercent: number;
    paid: boolean;
    group?: string;
    createdAt: Date;
@@ -15,4 +16,5 @@ export interface IBet {
 export interface NewBet {
    oddId: number;
    amount: number;
+
 }

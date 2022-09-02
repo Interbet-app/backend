@@ -10,6 +10,7 @@ module.exports = {
          amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          status: { type: DataTypes.ENUM("pendent", "completed"), allowNull: false },
          result: { type: DataTypes.ENUM("pendent", "win", "lose"), allowNull: false },
+         percentIsBonus: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
          group: { type: DataTypes.STRING, allowNull: true, defaultValue: "0" },
          paid: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
          createdAt: DataTypes.DATE,
@@ -21,4 +22,6 @@ module.exports = {
       await queryInterface.dropTable("bets");
    },
 };
+
+
 
