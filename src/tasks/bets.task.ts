@@ -15,7 +15,7 @@ export async function CrediteUserBets() {
             let bonus = 0; //? lucro para bônus
 
             const bonusAmount = Number(aposta.amount) * (Number(aposta.bonusPercent) / 100); //? valor da aposta que é bonus
-            const balanceAmount = Number(aposta.amount) - Number(bonus); //? valor da aposta que é saldo
+            const balanceAmount = Number(aposta.amount) - Number(bonusAmount); //? valor da aposta que é saldo
 
             bonus = bonusAmount * Number(aposta.payout); //? lucro do bonus
             profit = balanceAmount * Number(aposta.payout); //? lucro do saldo
@@ -42,8 +42,8 @@ export async function CrediteUserBets() {
 
             const odd = await odds.findOne({ where: { id: aposta.oddId } });
 
-            let message = `Parabéns, você ganhou R$${profit} reais`;
-            if (bonus > 0) message += `, e R$${bonus} de bônus`;
+            let message = `Parabéns, você ganhou R$${profit.toFixed(2)} reais`;
+            if (bonus > 0) message += `, e R$${bonus.toFixed(2)} de bônus`;
 
             //? criar um notificação para o usuário sobre a vitoria
             await notifications.create({
@@ -131,8 +131,8 @@ export async function CrediteUserBets() {
                });
             }
 
-            let message = `Parabéns, você ganhou R$${profit} reais`;
-            if (bonus > 0) message += `, e R$${bonus} de bônus`;
+            let message = `Parabéns, você ganhou R$${profit.toFixed(2)} reais`;
+            if (bonus > 0) message += `, e R$${bonus.toFixed(2)} de bônus`;
 
             //? criar um notificação para o usuário sobre a vitoria
             await notifications.create({
@@ -149,6 +149,9 @@ export async function CrediteUserBets() {
       logger.error(error);
    }
 }
+
+
+
 
 
 
