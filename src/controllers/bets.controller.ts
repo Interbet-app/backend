@@ -63,28 +63,30 @@ export async function CreateBet(req: Request, res: Response, next: any) {
 
       //% atualizar carteira do usuário
       let resAmount = Number(amount);
-      //? Se o usuário tiver bonus, usar ele primeiro
-      if (wallet.bonus > 0) {
-         const rest = Number(wallet.bonus) - resAmount;
+      //? Se o usuário tiver saldo, usar ele primeiro
+      if (wallet.balance > 0) {
+         const rest = Number(wallet.balance) - resAmount;
          if (rest >= 0) {
-            wallet.bonus = rest;
+            wallet.balance = rest;
             resAmount = 0;
          } else {
-            wallet.bonus = 0;
+            wallet.balance = 0;
             resAmount = Math.abs(rest);
          }
       }
-      wallet.balance = Number(wallet.balance) - resAmount;
+      wallet.bonus = Number(wallet.bonus) - resAmount;
       wallet.updatedAt = new Date();
       await wallet.save();
 
       //! atualizar payout das odds
       const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
       const balances = oddToUpdate.map((odd) => Number(odd.payment));
+      const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
+
       if (balances.length == 2) {
          const newPayout = RefreshOddsPayout(balances);
          oddToUpdate.forEach((odd, index) => {
-            odd.payout = newPayout[index];
+            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index])/2:newPayout[index];
             odd.updatedAt = new Date();
             odd.save();
          });
