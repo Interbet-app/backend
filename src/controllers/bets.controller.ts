@@ -44,20 +44,13 @@ export async function CreateBet(req: Request, res: Response, next: any) {
 
       //! atualizar carteira do usuário
       let percent = 0;
-      let resAmount = Number(amount);
-      if (wallet.bonus > 0) {
-         const rest = Number(wallet.bonus) - Number(amount);
-         if (rest >= 0) {
-            percent = 100;
-            wallet.bonus = Number(wallet.bonus) - Number(amount);
-            resAmount = 0;
-         } else {
-            percent = (Number(wallet.bonus) * 100) / Number(amount);
-            wallet.bonus = 0;
-            resAmount = Math.abs(rest);
-         }
-      }
-      wallet.balance = Number(wallet.balance) - resAmount;
+      const rest = Number(wallet.balance) - Number(amount);
+      if (rest < 0) {
+         percent = (Math.abs(rest) * 100) / Number(amount);
+         wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
+         wallet.balance = 0;
+      } else wallet.balance = rest;
+
       wallet.updatedAt = new Date();
       await wallet.save();
 
@@ -85,10 +78,11 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       //! atualizar payout das odds
       const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
       const balances = oddToUpdate.map((odd) => Number(odd.payment));
+      const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
       if (balances.length == 2) {
          const newPayout = RefreshOddsPayout(balances);
          oddToUpdate.forEach((odd, index) => {
-            odd.payout = newPayout[index];
+            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
             odd.updatedAt = new Date();
             odd.save();
          });
@@ -162,20 +156,12 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
 
          //! atualizar carteira do usuário
          let percent = 0;
-         let resAmount = Number(bet.amount);
-         if (wallet.bonus > 0) {
-            const rest = Number(wallet.bonus) - Number(bet.amount);
-            if (rest >= 0) {
-               percent = 100;
-               wallet.bonus = Number(wallet.bonus) - Number(bet.amount);
-               resAmount = 0;
-            } else {
-               percent = (Number(wallet.bonus) * 100) / Number(bet.amount);
-               wallet.bonus = 0;
-               resAmount = Math.abs(rest);
-            }
-         }
-         wallet.balance = Number(wallet.balance) - resAmount;
+         const rest = Number(wallet.balance) - Number(bet.amount);
+         if (rest < 0) {
+            percent = (Math.abs(rest) * 100) / Number(bet.amount);
+            wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
+            wallet.balance = 0;
+         } else wallet.balance = rest;
          wallet.updatedAt = new Date();
          await wallet.save();
 
@@ -189,10 +175,11 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          //! atualizar payout das odds
          const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
          const balances = oddToUpdate.map((odd) => Number(odd.payment));
+         const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
          if (balances.length == 2) {
             const newPayout = RefreshOddsPayout(balances);
             oddToUpdate.forEach((odd, index) => {
-               odd.payout = newPayout[index];
+               odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
                odd.updatedAt = new Date();
                odd.save();
             });
@@ -261,3 +248,4 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
