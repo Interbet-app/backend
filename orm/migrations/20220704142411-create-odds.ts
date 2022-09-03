@@ -7,6 +7,7 @@ module.exports = {
          gameId: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
          name: { type: DataTypes.STRING(60), allowNull: false },
          teamId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
+         startPayOut: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
          payout: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
          maxBetAmount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
@@ -23,4 +24,5 @@ module.exports = {
       await queryInterface.dropTable("odds");
    },
 };
+
 

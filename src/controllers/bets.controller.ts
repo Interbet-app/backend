@@ -33,13 +33,26 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-      if (parseFloat(amount) > Number(wallet.balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus))
+         throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
 
       const game = await games.findByPk(odd.gameId);
       if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
       if (game.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
-      if (game.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+      if (game.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+
+      //! atualizar carteira do usuário
+      let percent = 0;
+      const rest = Number(wallet.balance) - Number(amount);
+      if (rest < 0) {
+         percent = (Math.abs(rest) * 100) / Number(amount);
+         wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
+         wallet.balance = 0;
+      } else wallet.balance = rest;
+
+      wallet.updatedAt = new Date();
+      await wallet.save();
 
       const bet = await bets.create({
          userId: token.userId,
@@ -48,6 +61,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          payout: odd.payout,
          status: "pendent",
          result: "pendent",
+         bonusPercent: percent,
          group: "0",
          paid: false,
          createdAt: new Date(),
@@ -61,32 +75,14 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       odd.updatedAt = new Date();
       await odd.save();
 
-      //% atualizar carteira do usuário
-      let resAmount = Number(amount);
-      //? Se o usuário tiver saldo, usar ele primeiro
-      if (wallet.balance > 0) {
-         const rest = Number(wallet.balance) - resAmount;
-         if (rest >= 0) {
-            wallet.balance = rest;
-            resAmount = 0;
-         } else {
-            wallet.balance = 0;
-            resAmount = Math.abs(rest);
-         }
-      }
-      wallet.bonus = Number(wallet.bonus) - resAmount;
-      wallet.updatedAt = new Date();
-      await wallet.save();
-
       //! atualizar payout das odds
       const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
       const balances = oddToUpdate.map((odd) => Number(odd.payment));
       const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
-
       if (balances.length == 2) {
          const newPayout = RefreshOddsPayout(balances);
          oddToUpdate.forEach((odd, index) => {
-            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index])/2:newPayout[index];
+            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
             odd.updatedAt = new Date();
             odd.save();
          });
@@ -120,7 +116,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
 
       const Bets = req.body as NewBet[];
-      const sumAmount = Bets.reduce((prev, cur) => prev + cur.amount, 0);
+      const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
       if (sumAmount > Number(wallet.balance) + Number(wallet.bonus))
          throw new AppError(400, "Usuário não tem saldo suficiente!");
 
@@ -137,7 +133,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       const jogos = await games.findAll({ where: { id: { [Op.in]: gameIds } } });
       jogos.forEach((jogo) => {
          if (jogo.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
-         if (jogo.endDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
+         if (jogo.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
       });
 
       //! Verificar se os valores das apostas são menores que o valor máximo de opção
@@ -158,20 +154,14 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          const odd = await odds.findByPk(bet.oddId);
          if (!odd) throw new AppError(404, "Opção não encontrada!");
 
-         //% atualizar carteira do usuário
-         let resAmount = Number(bet.amount);
-         //? Se o usuário tiver bonus, usar ele primeiro
-         if (wallet.bonus > 0) {
-            const rest = Number(wallet.bonus) - resAmount;
-            if (rest >= 0) {
-               wallet.bonus = rest;
-               resAmount = 0;
-            } else {
-               wallet.bonus = 0;
-               resAmount = Math.abs(rest);
-            }
-         }
-         wallet.balance = Number(wallet.balance) - resAmount;
+         //! atualizar carteira do usuário
+         let percent = 0;
+         const rest = Number(wallet.balance) - Number(bet.amount);
+         if (rest < 0) {
+            percent = (Math.abs(rest) * 100) / Number(bet.amount);
+            wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
+            wallet.balance = 0;
+         } else wallet.balance = rest;
          wallet.updatedAt = new Date();
          await wallet.save();
 
@@ -185,11 +175,11 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          //! atualizar payout das odds
          const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
          const balances = oddToUpdate.map((odd) => Number(odd.payment));
+         const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
          if (balances.length == 2) {
             const newPayout = RefreshOddsPayout(balances);
-            console.log("new payout", newPayout);
             oddToUpdate.forEach((odd, index) => {
-               odd.payout = newPayout[index];
+               odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
                odd.updatedAt = new Date();
                odd.save();
             });
@@ -220,6 +210,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             payout: Number(odd.payout),
             status: "pendent",
             result: "pendent",
+            bonusPercent: percent,
             paid: false,
             group: group,
             createdAt: new Date(),
@@ -257,6 +248,4 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
-
 

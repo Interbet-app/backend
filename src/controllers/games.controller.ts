@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, events, odds, games, teams, athletics, rankings } from "../models";
+import { bets, events, odds, games, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
 
@@ -56,7 +56,7 @@ export async function GamesAndOdds(req: Request, res: Response, next: any) {
 }
 export async function CreateGame(req: Request, res: Response, next: any) {
    try {
-      const { eventId, name, status, modality, location, startDate, endDate, winnerCommission } = req.body;
+      const { eventId, name, status, modality, location, startDate, winnerCommission } = req.body;
       const event = await events.findByPk(eventId);
       if (!event) return res.status(404).json({ message: `Evento '${eventId}' não foi encontrado!` });
       const game = await games.create({
@@ -67,7 +67,6 @@ export async function CreateGame(req: Request, res: Response, next: any) {
          location: location,
          winnerCommission: winnerCommission > 0 ? winnerCommission : -1,
          startDate: new Date(startDate),
-         endDate: new Date(endDate),
          createdAt: new Date(),
          updatedAt: new Date(),
       });
@@ -88,7 +87,7 @@ export async function GetGame(req: Request, res: Response, next: any) {
 }
 export async function UpdateGame(req: Request, res: Response, next: any) {
    try {
-      const { gameId, name, eventId, status, modality, location, startDate, endDate } = req.body;
+      const { gameId, name, eventId, status, modality, location, startDate } = req.body;
       const game = await games.findByPk(gameId);
       if (!game) return res.status(404).json({ message: `Jogo '${gameId}' não foi encontrado!` });
 
@@ -98,7 +97,6 @@ export async function UpdateGame(req: Request, res: Response, next: any) {
       game.modality = modality;
       game.location = location;
       game.startDate = new Date(startDate);
-      game.endDate = new Date(endDate);
       game.updatedAt = new Date();
       await game.save();
       res.status(200).json(game as IGame);
@@ -125,16 +123,22 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       if (game.winnerOddId) return res.status(400).json({ message: `Jogo '${gameId}' já foi processado!` });
 
       let options = await odds.findAll({ where: { gameId: gameId } });
-      if (!options) return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${gameId}'!` });
-      
+      if (!options)
+         return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${gameId}'!` });
+
       //? processar a classificação dos times do evento do jogo
       const oddTeams = options.filter((odd) => odd.teamId === teamA.id || odd.teamId === teamB.id);
-      if (oddTeams.length < 2) throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
-      await UpdateRanking(game.eventId, teamA, teamB, next);
+      if (oddTeams.length < 2)
+         throw new AppError(
+            400,
+            `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`
+         );
+      await UpdateRanking(game.eventId, teamA, teamB,game.startDate.toISOString(), next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
-      if (!winnerOdd) return res.status(404).json({ message: `Opção de aposta vencedora '${winnerOddId}' não foi encontrada!` });
+      if (!winnerOdd)
+         return res.status(404).json({ message: `Opção de aposta vencedora '${winnerOddId}' não foi encontrada!` });
 
       //% 2 -> Percorrer todas as opções de aposta do jogo e proibir novas apostas
       options.forEach(async (option) => {
@@ -173,7 +177,7 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function LastGamesTeam(req: Request, res: Response, next: any) {
+export async function TeamLastGames(req: Request, res: Response, next: any) {
    try {
       const { teamId, limit } = req.query;
       let options = await odds.findAll({ where: { teamId: Number(teamId), status: "lock" } });
@@ -205,7 +209,7 @@ export async function LastGamesTeam(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function LastGamesAthletic(req: Request, res: Response, next: any) {
+export async function AthleticLastGames(req: Request, res: Response, next: any) {
    try {
       const { athleticId, teamId, limit } = req.query;
       if (!athleticId && !teamId) throw new AppError(422, "Informe ao menos um parâmetro! athleticId ou teamId");
@@ -223,11 +227,7 @@ export async function LastGamesAthletic(req: Request, res: Response, next: any) 
       const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
       const gamesIds = AthleticsOdds.map((odd) => odd.gameId!);
       const result = await games.findAll({
-         where: {
-            id: {
-               [Op.in]: gamesIds,
-            },
-         },
+         where: { id: { [Op.in]: gamesIds } },
          order: [["updatedAt", "DESC"]],
          limit: limit ? Number(limit) : 5,
       });
@@ -236,8 +236,7 @@ export async function LastGamesAthletic(req: Request, res: Response, next: any) 
       next(error);
    }
 }
-
-async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, next: any) {
+async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: string, next: any) {
    try {
       const event = await events.findByPk(eventId);
       if (!event) throw new AppError(404, "Evento não foi encontrado!");
@@ -296,7 +295,19 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, next
          rankingB.goalDifference += B.goals - A.goals;
          await rankingB.save();
       }
+
+      //% Salvar o resultado do jogo no histórico
+      await gamesHistory.create({
+         date: gameDate,
+         teamA: teamA.name,
+         teamB: teamB.name,
+         scoreA: A.goals,
+         scoreB: B.goals,
+         ref_table: "games",
+         event: event?.name!,
+      });
    } catch (error) {
       next(error);
    }
 }
+

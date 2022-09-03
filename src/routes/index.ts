@@ -18,14 +18,14 @@ route.post("/games/history", AuthUser, AuthAdmin, Middle.CreateGameHistory, Cont
 route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/games", AuthUser, Control.GetGames);
-route.get("/games/full", AuthUser, Control.GamesAndOdds);
-route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
-route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
-route.get("/games/last/team", AuthUser, Control.LastGamesTeam);
-route.get("/games/last/athletic", AuthUser, Control.LastGamesAthletic);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
-route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
+route.get("/games/full", AuthUser, Control.GamesAndOdds);
+route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
+route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
+route.get("/games/last/team", AuthUser, Control.TeamLastGames);
+route.get("/games/last/athletic", AuthUser, Control.AthleticLastGames);
+route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
 route.delete("/games/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteGame);
 
 route.get("/odds", AuthUser, Control.GetOdds);
@@ -92,7 +92,12 @@ route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
+route.get("/ranking/bets", AuthUser, Control.UsersBetsRanking);
+route.get("/ranking/athletics", AuthUser, Control.AthleticsRanking);
 route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
+
+route.get("/logs", AuthUser, AuthAdmin, Control.ShowLogs);
+route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallback);

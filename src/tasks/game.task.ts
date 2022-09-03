@@ -21,7 +21,7 @@ export async function CrediteCommissions() {
             const team = await teams.findOne({ where: { id: odd.teamId } });
             if (!team || team.adminId == null) return;
 
-            const commission = Number(odd.amount) * (Number(jogos[i].winnerCommission)/100);
+            const commission = Number(odd.amount) * (Number(jogos[i].winnerCommission) / 100);
             if (commission > 0) {
                const wallet = await wallets.findOne({ where: { userId: team.adminId } });
                if (!wallet) {
@@ -52,6 +52,21 @@ export async function CrediteCommissions() {
       }
    } catch (error) {
       logger.error("Erro processar comissões do jogo " + error);
+   }
+}
+
+export async function CloseGames() {
+   try {
+      const jogos = await games.findAll({ where: { status: "open" } });
+      jogos.forEach(async (jogo) => {
+         if (jogo.startDate < new Date()) {
+            jogo.status = "pendent";
+            jogo.updatedAt = new Date();
+            await jogo.save();
+         }
+      });
+   } catch (error) {
+      console.log(error);
    }
 }
 

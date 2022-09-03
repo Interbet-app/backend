@@ -10,7 +10,6 @@ export interface IGame {
    goalsA?: number;
    goalsB?: number;
    startDate: Date;
-   endDate: Date;
    createdAt: Date;
    updatedAt: Date;
 }

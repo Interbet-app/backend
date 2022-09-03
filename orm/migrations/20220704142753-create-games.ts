@@ -13,8 +13,7 @@ module.exports = {
          goalsA: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
          goalsB: { type: DataTypes.INTEGER, allowNull: true, defaultValue: 0 },
          location: { type: DataTypes.STRING(60), allowNull: true },
-         startDate: { type: DataTypes.DATE, allowNull: true },
-         endDate: { type: DataTypes.DATE, allowNull: false },
+         startDate: { type: DataTypes.DATE, allowNull: false },
          createdAt: DataTypes.DATE,
          updatedAt: DataTypes.DATE,
       });
@@ -24,9 +23,3 @@ module.exports = {
       await queryInterface.dropTable("games");
    },
 };
-
-
-
-
-
-

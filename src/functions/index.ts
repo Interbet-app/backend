@@ -33,4 +33,3 @@ export const RefreshOddsPayout = (balance: number[]) => {
    });
    return newOdds;
 };
-

@@ -45,6 +45,7 @@ export const create_event = Joi.object({
 export const create_game = Joi.object({
    eventId: Joi.number().required(),
    name: Joi.string().max(40).required(),
+   winnerCommission: Joi.number().required(),
    status: Joi.string().valid("open", "pendent", "closed").required(),
    modality: Joi.string().max(60).required(),
    location: Joi.string().max(60).required(),
@@ -55,6 +56,7 @@ export const update_game = Joi.object({
    gameId: Joi.number().required(),
    eventId: Joi.number().required(),
    name: Joi.string().max(60).required(),
+   winnerCommission: Joi.number().required(),
    status: Joi.string().valid("open", "pendent", "closed").required(),
    modality: Joi.string().max(70).required(),
    location: Joi.string().max(60).required(),
@@ -136,5 +138,6 @@ export const create_game_history = Joi.object({
    scoreB: Joi.number().required(),
    ref_table: Joi.string().optional(),
    date: Joi.date().optional(),
+
 
 });
