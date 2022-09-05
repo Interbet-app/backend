@@ -17,6 +17,8 @@ export class Jwt {
       try {
          let token: Token = { userId };
          logger.info("Signing token ->" + Jwt.privateKey);
+         const processKey = Jwt.privateKey.replace(/\\n/gm, "\n");
+         logger.info("Verifying processed key ->" + processKey);
          return jwt.sign(token, Jwt.privateKey, { expiresIn: Jwt.expires, algorithm: "RS512" });
       } catch (error) {
          next(error);
@@ -26,7 +28,9 @@ export class Jwt {
       try {
          logger.info("Verifying token ->" + token);
          logger.info("Verifying key ->" + Jwt.publicKey);
-         const result = jwt.verify(token, Jwt.publicKey, { algorithm: ["RS512"] } as VerifyOptions) as Token;
+         const processKey = Jwt.publicKey.replace(/\\n/gm, "\n");
+         logger.info("Verifying processed key ->" + processKey);
+         const result = jwt.verify(token, processKey, { algorithm: ["RS512"] } as VerifyOptions) as Token;
          return {
             userId: result.userId,
             jwt: token,
@@ -46,4 +50,7 @@ export class Jwt {
       }
    }
 }
+
+
+
 
