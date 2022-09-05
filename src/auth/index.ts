@@ -16,7 +16,7 @@ export class Jwt {
    static async sign(userId: number, next: any) {
       try {
          let token: Token = { userId };
-         logger.info("Signing token ->" + token);
+         logger.info("Signing token ->" + Jwt.privateKey);
          return jwt.sign(token, Jwt.privateKey, { expiresIn: Jwt.expires, algorithm: "RS512" });
       } catch (error) {
          next(error);
@@ -25,6 +25,7 @@ export class Jwt {
    static async verify(token: string, next: any): Promise<Token | null> {
       try {
          logger.info("Verifying token ->" + token);
+         logger.info("Verifying key ->" + Jwt.publicKey);
          const result = jwt.verify(token, Jwt.publicKey, { algorithm: ["RS512"] } as VerifyOptions) as Token;
          return {
             userId: result.userId,
