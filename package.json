@@ -4,9 +4,13 @@
    "description": "",
    "main": "server.js",
    "moduleResolution": "node",
+   "engines": {
+      "node": ">=12.0.0"
+   },
    "scripts": {
       "start": "node -r dotenv/config ./dist/src/server.js",
       "build": "tsc",
+      "production": "npm install && tsc",
       "dev": "ts-node-dev -r dotenv/config src/server.ts",
       "database": "npx sequelize-cli db:create",
       "migrate": "npx sequelize-cli db:migrate",
@@ -54,3 +58,4 @@
       "typescript": "^4.7.4"
    }
 }
+
