@@ -68,6 +68,7 @@ route.put("/user", AuthUser, Control.UserUpdate);
 route.put("/user/profile", AuthUser, Control.UserProfile);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
+route.get("/wallet/balances", AuthUser, AuthAdmin, Control.SumBalances);
 route.post("/wallet", AuthUser, AuthAdmin, Control.CreateWallet);
 route.put("/wallet", AuthUser, AuthAdmin, Middle.UpdateWallet, Control.UpdateWallet);
 
@@ -104,6 +105,4 @@ route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 
 export default route;
-
-
 

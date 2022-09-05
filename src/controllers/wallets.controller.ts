@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import sequelize from "sequelize";
 import { wallets } from "../models";
 import { IWallet } from "../interfaces";
 import { Jwt, Token } from "../auth";
@@ -54,6 +55,20 @@ export async function UpdateWallet(req: Request, res: Response, next: any) {
       wallet.updatedAt = new Date();
       await wallet.save();
       res.status(200).json(wallet as IWallet);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function SumBalances(_req: Request, res: Response, next: any) {
+   try {
+      const data = await wallets.findAll({
+         attributes: [
+            [sequelize.fn("sum", sequelize.col("balance")), "balance"],
+            [sequelize.fn("sum", sequelize.col("bonus")), "bonus"],
+         ],
+      });
+
+      res.status(200).json(data);
    } catch (error) {
       next(error);
    }
