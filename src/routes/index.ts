@@ -20,7 +20,8 @@ route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Game
 route.get("/games", AuthUser, Control.GetGames);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
-route.get("/games/full", AuthUser, Control.GamesAndOdds);
+route.get("/games/full", AuthUser, Control.GamesFilter);
+route.get("/games/filter", AuthUser, Control.GamesFilter);
 route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
 route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
 route.get("/games/last/team", AuthUser, Control.TeamLastGames);
@@ -103,5 +104,6 @@ route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 route.post("/deposits/complete/callback", Control.OpenPixCallback);
 
 export default route;
+
 
 

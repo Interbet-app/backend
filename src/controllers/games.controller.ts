@@ -23,12 +23,30 @@ export async function GameDetails(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GamesAndOdds(req: Request, res: Response, next: any) {
+export async function GamesFilter(req: Request, res: Response, next: any) {
    try {
-      const { modality } = req.query;
-      let data;
-      if (modality) data = await games.findAll({ where: { modality: { [Op.like]: `%${modality}%` } } });
-      else data = await games.findAll();
+      const { modality, category, athleticId, status } = req.query;
+      const gamesIds = [] as number[];
+
+      //? Filtrar os jogos po uma atlética especifica
+      if (athleticId) {
+         const athletic = await athletics.findByPk(Number(athleticId));
+         if (!athletic) return res.status(404).json({ message: `Atlética '${athleticId}' não foi encontrada!` });
+         const times = await teams.findAll({ where: { athleticId: athletic.id } });
+         if (times.length > 0) {
+            const teamsIds = times.map((team) => team.id!);
+            const AthleticsOdds = await odds.findAll({ where: { teamId: { [Op.in]: teamsIds } } });
+            if (AthleticsOdds.length > 0) gamesIds.push(...AthleticsOdds.map((odd) => odd.gameId!));
+         }
+      }
+      const data = await games.findAll({
+         where: {
+            ...(modality ? { modality: { [Op.like]: `%${modality}%` } } : null),
+            ...(category ? { name: { [Op.like]: `%${category}%` } } : null),
+            ...(athleticId && gamesIds.length > 0 ? { id: { [Op.in]: gamesIds } } : null),
+            ...(status ? { status: `${status}` } : null),
+         },
+      });
 
       const result = await odds.findAll();
       const games_odds = data.map((game) => {
@@ -133,7 +151,7 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
             400,
             `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`
          );
-      await UpdateRanking(game.eventId, teamA, teamB,game.startDate.toISOString(), next);
+      await UpdateRanking(game.eventId, teamA, teamB, game.startDate.toISOString(), next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
@@ -310,4 +328,3 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
       next(error);
    }
 }
-

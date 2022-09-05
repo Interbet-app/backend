@@ -4,7 +4,6 @@ import logger from "./log";
 import dotenv from "dotenv";
 import { TaskProcessor } from "./tasks/processor";
 import { WsSocket } from "./api-ws";
-import { setInterval } from "timers";
 
 //Carregar variáveis de ambiente
 dotenv.config();
