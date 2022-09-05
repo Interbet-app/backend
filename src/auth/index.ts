@@ -1,12 +1,12 @@
 import { Response } from "express";
 import AppError from "../error";
 import jwt, { VerifyOptions } from "jsonwebtoken";
+import logger from "../log";
 
 export type Token = {
    userId: number;
    jwt?: string;
 };
-
 
 export class Jwt {
    static publicKey = process.env.JWT_RSA_PUBLIC as string;
@@ -16,6 +16,7 @@ export class Jwt {
    static async sign(userId: number, next: any) {
       try {
          let token: Token = { userId };
+         logger.info("Signing token ->" + token);
          return jwt.sign(token, Jwt.privateKey, { expiresIn: Jwt.expires, algorithm: "RS512" });
       } catch (error) {
          next(error);
@@ -23,6 +24,7 @@ export class Jwt {
    }
    static async verify(token: string, next: any): Promise<Token | null> {
       try {
+         logger.info("Verifying token ->" + token);
          const result = jwt.verify(token, Jwt.publicKey, { algorithm: ["RS512"] } as VerifyOptions) as Token;
          return {
             userId: result.userId,
@@ -43,5 +45,4 @@ export class Jwt {
       }
    }
 }
-
 
