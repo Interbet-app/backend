@@ -1,6 +1,6 @@
 import { Model, Optional, DataTypes } from "sequelize";
 import { IRanking } from "../interfaces";
-import Database from "../../orm/sequelize";
+import Database from "../database";
 
 interface RankingCreationAttributes extends Optional<IRanking, "id"> {}
 export interface RankingModel extends Model<IRanking, RankingCreationAttributes>, IRanking {}

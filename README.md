@@ -25,14 +25,12 @@
 ```
 npm install
 ```
-   Configure o arquivo .env com as variáveis de ambiente necessárias para o projeto, após isso execute o comando abaixo para criar o banco de dados:
+   Realize o build do projeto:
 ```
-npm run database
+npm build
 ```
-   Para criar as tabelas execute o comando abaixo:
-```
-npm run migrate
-```
+   Configure um arquivo ".env" com as variáveis de ambiente necessárias para o projeto, tendo como base o arquivo ".env.example".
+   
    Após isso execute o comando abaixo para iniciar o projeto:
 ```
 npm start

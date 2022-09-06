@@ -1,5 +1,5 @@
 import { Model, Optional, DataTypes } from "sequelize";
-import Database from "../../orm/sequelize";
+import Database from "../database";
 import { IWithdrawal } from "../interfaces";
 
 interface CreationAttributes extends Optional<IWithdrawal, "id"> {}

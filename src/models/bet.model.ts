@@ -1,6 +1,6 @@
 import Sequelize, { Model, Optional } from "sequelize";
 import { users } from "./user.model";
-import Database from "../../orm/sequelize";
+import Database from "../database";
 import { IBet } from "../interfaces";
 
 interface CreationAttributes extends Optional<IBet, "id"> {}

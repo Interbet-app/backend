@@ -1,9 +1,10 @@
 {
-	"semi": true,
-	"singleQuote": false,
-	"tabWidth": 3,
-	"useTabs": false,
-	"printWidth": 120,
-	"bracketSameLine": true,
-	"endOfLine": "crlf"
+   "semi": true,
+   "singleQuote": false,
+   "tabWidth": 3,
+   "useTabs": false,
+   "printWidth": 140,
+   "bracketSameLine": true,
+   "tabStyle": "spaces",
+   "endOfLine": "crlf"
 }
