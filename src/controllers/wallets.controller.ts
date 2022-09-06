@@ -61,7 +61,7 @@ export async function UpdateWallet(req: Request, res: Response, next: any) {
 }
 export async function SumBalances(_req: Request, res: Response, next: any) {
    try {
-      const data = await wallets.findAll({
+      const data = await wallets.findOne({
          attributes: [
             [sequelize.fn("sum", sequelize.col("balance")), "balance"],
             [sequelize.fn("sum", sequelize.col("bonus")), "bonus"],
