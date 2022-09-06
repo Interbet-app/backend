@@ -1,5 +1,5 @@
 import api from "./api";
-import Database from "../orm/sequelize";
+import Database from "./database";
 import logger from "./log";
 import dotenv from "dotenv";
 import { TaskProcessor } from "./tasks/processor";

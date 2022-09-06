@@ -1,5 +1,5 @@
 import Sequelize, { Model, Optional } from "sequelize";
-import Database from "../../orm/sequelize";
+import Database from "../database";
 import { IEvent } from "../interfaces";
 
 interface CreationAttributes extends Optional<IEvent, "id"> {}

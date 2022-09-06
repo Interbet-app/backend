@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import Database from "../../orm/sequelize";
+import Database from "../database";
 import { IGameHistory } from "../interfaces";
 
 export interface IGameHistoryModel extends Model<IGameHistory>, IGameHistory {}
