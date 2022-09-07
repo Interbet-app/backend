@@ -47,6 +47,9 @@ export async function CrediteCommissions() {
                   createdAt: new Date(),
                   updatedAt: new Date(),
                });
+
+               jogos[i].winnerCommission = -1;
+               await jogos[i].save();
             }
          }
       }
