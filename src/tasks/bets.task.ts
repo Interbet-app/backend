@@ -52,7 +52,6 @@ export async function CrediteUserBets() {
                message: message + `, na aposta em ${odd?.name}`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             });
          }
 
@@ -141,7 +140,6 @@ export async function CrediteUserBets() {
                message: message + `, na aposta em ${name}`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             });
          }
       });

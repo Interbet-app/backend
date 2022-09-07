@@ -259,13 +259,11 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
             message: "Parabéns, você ganhou R$ 10,00 de bonus por se cadastrar com o link de indicação de um amigo.",
             createdAt: new Date(),
             updatedAt: new Date(),
-            unread: true,
          },
          {
             userId: affiliateId,
             title: "Bônus de indicação",
             message: `Parabéns, você ganhou R$ 10,00 de bônus por indicar o usuário ${userEmail}!`,
-            unread: true,
             createdAt: new Date(),
             updatedAt: new Date(),
          },

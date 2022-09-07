@@ -102,7 +102,8 @@ route.get("/logs", AuthUser, AuthAdmin, Control.ShowLogs);
 route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 
 //- Callback routes
-route.post("/deposits/complete/callback", Control.OpenPixCallback);
+route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
+route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
 export default route;
 

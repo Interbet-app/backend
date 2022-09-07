@@ -71,7 +71,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function OpenPixCallback(req: Request, res: Response, next: any) {
+export async function OpenPixCallbackComplete(req: Request, res: Response, next: any) {
    try {
       const { evento } = req.body;
       if (evento == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
@@ -93,6 +93,15 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       deposit.updatedAt = new Date();
       await deposit.save();
 
+      res.sendStatus(200);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
+   try {
+      const body = req.body;
+      console.log(JSON.stringify(body));
       res.sendStatus(200);
    } catch (error) {
       next(error);

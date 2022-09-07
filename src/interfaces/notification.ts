@@ -3,7 +3,7 @@ export interface INotification {
    userId: number;
    title: string;
    message: string;
-   unread: boolean;
+   unread?: boolean;
    createdAt: Date;
    updatedAt: Date;
 }

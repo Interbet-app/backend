@@ -37,7 +37,6 @@ export async function CrediteCompletedDeposits() {
                message: `Seu depósito de R$ ${deposit.amount} foi confirmado com sucesso!`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             },
          ];
          if (bonus > 0)
@@ -47,7 +46,6 @@ export async function CrediteCompletedDeposits() {
                message: `Você recebeu um bônus de R$ ${bonus} por realizar seu primeiro depósito!`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             });
          //? Criar as notificações necessárias para o usuário
          await notifications.bulkCreate(notification);
