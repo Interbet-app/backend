@@ -71,7 +71,7 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function OpenPixCallback(req: Request, res: Response, next: any) {
+export async function OpenPixCallbackComplete(req: Request, res: Response, next: any) {
    try {
       const { evento } = req.body;
       if (evento == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
@@ -82,12 +82,13 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
 
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
-      
+
       const deposit = await deposits.findOne({ where: { uniqueId: correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${correlationID}`);
       if (status !== "COMPLETED") throw new AppError(400, `Status do pagamento é inválido! ${status}`);
-      if (value != deposit.externalAmount!) throw new AppError(400, `Valor do pagamento inválido, ${value} deve ser igual a salvo no banco ${deposit.externalAmount}`);
-      
+      if (value != deposit.externalAmount!)
+         throw new AppError(400, `Valor do pagamento inválido, ${value} deve ser igual a salvo no banco ${deposit.externalAmount}`);
+
       deposit.externalTransactionId = transactionID;
       deposit.externalStatus = status;
       deposit.updatedAt = new Date();
@@ -98,6 +99,14 @@ export async function OpenPixCallback(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
+   try {
+      const headers = req.headers;
+      const { event, charge } = req.body;
+
+      if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
+      if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
+
 
 export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
    try {

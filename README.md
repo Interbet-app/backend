@@ -17,7 +17,7 @@
 
 ## 📡 Links para referencia
   - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
-  - [Produção](https://api.v1.interbet.app/) - AWS
+  - [Produção](https://api.v2.interbet.app/) - AWS
 
 ## ⚙️ Instalação
    Siga o passo a baixo para poder executar o projeto em sua maquina.

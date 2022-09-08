@@ -11,29 +11,29 @@ export async function CrediteUserBets() {
 
       apostas.forEach(async (aposta) => {
          if (aposta.result === "win") {
-            let profit = 0; //? lucro para saldo
-            let bonus = 0; //? lucro para bônus
+            let balance = 0; //? lucro em saldo da aposta
+            let bonus = 0; //? lucro em bônus da aposta
 
-            const bonusAmount = Number(aposta.amount) * (Number(aposta.bonusPercent) / 100); //? valor da aposta que é bonus
-            const balanceAmount = Number(aposta.amount) - Number(bonusAmount); //? valor da aposta que é saldo
+            const BonusValue = Number(aposta.amount) * (Number(aposta.bonusPercent) / 100); //? valor da aposta que é bonus
+            const BalanceValue = Number(aposta.amount) - Number(BonusValue); //? valor da aposta que é saldo
 
-            bonus = bonusAmount * Number(aposta.payout); //? lucro do bonus
-            profit = balanceAmount * Number(aposta.payout); //? lucro do saldo
+            bonus = BonusValue * Number(aposta.payout); //? lucro do bonus
+            balance = BalanceValue * Number(aposta.payout); //? lucro do saldo
 
-            profit += bonus * 0.25; //? 25% do bonus vira saldo
-            bonus = bonus * 0.75; //? 75% do bonus continua bonus
+            balance += Number(bonus) * 0.25; //? 25% do lucro em bônus vira saldo
+            bonus = Number(bonus) * 0.75; //? 75% do lucro em bônus permanece como bônus
 
-            const wallet = await wallets.findOne({ where: { userId: aposta.userId } });
+            const wallet = await wallets.findOne({ where: { userId: Number(aposta.userId) } });
             if (wallet) {
-               wallet.balance = Number(wallet.balance) + profit;
-               wallet.bonus = Number(wallet.bonus) + bonus;
+               wallet.balance = Number(wallet.balance) + Number(balance);
+               wallet.bonus = Number(wallet.bonus) + Number(bonus);
                wallet.updatedAt = new Date();
                await wallet.save();
             } else {
                wallets.create({
                   userId: aposta.userId,
-                  balance: profit,
-                  bonus: bonus,
+                  balance: Number(balance),
+                  bonus: Number(bonus),
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   score: 0,
@@ -42,17 +42,16 @@ export async function CrediteUserBets() {
 
             const odd = await odds.findOne({ where: { id: aposta.oddId } });
 
-            let message = `Parabéns, você ganhou R$${profit.toFixed(2)} reais`;
-            if (bonus > 0) message += `, e R$${bonus.toFixed(2)} de bônus`;
+            let msg = `Parabéns, você ganhou R$${balance.toFixed(2)} reais`;
+            if (bonus > 0) msg += `, e R$${bonus.toFixed(2)} de bônus`;
 
             //? criar um notificação para o usuário sobre a vitoria
             await notifications.create({
                userId: aposta.userId,
                title: bonus <= 0 ? "Vitória" : "Vitória com Bônus",
-               message: message + `, na aposta em ${odd?.name}`,
+               message: msg + `, na aposta em ${odd?.name}`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             });
          }
 
@@ -63,7 +62,7 @@ export async function CrediteUserBets() {
 
       //% -> processar apostas múltiplas
       apostas = await bets.findAll({
-         where: { paid: false, group: { [Op.not]: "0" } },
+         where: { paid: false, group: { [Op.not]: "0" }, result: { [Op.not]: "pendent" } },
       });
 
       const groups = apostas.map((aposta) => aposta.group);
@@ -108,23 +107,23 @@ export async function CrediteUserBets() {
             let profit = 0; //? lucro para saldo
             let bonus = 0; //? lucro para bônus
 
-            bonus = bonusSum * Number(payoutSum); //? lucro do bonus
-            profit = amountSum * Number(payoutSum); //? lucro do saldo
+            bonus = Number(bonusSum) * Number(payoutSum); //? lucro do bonus
+            profit = Number(amountSum) * Number(payoutSum); //? lucro do saldo
 
-            profit += bonus * 0.25; //? 25% do bonus vira saldo
-            bonus = bonus * 0.75; //? 75% do bonus continua bonus
+            profit += Number(bonus) * 0.25; //? 25% do bonus vira saldo
+            bonus = Number(bonus) * 0.75; //? 75% do bônus continua bônus
 
             const wallet = await wallets.findOne({ where: { userId: userId } });
             if (wallet) {
-               wallet.balance = Number(wallet.balance) + profit;
-               wallet.bonus = Number(wallet.bonus) + bonus;
+               wallet.balance = Number(wallet.balance) + Number(profit);
+               wallet.bonus = Number(wallet.bonus) + Number(bonus);
                wallet.updatedAt = new Date();
                await wallet.save();
             } else {
                wallets.create({
                   userId: userId,
-                  balance: profit,
-                  bonus: bonus,
+                  balance: Number(profit),
+                  bonus: Number(bonus),
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   score: 0,
@@ -141,7 +140,6 @@ export async function CrediteUserBets() {
                message: message + `, na aposta em ${name}`,
                createdAt: new Date(),
                updatedAt: new Date(),
-               unread: true,
             });
          }
       });
@@ -149,9 +147,3 @@ export async function CrediteUserBets() {
       logger.error(error);
    }
 }
-
-
-
-
-
-

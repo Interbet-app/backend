@@ -43,7 +43,6 @@ export async function CrediteCommissions() {
                   userId: team.adminId,
                   title: "Bonificação por vitória",
                   message: `Seu time recebeu R$ ${commission} referente a vitória no jogo ${jogos[i].name}.`,
-                  unread: true,
                   createdAt: new Date(),
                   updatedAt: new Date(),
                });
