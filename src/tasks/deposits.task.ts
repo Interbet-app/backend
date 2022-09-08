@@ -26,7 +26,8 @@ export async function CrediteCompletedDeposits() {
          // % verificar se é o primeiro depósito concluído, caso seja creditar 50% do valor como bônus
          const data = await deposits.count({ where: { userId: deposit.userId, status: "completed" } });
          if (data < 1) bonus = Number(deposit.amount) * 0.5; //! 50% de bonus
-         wallet.balance = Number(wallet.balance) + Number(deposit.amount) + Number(bonus);
+         wallet.balance = Number(wallet.balance) + Number(deposit.amount);
+         wallet.bonus = Number(wallet.bonus) + Number(bonus);
          wallet.updatedAt = new Date();
          await wallet.save();
 

@@ -107,8 +107,16 @@ export async function OpenPixCallbackExpired(req: Request, res: Response, next: 
       if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
       if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
 
+
+export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
+   try {
+      const { event, charge } = req.body;
+      if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
+      if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
+      
+      const Pix = new OpenPix();
       const signature = req.headers["x-openpix-signature"] as string;
-      logger.info("OpenPixCallbackExpired", JSON.stringify(headers), JSON.stringify(req.body));
+      if (!Pix.VerifySignature(req.body, signature, "expire")) throw new AppError(401, "Assinatura HMAC inválida!");
 
       const deposit = await deposits.findOne({ where: { uniqueId: charge.correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${charge.correlationID}`);
@@ -118,6 +126,7 @@ export async function OpenPixCallbackExpired(req: Request, res: Response, next: 
       deposit.externalQrCode = "";
       deposit.externalQrCodeContent = "";
       deposit.externalUrl = "";
+      deposit.status = "canceled";
       deposit.updatedAt = new Date();
       await deposit.save();
 
