@@ -82,12 +82,13 @@ export async function OpenPixCallbackComplete(req: Request, res: Response, next:
 
       const Pix = new OpenPix();
       if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
-      
+
       const deposit = await deposits.findOne({ where: { uniqueId: correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${correlationID}`);
       if (status !== "COMPLETED") throw new AppError(400, `Status do pagamento é inválido! ${status}`);
-      if (value != deposit.externalAmount!) throw new AppError(400, `Valor do pagamento inválido, ${value} deve ser igual a salvo no banco ${deposit.externalAmount}`);
-      
+      if (value != deposit.externalAmount!)
+         throw new AppError(400, `Valor do pagamento inválido, ${value} deve ser igual a salvo no banco ${deposit.externalAmount}`);
+
       deposit.externalTransactionId = transactionID;
       deposit.externalStatus = status;
       deposit.updatedAt = new Date();
@@ -100,11 +101,28 @@ export async function OpenPixCallbackComplete(req: Request, res: Response, next:
 }
 export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
    try {
-      const body = req.body;
-      console.log(JSON.stringify(body));
+      const headers = req.headers;
+      const { event, charge } = req.body;
+
+      if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
+      if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
+
+      const signature = req.headers["x-openpix-signature"] as string;
+      logger.info("OpenPixCallbackExpired", JSON.stringify(headers), JSON.stringify(req.body));
+
+      const deposit = await deposits.findOne({ where: { uniqueId: charge.correlationID } });
+      if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${charge.correlationID}`);
+
+      deposit.externalStatus = charge.status;
+      deposit.externalTransactionId = charge.transactionID;
+      deposit.externalQrCode = "";
+      deposit.externalQrCodeContent = "";
+      deposit.externalUrl = "";
+      deposit.updatedAt = new Date();
+      await deposit.save();
+
       res.sendStatus(200);
    } catch (error) {
       next(error);
    }
 }
-

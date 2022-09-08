@@ -33,7 +33,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus))
+      if (parseFloat(amount) > (Number(wallet.balance) + Number(wallet.bonus)))
          throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
 
@@ -49,19 +49,18 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          percent = (Math.abs(rest) * 100) / Number(amount);
          wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
          wallet.balance = 0;
-      } else wallet.balance = rest;
-
+      } else wallet.balance = Number(rest);
       wallet.updatedAt = new Date();
       await wallet.save();
 
       const bet = await bets.create({
          userId: token.userId,
          oddId: oddId,
-         amount: amount,
-         payout: odd.payout,
+         amount: Number(amount),
+         payout: Number(odd.payout),
          status: "pendent",
          result: "pendent",
-         bonusPercent: percent,
+         bonusPercent: Number(percent),
          group: "0",
          paid: false,
          createdAt: new Date(),
@@ -161,7 +160,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             percent = (Math.abs(rest) * 100) / Number(bet.amount);
             wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
             wallet.balance = 0;
-         } else wallet.balance = rest;
+         } else wallet.balance = Number(rest);
          wallet.updatedAt = new Date();
          await wallet.save();
 
@@ -210,7 +209,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             payout: Number(odd.payout),
             status: "pendent",
             result: "pendent",
-            bonusPercent: percent,
+            bonusPercent: Number(percent),
             paid: false,
             group: group,
             createdAt: new Date(),
