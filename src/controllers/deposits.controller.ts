@@ -99,14 +99,6 @@ export async function OpenPixCallbackComplete(req: Request, res: Response, next:
       next(error);
    }
 }
-export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
-   try {
-      const headers = req.headers;
-      const { event, charge } = req.body;
-
-      if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
-      if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
-
 
 export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
    try {
