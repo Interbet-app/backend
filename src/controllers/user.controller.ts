@@ -21,6 +21,15 @@ export async function GetUser(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function GetAllUsers(_req: Request, res: Response, next: any) {
+   try {
+      const accounts = await users.findAll();
+      const response = accounts.map((account) => account as IUser);
+      res.status(200).json(response);
+   } catch (error) {
+      next(error);
+   }
+}
 export async function GoogleOAuth(req: Request, res: Response, next: any) {
    try {
       const { affiliateId } = req.body;
@@ -274,4 +283,3 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       next(error);
    }
 }
-
