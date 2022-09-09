@@ -195,6 +195,7 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 export async function UserProfile(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
@@ -203,10 +204,10 @@ export async function UserProfile(req: Request, res: Response, next: any) {
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
 
       if (document && user.document != null)
-         return res
-            .status(401)
-            .json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
+         return res.status(401).json({ message: "Você já cadastrou um CPF, para altera-lo entre em contato com o suporte!" });
       if (document) {
+         document.replace(".", "");
+         document.replace("-", "");
          const validator = new RegExp(/^[0-9]{11}$/);
          if (!validator.test(document)) return res.status(401).json({ message: "CPF inválido" });
          const search = await users.findOne({ where: { document } });
