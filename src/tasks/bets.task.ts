@@ -5,14 +5,14 @@ import logger from "../log";
 export async function CrediteUserBets() {
    try {
       //% 1-> processar apostas únicas
-      const apostas = await bets.findAll({ where: { paid: false, result: { [Op.not]: "pendent" }, group: "0" }});
+      const apostas = await bets.findAll({ where: { paid: false, result: { [Op.not]: "pendent" }, group: "0" } });
       const usersIds = [] as number[];
 
       apostas.forEach(async (aposta: IBetModel) => {
-         if (aposta.result === "win") {
-            if (usersIds.indexOf(aposta.userId) === -1) {
-               usersIds.push(aposta.userId);
+         if (usersIds.indexOf(aposta.userId) === -1) {
+            usersIds.push(aposta.userId);
 
+            if (aposta.result === "win") {
                let balance = 0; //? lucro em saldo da aposta
                let bonus = 0; //? lucro em bônus da aposta
 
@@ -55,11 +55,10 @@ export async function CrediteUserBets() {
                   updatedAt: new Date(),
                });
             }
+            aposta.paid = true;
+            aposta.updatedAt = new Date();
+            await aposta.save();
          }
-
-         aposta.paid = true;
-         aposta.updatedAt = new Date();
-         await aposta.save();
       });
 
       // //% -> processar apostas múltiplas
