@@ -8,8 +8,8 @@ export const rankings = Database.define<RankingModel>(
    "rankings",
    {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      eventId: { type: DataTypes.INTEGER, allowNull: false },
-      teamId: { type: DataTypes.INTEGER, allowNull: false },
+      eventId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+      teamId: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
       name: { type: DataTypes.STRING(60), allowNull: false },
       score: { type: DataTypes.INTEGER, allowNull: false },
       wins: { type: DataTypes.INTEGER, allowNull: false },
@@ -21,4 +21,3 @@ export const rankings = Database.define<RankingModel>(
    },
    { timestamps: false }
 );
-

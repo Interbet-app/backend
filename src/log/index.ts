@@ -11,6 +11,7 @@ const logger = winston.createLogger({
    transports: [
       new winston.transports.File({ filename: "logs/error.log", level: "error" }),
       new winston.transports.File({ filename: "logs/info.log", level: "info" }),
+      new winston.transports.File({ filename: "logs/wallet.log", level: "warn" }),
    ],
 });
 
@@ -30,3 +31,4 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export default logger;
+

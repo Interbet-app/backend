@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import sequelize, { Op } from "sequelize";
 import { athletics, wallets, teams, odds, bets, games } from "../models";
 import { IBet, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
@@ -33,8 +33,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-      if (parseFloat(amount) > (Number(wallet.balance) + Number(wallet.bonus)))
-         throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
 
       const game = await games.findByPk(odd.gameId);
@@ -116,8 +115,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
 
       const Bets = req.body as NewBet[];
       const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
-      if (sumAmount > Number(wallet.balance) + Number(wallet.bonus))
-         throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (sumAmount > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
 
       const oddsIds = Bets.map((bet) => bet.oddId);
       const options = await odds.findAll({ where: { id: { [Op.in]: oddsIds } } });
@@ -125,8 +123,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
 
       //! Evitar apostas em duas opções de um mesmo jogo, ja que não haveria chance de vitória neste caso
       const removeDuplicateGames = [...new Set(gameIds)];
-      if (gameIds.length != removeDuplicateGames.length)
-         throw new AppError(400, "Voce não pode apostar em duas opções do mesmo jogo!");
+      if (gameIds.length != removeDuplicateGames.length) throw new AppError(400, "Voce não pode apostar em duas opções do mesmo jogo!");
 
       //! Verificar se os jogos estão abertos
       const jogos = await games.findAll({ where: { id: { [Op.in]: gameIds } } });
@@ -228,9 +225,16 @@ export async function DeleteBet(req: Request, res: Response, next: any) {
       const betId = parseInt(req.params.id, 10);
       await bets.destroy({ where: { id: betId } });
       res.status(200).json({
-         message:
-            "Aposta excluída com sucesso!, mas o saldo do usuário não foi retornado! se necessário, pode ser feito manualmente.",
+         message: "Aposta excluída com sucesso!, mas o saldo do usuário não foi retornado! se necessário, pode ser feito manualmente.",
       });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function GetBetsSum(_req: Request, res: Response, next: any) {
+   try {
+      const amount = await bets.sum("amount");
+      res.status(200).json({ amount: amount });
    } catch (error) {
       next(error);
    }
@@ -247,4 +251,3 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-

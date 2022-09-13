@@ -147,10 +147,9 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       //? processar a classificação dos times do evento do jogo
       const oddTeams = options.filter((odd) => odd.teamId === teamA.id || odd.teamId === teamB.id);
       if (oddTeams.length < 2)
-         throw new AppError(
-            400,
-            `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`
-         );
+         throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
+      
+      //? processar a classificação dos times do evento do jogo
       await UpdateRanking(game.eventId, teamA, teamB, game.startDate.toISOString(), next);
 
       //% 1 -> Obter a odd ganhadora
@@ -263,6 +262,17 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
       const teamB = await teams.findByPk(B.id);
       if (!teamA || !teamB) throw new AppError(404, "Times não foram encontrados!");
 
+      //% Salvar o resultado do jogo no histórico
+      await gamesHistory.create({
+         date: gameDate,
+         teamA: teamA.name,
+         teamB: teamB.name,
+         scoreA: A.goals,
+         scoreB: B.goals,
+         ref_table: "games",
+         event: event?.name!,
+      });
+
       const rankingA = await rankings.findOne({ where: { eventId, teamId: A.id } });
       const rankingB = await rankings.findOne({ where: { eventId, teamId: B.id } });
 
@@ -313,17 +323,6 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
          rankingB.goalDifference += B.goals - A.goals;
          await rankingB.save();
       }
-
-      //% Salvar o resultado do jogo no histórico
-      await gamesHistory.create({
-         date: gameDate,
-         teamA: teamA.name,
-         teamB: teamB.name,
-         scoreA: A.goals,
-         scoreB: B.goals,
-         ref_table: "games",
-         event: event?.name!,
-      });
    } catch (error) {
       next(error);
    }

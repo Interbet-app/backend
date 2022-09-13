@@ -7,6 +7,7 @@ const route = Router();
 
 route.get("/bets", AuthUser, AuthAdmin, Control.GetBets);
 route.post("/bets", AuthUser, Control.CreateBet);
+route.get("/bets/amounts", AuthUser, AuthAdmin, Control.GetBetsSum);
 route.post("/bets/multiple", Middle.MultipleBets, AuthUser, Control.CreateMultipleBets);
 route.get("/bets/me", AuthUser, Control.GetUserBets);
 route.get("/bets/game/:id/", Middle.ID, AuthUser, AuthAdmin, Control.GetBetsByGame);
@@ -107,4 +108,3 @@ route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
 export default route;
-
