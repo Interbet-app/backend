@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { odds, teams, games, athletics } from "../models";
-import { IAthletic, IGame } from "../interfaces";
+import { athletics, teams } from "../models";
+import { IAthletic } from "../interfaces";
 import { S3 } from "../aws";
 import { File } from "../functions";
 import multer from "multer";
@@ -39,12 +39,10 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
                throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
             const check = File.BreakMimetype(req.file.mimetype);
-            if (check?.type !== "image")
-               throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
+            if (check?.type !== "image") throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
             const bucket = new S3();
-            const file_bucket_name =
-               `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
+            const file_bucket_name = `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
             const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
             //! Se o upload para o bucket na aws falhou, retorna o erro
@@ -91,8 +89,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          const result = await bucket.DeleteFile(to_delete);
          if (result instanceof AppError) throw result;
 
-         const file_bucket_name =
-            `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
+         const file_bucket_name = `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
          const result2 = await bucket.UploadFile(req.file.buffer, file_bucket_name);
          if (result2 instanceof AppError) throw result2;
 
@@ -125,5 +122,24 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function SetAthleticAndTeamAdminId(req: Request, res: Response, next: any) {
+   try {
+      const { teamId, athleticId, adminId } = req.body;
+      if (!teamId) throw new AppError(422, "Id do time é obrigatório!");
+      if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
+      if (!adminId) throw new AppError(422, "Id do administrador é obrigatório!");
 
+      const team = await teams.findByPk(teamId);
+      if (!team) throw new AppError(404, "Time não encontrado!");
+      const athletic = await athletics.findByPk(athleticId);
+      if (!athletic) throw new AppError(404, "Atlética não encontrada!");
+      athletic.adminId = adminId;
+      team.adminId = adminId;
+      await team.save();
+      await athletic.save();
+      res.status(200).json({ message: "Administrador definido com sucesso!" });
+   } catch (error) {
+      next(error);
+   }
+}
 
