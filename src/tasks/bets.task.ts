@@ -28,11 +28,11 @@ export async function CrediteUserBets() {
 
             bonus = BonusValue * Number(bet.payout); //? lucro total do bonus
             profit = BalanceValue * Number(bet.payout); //? lucro total do saldo
-            profit += (Number(BonusValue) - Number(bonus)) * 0.25; //? 25% do lucro em bônus vira saldo
-            bonus = (Number(BonusValue) - Number(bonus)) * 0.75; //? 75% do lucro em bônus permanece como bônus
+            profit += (Number(bonus) - Number(BonusValue)) * 0.25; //? 25% do lucro em bônus vira saldo
+            bonus = (Number(bonus) - Number(BonusValue)) * 0.75; //? 75% do lucro em bônus permanece como bônus
 
             //? memorizar atualização de saldo do usuário
-            logger.warn(`Usuário ${bet.userId} ganhou ${profit} de saldo e ${bonus} de bonus na aposta ${bet.id}`);
+            logger.warn(`Usuário ${bet.userId} ganhou ${profit} de saldo e ${bonus} de bonus na aposta de ID ${bet.id}`);
             const index = WALLETS.findIndex((wallet) => wallet.userId === bet.userId);
             if (index === -1) WALLETS.push({ userId: bet.userId, balance: profit, bonus });
             else {
@@ -87,8 +87,8 @@ export async function CrediteUserBets() {
 
             bonus = Number(bonusSum) * Number(payoutSum); //? lucro + bônus
             profit = Number(amountSum) * Number(payoutSum); //? lucro + saldo * payout
-            profit += (Number(bonusSum) - Number(bonus)) * 0.25; //? 25% do lucro no bônus vira saldo
-            bonus = Number(bonusSum) - Number(bonus) * 0.75; //? 75% do lucro no bônus continua bônus
+            profit += (Number(bonus) - Number(bonusSum)) * 0.25; //? 25% do lucro no bônus vira saldo
+            bonus = (Number(bonus) - Number(bonusSum)) * 0.75; //? 75% do lucro no bônus continua bônus
 
             //? memorizar atualização de saldo do usuário
             logger.warn(`Usuário ${userId} ganhou ${profit} de saldo e ${bonus} de bônus na aposta múltipla do grupo ${group}`);

@@ -66,6 +66,7 @@ route.delete("/adds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAdds);
 
 route.get("/user", AuthUser, Control.GetUser);
 route.get("/user/all", AuthUser, AuthAdmin, Control.GetAllUsers);
+route.post("/user/athletic/admin", AuthUser, AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
 route.put("/user/profile", AuthUser, Control.UserProfile);
 
