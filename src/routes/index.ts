@@ -104,6 +104,10 @@ route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 route.get("/logs", AuthUser, AuthAdmin, Control.ShowLogs);
 route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 
+//- Feedback
+route.get("/feedback", AuthUser, AuthAdmin, Control.GetAllFeedbacks);
+route.post("/feedback", AuthUser, Control.CreateFeedback);
+
 //- Callback routes
 route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
