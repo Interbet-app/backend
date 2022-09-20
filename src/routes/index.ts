@@ -80,27 +80,33 @@ route.post("/facebook/oauth", Middle.FacebookOAuthSchema, Control.FacebookOAuth)
 route.post("/instagram/oauth", Middle.InstagramOAuthSchema, Control.InstagramOAuth);
 route.get("/logout", AuthUser, Control.Logout);
 
+//- Notificações
 route.get("/notifications", AuthUser, Control.UserNotifications);
 route.put("/notifications/:id/", Middle.ID, AuthUser, Control.NotificationMarkAsRead);
 route.delete("/notifications/:id/", Middle.ID, AuthUser, Control.NotificationDelete);
 
+//- Administração
 route.get("/maintenances/me", AuthUser, Control.UserMaintenances);
 route.get("/maintenances", AuthUser, AuthAdmin, Control.GetMaintenances);
 route.get("/maintenances/:group/", AuthUser, AuthAdmin, Control.FindGroupMaintenances);
 route.post("/maintenances", AuthUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteMaintenance);
 
+//-Depósitos
 route.get("/deposits", AuthUser, Control.UserDeposits);
 route.get("/deposits/:id/", Middle.ID, AuthUser, Control.UserDepositDetails);
 route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
 
+//-Retiradas
 route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
 route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
+//- Classificações
 route.get("/ranking/bets", AuthUser, Control.UsersBetsRanking);
 route.get("/ranking/athletics", AuthUser, Control.AthleticsRanking);
 route.get("/ranking/:id/", Middle.ID, AuthUser, Control.EventRanking);
 
+//- Logs
 route.get("/logs", AuthUser, AuthAdmin, Control.ShowLogs);
 route.post("/logs/flush", AuthUser, AuthAdmin, Control.FlushLogs);
 

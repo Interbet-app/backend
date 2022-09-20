@@ -17,9 +17,8 @@ export async function CreateFeedback(req: Request, res: Response, next: any) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const { message } = req.body;
-
       if (!message) throw new AppError(422, "Mensagem é obrigatória");
-      if (message.length < 50) throw new AppError(422, "Mensagem deve ter no mínimo 50 caracteres");
+
       const feedback = await feedbacks.create({
          userId: token.userId,
          message,
