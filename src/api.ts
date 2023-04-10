@@ -25,7 +25,7 @@ api.use("/", (_req: Request, res: Response) => {
 });
 
 //Captura e processa os erros
-api.use((error: Error, _req: Request, res: Response, _next: any) => {
+api.use((error: Error | any, _req: Request, res: Response, _next: any) => {
    try {
       if (error instanceof AppError) {
          if (typeof error.message === "string") logger.error(error.message);
@@ -35,8 +35,11 @@ api.use((error: Error, _req: Request, res: Response, _next: any) => {
             error: error.error?.message,
          });
       } else {
+         console.log(error?.response.data.code);
          if (error.message.includes("jwt expired")) {
             res.status(403).json({ message: "Authorization token is expired!" });
+         } else if (error.response.data.code === "service_error") {
+            res.status(422).json({ message: "Invalid Token!" });
          } else {
             if (typeof error.message === "string") logger.error(error.message);
             else logger.error(JSON.stringify(error.message));
@@ -49,5 +52,4 @@ api.use((error: Error, _req: Request, res: Response, _next: any) => {
 });
 
 export default api;
-
 

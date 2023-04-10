@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
-import { athletics, wallets, teams, odds, bets, games } from "../models";
+import { athletics, wallets, teams, odds, bets, games, events } from "../models";
 import { IBet, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
+import { placeBet, getBalance, getAccountDetails } from "../services";
 
 export async function GetUserBets(_req: Request, res: Response, next: any) {
    try {
@@ -23,17 +24,25 @@ export async function GetBets(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
 export async function CreateBet(req: Request, res: Response, next: any) {
    try {
-      const token = Jwt.getLocals(res, next) as Token;
-      const wallet = await wallets.findOne({ where: { userId: token.userId } });
-      if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
+      // const token = Jwt.getLocals(res, next) as Token;
+      // const wallet = await wallets.findOne({ where: { userId: 310 } });
+      // if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
+
+      // Get Balance
 
       const { oddId, amount } = req.body;
+
+      const userBalance = await getBalance({ userToken: req.user.id });
+
+      const balance = Number(userBalance?.balance) / 100;
+
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-      if (parseFloat(amount) > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (parseFloat(amount) > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
 
       const game = await games.findByPk(odd.gameId);
@@ -41,69 +50,70 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (game.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
       if (game.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
 
-      //! atualizar carteira do usuário
-      let percent = 0;
-      const rest = Number(wallet.balance) - Number(amount);
-      if (rest < 0) {
-         percent = (Math.abs(rest) * 100) / Number(amount);
-         wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
-         wallet.balance = 0;
-      } else wallet.balance = Number(rest);
-      wallet.updatedAt = new Date();
-      await wallet.save();
+      // const bet = await bets.create({
+      //    userId: 1,
+      //    oddId: oddId,
+      //    amount: Number(amount),
+      //    payout: Number(odd.payout),
+      //    status: "pendent",
+      //    result: "pendent",
+      //    bonusPercent: 30,
+      //    group: "0",
+      //    paid: false,
+      //    createdAt: new Date(),
+      //    updatedAt: new Date(),
+      // });
+      // if (!bet) throw new AppError(500, "Aposta não foi criada!");
 
-      const bet = await bets.create({
-         userId: token.userId,
-         oddId: oddId,
+      const response = await placeBet({
          amount: Number(amount),
-         payout: Number(odd.payout),
-         status: "pendent",
-         result: "pendent",
-         bonusPercent: Number(percent),
-         group: "0",
-         paid: false,
-         createdAt: new Date(),
-         updatedAt: new Date(),
+         oddId: Number(oddId),
+         gameId: Number(game.id),
+         oddValue: odd.payout,
       });
-      if (!bet) throw new AppError(500, "Aposta não foi criada!");
 
-      odd.amount = Number(odd.amount) + parseFloat(amount);
-      odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
-      odd.bets = Number(odd.bets) + 1;
-      odd.updatedAt = new Date();
-      await odd.save();
+      // const userBalance = await getBalance({
+      //    userToken: "847737-inter_bet_game-1680806812759",
+      // });
 
-      //! atualizar payout das odds
-      const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
-      const balances = oddToUpdate.map((odd) => Number(odd.payment));
-      const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
-      if (balances.length == 2) {
-         const newPayout = RefreshOddsPayout(balances);
-         oddToUpdate.forEach((odd, index) => {
-            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
-            odd.updatedAt = new Date();
-            odd.save();
-         });
-      }
+      // odd.amount = Number(odd.amount) + parseFloat(amount);
+      // odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
+      // odd.bets = Number(odd.bets) + 1;
+      // odd.updatedAt = new Date();
+      // await odd.save();
 
-      //! Não é odd de empate
-      if (odd.teamId > 0) {
-         const team = await teams.findOne({ where: { id: odd.teamId } });
-         if (team) {
-            const athletic = await athletics.findByPk(team.athleticId);
-            if (athletic && athletic.adminId) {
-               const wallet = await wallets.findOne({ where: { userId: athletic.adminId } });
-               const commission = Number(amount) * 0.01; //! 1% de comissão para a atlética
-               if (wallet) {
-                  wallet.balance = Number(wallet.balance) + Number(commission);
-                  wallet.updatedAt = new Date();
-                  await wallet.save();
-               }
-            }
-         }
-      }
-      res.status(201).json(bet as IBet);
+      // //! atualizar payout das odds
+      // const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
+      // const balances = oddToUpdate.map((odd) => Number(odd.payment));
+      // const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
+      // if (balances.length == 2) {
+      //    const newPayout = RefreshOddsPayout(balances);
+      //    oddToUpdate.forEach((odd, index) => {
+      //       odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
+      //       odd.updatedAt = new Date();
+      //       odd.save();
+      //    });
+      // }
+
+      // //! Não é odd de empate
+      // if (odd.teamId > 0) {
+      //    const team = await teams.findOne({ where: { id: odd.teamId } });
+      //    if (team) {
+      //       const athletic = await athletics.findByPk(team.athleticId);
+      //       if (athletic && athletic.adminId) {
+      //          const wallet = await wallets.findOne({ where: { userId: athletic.adminId } });
+      //          const commission = Number(amount) * 0.01; //! 1% de comissão para a atlética
+      //          if (wallet) {
+      //             wallet.balance = Number(wallet.balance) + Number(commission);
+      //             wallet.updatedAt = new Date();
+      //             await wallet.save();
+      //          }
+      //       }
+      //    }
+      // }
+      res.status(201).json(response);
    } catch (error) {
+      console.log(error);
       next(error);
    }
 }
@@ -251,3 +261,4 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+

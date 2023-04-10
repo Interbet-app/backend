@@ -6,6 +6,11 @@ import { IUser } from "../interfaces";
 //import axios from "axios";
 import AppError from "../error";
 import logger from "../log";
+import { getBalance } from "../services";
+
+export type UserToken = {
+   userId: number;
+};
 
 // const INSTAGRAM_CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID as string;
 // const INSTAGRAM_CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET as string;
@@ -21,6 +26,17 @@ export async function GetUser(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
+
+export async function GetMotionUser(req: Request, res: Response, next: any) {
+   try {
+      const userInfo = await getBalance({ userToken: req.user.id });
+
+      res.status(200).json({ token: userInfo?.token, balance: Number(userInfo?.balance) / 100, name: userInfo?.externalUserID });
+   } catch (error) {
+      next(error);
+   }
+}
+
 export async function GetAllUsers(_req: Request, res: Response, next: any) {
    try {
       const accounts = await users.findAll();
@@ -282,3 +298,4 @@ async function CrediteBonus(next: any, affiliateId: number, userId: number, user
       next(error);
    }
 }
+

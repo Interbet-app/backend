@@ -5,6 +5,14 @@ import { IWallet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import AppError from "../error";
 
+export async function GetMotionWallet(_req: Request, res: Response, next: any) {
+   try {
+      res.status(200).json({ ok: true });
+   } catch (error) {
+      next(error);
+   }
+}
+
 export async function GetWallet(_req: Request, res: Response, next: any) {
    try {
       const token = (await Jwt.getLocals(res, next)) as Token;

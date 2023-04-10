@@ -2,11 +2,12 @@ import { Router } from "express";
 import { AuthGoogle, AuthUser, AuthAdmin } from "../middlewares";
 import * as Control from "../controllers";
 import * as Middle from "../middlewares";
+import { AuthMotionUser } from "../middlewares/motion-auth.middleware";
 
 const route = Router();
 
-route.get("/bets", AuthUser, AuthAdmin, Control.GetBets);
-route.post("/bets", AuthUser, Control.CreateBet);
+route.get("/bets", Control.GetBets);
+route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.get("/bets/amounts", AuthUser, AuthAdmin, Control.GetBetsSum);
 route.post("/bets/multiple", Middle.MultipleBets, AuthUser, Control.CreateMultipleBets);
 route.get("/bets/me", AuthUser, Control.GetUserBets);
@@ -21,10 +22,10 @@ route.delete("/games/history/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Game
 route.get("/games", AuthUser, Control.GetGames);
 route.post("/games", AuthUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
-route.get("/games/full", AuthUser, Control.GamesFilter);
-route.get("/games/filter", AuthUser, Control.GamesFilter);
+route.get("/games/full", AuthMotionUser, Control.GamesFilter);
+route.get("/games/filter", AuthMotionUser, Control.GamesFilter);
 route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthUser, AuthAdmin, Control.ProcessGame);
-route.get("/games/details/:id/", Middle.ID, AuthUser, Control.GameDetails);
+route.get("/games/details/:id/", Middle.ID, AuthMotionUser, Control.GameDetails);
 route.get("/games/last/team", AuthUser, Control.TeamLastGames);
 route.get("/games/last/athletic", AuthUser, Control.AthleticLastGames);
 route.get("/games/:id/", Middle.ID, AuthUser, Control.GetGame);
@@ -37,7 +38,7 @@ route.post("/odds", AuthUser, AuthAdmin, Middle.CreateOdd, Control.CreateOdd);
 route.put("/odds", AuthUser, AuthAdmin, Middle.UpdateOdd, Control.UpdateOdd);
 route.delete("/odds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteOdd);
 
-route.get("/teams", AuthUser, Control.GetTeams);
+route.get("/teams", AuthMotionUser, Control.GetTeams);
 route.get("/teams/:name/", AuthUser, Control.FindTeams);
 route.get("/teams/players/:id/", Middle.ID, AuthUser, Control.TeamPlayers);
 route.get("/teams/info/:id/", Middle.ID, AuthUser, Control.GetTeam);
@@ -50,7 +51,7 @@ route.delete("/teams/players/:id/", Middle.ID, AuthUser, AuthAdmin, Control.Dele
 
 route.get("/players", AuthUser, AuthAdmin, Control.GetPlayers);
 
-route.get("/athletics", AuthUser, Control.GetAthletics);
+route.get("/athletics", AuthMotionUser, Control.GetAthletics);
 route.get("/athletics/:name/", AuthUser, Control.FindAthletics);
 route.post("/athletics", AuthUser, AuthAdmin, Control.CreateAthletic);
 route.put("/athletics", AuthUser, AuthAdmin, Control.UpdateAthletic);
@@ -65,10 +66,11 @@ route.post("/adds", AuthUser, AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthUser, AuthAdmin, Control.DeleteAdds);
 
 route.get("/user", AuthUser, Control.GetUser);
-route.get("/user/all", AuthUser, AuthAdmin, Control.GetAllUsers);
+route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthUser, AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
 route.put("/user/profile", AuthUser, Control.UserProfile);
+route.get("/user/me", AuthMotionUser, Control.GetMotionUser);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
 route.get("/wallet/balances", AuthUser, AuthAdmin, Control.SumBalances);
@@ -119,3 +121,4 @@ route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
 export default route;
+
