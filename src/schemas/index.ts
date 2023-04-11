@@ -25,7 +25,7 @@ export const instagram_oauth = Joi.object().keys({
 
 export const update_user = Joi.object({
    name: Joi.string().max(60).required(),
-   teamId: Joi.number().required(),
+   athleticId: Joi.number().required(),
 });
 
 export const create_maintenance = Joi.object({

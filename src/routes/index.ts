@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuthGoogle, AuthUser, AuthAdmin } from "../middlewares";
+import { AuthUser, AuthAdmin } from "../middlewares";
 import * as Control from "../controllers";
 import * as Middle from "../middlewares";
 import { AuthMotionUser } from "../middlewares/motion-auth.middleware";
@@ -69,7 +69,7 @@ route.get("/user", AuthUser, Control.GetUser);
 route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthUser, AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
-route.put("/user/profile", AuthUser, Control.UserProfile);
+// route.put("/user/profile", AuthUser, Control.UserProfile);
 route.get("/user/me", AuthMotionUser, Control.GetMotionUser);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
@@ -77,9 +77,9 @@ route.get("/wallet/balances", AuthUser, AuthAdmin, Control.SumBalances);
 route.post("/wallet", AuthUser, AuthAdmin, Control.CreateWallet);
 route.put("/wallet", AuthUser, AuthAdmin, Middle.UpdateWallet, Control.UpdateWallet);
 
-route.post("/google/oauth", Middle.GoogleOAuthSchema, AuthGoogle, Control.GoogleOAuth);
-route.post("/facebook/oauth", Middle.FacebookOAuthSchema, Control.FacebookOAuth);
-route.post("/instagram/oauth", Middle.InstagramOAuthSchema, Control.InstagramOAuth);
+// route.post("/google/oauth", Middle.GoogleOAuthSchema, AuthGoogle, Control.GoogleOAuth);
+// route.post("/facebook/oauth", Middle.FacebookOAuthSchema, Control.FacebookOAuth);
+// route.post("/instagram/oauth", Middle.InstagramOAuthSchema, Control.InstagramOAuth);
 route.get("/logout", AuthUser, Control.Logout);
 
 //- Notificações
