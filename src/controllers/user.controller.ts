@@ -197,12 +197,11 @@ export async function GetAllUsers(_req: Request, res: Response, next: any) {
 // }
 export async function UserUpdate(req: Request, res: Response, next: any) {
    try {
-      const { name, totalBet, athleticId } = req.body;
+      const { name, athleticId } = req.body;
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findByPk(token.userId);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
       if (name) user.name = name;
-      if (totalBet) user.totalBet = totalBet;
       if (athleticId) user.athleticId = athleticId;
       user.updatedAt = new Date();
       await user.save();

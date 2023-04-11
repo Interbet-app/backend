@@ -8,7 +8,6 @@ export const users = Database.define<IUserModel>("users", {
    id: { type: Sequelize.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
    name: { type: Sequelize.STRING(60), allowNull: false },
    athleticId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: true },
-   totalBet: { type: Sequelize.FLOAT, allowNull: false, defaultValue: 0 },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
