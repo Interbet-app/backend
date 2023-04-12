@@ -28,16 +28,16 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
       });
       const userIds = ranking.map((pos) => pos.userId);
       const usersRanking = await users.findAll({ where: { id: { [Op.in]: userIds } } });
-      const response = ranking.map(async (pos) => {
+      const response = await Promise.all(ranking.map(async (pos) => {
          const user = usersRanking.find((user) => user.id === pos.userId);
-         const athletic = await athletics.findByPk(user?.athleticId)
+         const athletic = await athletics.findByPk(user?.athleticId);
          return {
             userId: pos.userId,
             username: user?.name,
             picture: athletic?.picture,
             amount: pos.amount,
          };
-      });
+      }));
       res.status(200).json(response);
    } catch (error) {
       next(error);
