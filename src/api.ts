@@ -35,7 +35,6 @@ api.use((error: Error | any, _req: Request, res: Response, _next: any) => {
             error: error.error?.message,
          });
       } else {
-         console.log(error?.response.data.code);
          if (error.message.includes("jwt expired")) {
             res.status(403).json({ message: "Authorization token is expired!" });
          } else if (error.response.data.code === "service_error") {

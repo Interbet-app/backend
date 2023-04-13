@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { getAccountDetails } from "../services";
 import AppError from "../error";
 import axios from "axios";
+import { users } from "../models";
 
 export async function AuthMotionUser(req: Request, _: Response, next: NextFunction) {
    try {
@@ -32,8 +33,19 @@ export async function AuthMotionUser(req: Request, _: Response, next: NextFuncti
          throw new AppError(422, "Invalid token!");
       }
 
+      const user = await users.findOne({
+         where: {
+            name: userInfo.externalUserID,
+         },
+      });
+
+      if (!user) {
+         throw new AppError(400, "User does not exists.");
+      }
+
       req.user = {
-         id: userInfo.token,
+         motionId: userInfo.token,
+         id: user.id,
       };
 
       return next();

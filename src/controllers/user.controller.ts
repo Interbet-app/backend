@@ -30,10 +30,42 @@ export async function GetUser(_req: Request, res: Response, next: any) {
 
 export async function GetMotionUser(req: Request, res: Response, next: any) {
    try {
-      const userInfo = await getBalance({ userToken: req.user.id });
+      const userInfo = await getBalance({ userToken: req.user.motionId });
 
-      res.status(200).json({ token: userInfo?.token, balance: Number(userInfo?.balance) / 100, name: userInfo?.externalUserID });
+      if (!userInfo?.externalUserID) {
+         throw new AppError(400, "Erro");
+      }
+
+      const userExists = await users.findOne({
+         where: {
+            name: userInfo?.externalUserID,
+         },
+      });
+
+      if (!userExists) {
+         console.log("criar");
+         const user = await users.create({
+            name: userInfo.externalUserID,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+         });
+
+         return res.status(200).json({
+            token: userInfo?.token,
+            balance: Number(userInfo?.balance) / 100,
+            name: user.name,
+            athleticId: null,
+         });
+      }
+
+      res.status(200).json({
+         token: userInfo?.token,
+         balance: Number(userInfo?.balance) / 100,
+         name: userExists.name,
+         athleticId: userExists.athleticId,
+      });
    } catch (error) {
+      console.log(error);
       next(error);
    }
 }
@@ -197,11 +229,11 @@ export async function GetAllUsers(_req: Request, res: Response, next: any) {
 // }
 export async function UserUpdate(req: Request, res: Response, next: any) {
    try {
-      const { name, athleticId } = req.body;
-      const token = Jwt.getLocals(res, next) as Token;
-      const user = await users.findByPk(token.userId);
+      const { athleticId } = req.body;
+      // const token = Jwt.getLocals(res, next) as Token;
+      const { id } = req.user;
+      const user = await users.findByPk(id);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
-      if (name) user.name = name;
       if (athleticId) user.athleticId = athleticId;
       user.updatedAt = new Date();
       await user.save();

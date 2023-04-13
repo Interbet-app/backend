@@ -5,12 +5,12 @@ import { IBet, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
-import { placeBet, getBalance, getAccountDetails } from "../services";
+import { placeBet, getBalance } from "../services";
 
-export async function GetUserBets(_req: Request, res: Response, next: any) {
+export async function GetUserBets(req: Request, res: Response, next: any) {
    try {
-      const token = Jwt.getLocals(res, next) as Token;
-      const result = await bets.findAll({ where: { userId: token.userId } });
+      const { id } = req.user;
+      const result = await bets.findAll({ where: { userId: id } });
       res.status(200).json({ bets: result as IBet[] });
    } catch (error) {
       next(error);
@@ -31,11 +31,11 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       // const wallet = await wallets.findOne({ where: { userId: 310 } });
       // if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
 
-      // Get Balance
-
       const { oddId, amount } = req.body;
 
-      const userBalance = await getBalance({ userToken: req.user.id });
+      const { motionId, id } = req.user;
+
+      const userBalance = await getBalance({ userToken: motionId });
 
       const balance = Number(userBalance?.balance) / 100;
 
@@ -50,20 +50,20 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (game.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
       if (game.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
 
-      // const bet = await bets.create({
-      //    userId: 1,
-      //    oddId: oddId,
-      //    amount: Number(amount),
-      //    payout: Number(odd.payout),
-      //    status: "pendent",
-      //    result: "pendent",
-      //    bonusPercent: 30,
-      //    group: "0",
-      //    paid: false,
-      //    createdAt: new Date(),
-      //    updatedAt: new Date(),
-      // });
-      // if (!bet) throw new AppError(500, "Aposta não foi criada!");
+      const bet = await bets.create({
+         userId: Number(id),
+         oddId: oddId,
+         amount: Number(amount),
+         payout: Number(odd.payout),
+         status: "pendent",
+         result: "pendent",
+         bonusPercent: 30,
+         group: "0",
+         paid: false,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+      });
+      if (!bet) throw new AppError(500, "Aposta não foi criada!");
 
       const response = await placeBet({
          amount: Number(amount),
@@ -72,28 +72,24 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          oddValue: odd.payout,
       });
 
-      // const userBalance = await getBalance({
-      //    userToken: "847737-inter_bet_game-1680806812759",
-      // });
+      odd.amount = Number(odd.amount) + parseFloat(amount);
+      odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
+      odd.bets = Number(odd.bets) + 1;
+      odd.updatedAt = new Date();
+      await odd.save();
 
-      // odd.amount = Number(odd.amount) + parseFloat(amount);
-      // odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
-      // odd.bets = Number(odd.bets) + 1;
-      // odd.updatedAt = new Date();
-      // await odd.save();
-
-      // //! atualizar payout das odds
-      // const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
-      // const balances = oddToUpdate.map((odd) => Number(odd.payment));
-      // const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
-      // if (balances.length == 2) {
-      //    const newPayout = RefreshOddsPayout(balances);
-      //    oddToUpdate.forEach((odd, index) => {
-      //       odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
-      //       odd.updatedAt = new Date();
-      //       odd.save();
-      //    });
-      // }
+      //! atualizar payout das odds
+      const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
+      const balances = oddToUpdate.map((odd) => Number(odd.payment));
+      const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
+      if (balances.length == 2) {
+         const newPayout = RefreshOddsPayout(balances);
+         oddToUpdate.forEach((odd, index) => {
+            odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
+            odd.updatedAt = new Date();
+            odd.save();
+         });
+      }
 
       // //! Não é odd de empate
       // if (odd.teamId > 0) {
