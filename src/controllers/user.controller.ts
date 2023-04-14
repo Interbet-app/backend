@@ -7,7 +7,8 @@ import { IUser } from "../interfaces";
 //import axios from "axios";
 import AppError from "../error";
 // import logger from "../log";
-import { getBalance } from "../services";
+import { getAccountDetails, getBalance } from "../services";
+import axios from "axios";
 
 export type UserToken = {
    userId: number;
@@ -30,37 +31,63 @@ export async function GetUser(_req: Request, res: Response, next: any) {
 
 export async function GetMotionUser(req: Request, res: Response, next: any) {
    try {
-      const userInfo = await getBalance({ userToken: req.user.motionId });
+      const authorization = req.headers["authorization"] as string;
+      if (!authorization) throw new AppError(422, "Authorization header is required!");
 
-      if (!userInfo?.externalUserID) {
+      const [_, token] = authorization.split(" ");
+
+      const response = await axios({
+         method: "POST",
+         url: "https://bmapi-staging.salsaomni.com/games/start.do?language=BR&platform=DESKTOP",
+         data: {
+            id: 7164,
+            mode: "REAL",
+            platform: "DESKTOP",
+            language: "BR",
+         },
+         headers: {
+            Authorization: `Bearer ${token}`,
+         },
+      });
+
+      const userInfo = await getAccountDetails({
+         token: response.data.token,
+      });
+
+      if (!userInfo) {
+         throw new AppError(422, "Invalid token!");
+      }
+
+      const userBalanceInfo = await getBalance({ userToken: userInfo.token });
+
+      if (!userBalanceInfo?.externalUserID) {
          throw new AppError(400, "Erro");
       }
 
       const userExists = await users.findOne({
          where: {
-            name: userInfo?.externalUserID,
+            name: userBalanceInfo?.externalUserID,
          },
       });
 
       if (!userExists) {
-         console.log("criar");
          const user = await users.create({
-            name: userInfo.externalUserID,
+            name: userBalanceInfo.externalUserID,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
 
          return res.status(200).json({
-            token: userInfo?.token,
-            balance: Number(userInfo?.balance) / 100,
+            token: userBalanceInfo?.token,
+            balance: Number(userBalanceInfo?.balance) / 100,
             name: user.name,
             athleticId: null,
          });
       }
 
       res.status(200).json({
-         token: userInfo?.token,
-         balance: Number(userInfo?.balance) / 100,
+         token: userBalanceInfo?.token,
+         balance: Number(userBalanceInfo?.balance) / 100,
          name: userExists.name,
          athleticId: userExists.athleticId,
       });
@@ -277,6 +304,18 @@ export async function Logout(_req: Request, res: Response, next: any) {
       const token = Jwt.getLocals(res, next) as Token;
       Cache.set(`${token.userId}`, token.jwt, 1800);
       res.status(200).json({ message: "Logout realizado com sucesso" });
+   } catch (error) {
+      next(error);
+   }
+}
+
+export async function DeleteUser(req: Request, res: Response, next: any) {
+   try {
+      const userId = parseInt(req.params.id, 10);
+      await users.destroy({ where: { id: userId } });
+      res.status(200).json({
+         message: "Usuário excluído com sucesso!",
+      });
    } catch (error) {
       next(error);
    }

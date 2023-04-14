@@ -70,7 +70,8 @@ route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthUser, AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthMotionUser, Control.UserUpdate);
 // route.put("/user/profile", AuthUser, Control.UserProfile);
-route.get("/user/me", AuthMotionUser, Control.GetMotionUser);
+route.get("/user/me", Control.GetMotionUser);
+route.delete("/user/:id/", AuthMotionUser, Control.DeleteUser);
 
 route.get("/wallet", AuthUser, Control.GetWallet);
 route.get("/wallet/balances", AuthUser, AuthAdmin, Control.SumBalances);
