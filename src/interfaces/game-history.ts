@@ -6,7 +6,9 @@ export interface IGameHistory {
    teamB: string;
    scoreA: number;
    scoreB: number;
-   ref_table?: string;
+   group?: string;
+   gender: string;
+   serie: string;
    date?: string;
 
 }

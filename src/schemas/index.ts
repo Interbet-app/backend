@@ -136,7 +136,9 @@ export const create_game_history = Joi.object({
    teamB: Joi.string().required(),
    scoreA: Joi.number().required(),
    scoreB: Joi.number().required(),
-   ref_table: Joi.string().optional(),
+   group: Joi.string().optional(),
+   gender: Joi.string().required(),
+   serie: Joi.string().required(),
    date: Joi.date().optional(),
 
 

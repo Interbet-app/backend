@@ -32,14 +32,16 @@ export async function GamesHistorySearch(req: Request, res: Response, next: any)
 }
 export async function GamesHistoryCreate(req: Request, res: Response, next: any) {
    try {
-      const { event, teamA, teamB, scoreA, scoreB, date, ref_table } = req.body;
+      const { event, teamA, teamB, scoreA, scoreB, date, group, gender, serie } = req.body;
       const newGameHistory = await gamesHistory.create({
          event,
          teamA,
          teamB,
          scoreA,
          scoreB,
-         ref_table,
+         group,
+         serie,
+         gender,
          date,
       });
       res.status(201).json(newGameHistory);
