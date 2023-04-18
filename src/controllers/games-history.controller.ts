@@ -5,9 +5,9 @@ import { IGameHistory } from "../interfaces";
 
 export async function GamesHistory(_req: Request, res: Response, next: any) {
    try {
-      const gamesHistoryList = await gamesHistory.findAll();
-      const response = gamesHistoryList.map((gameHistory: IGameHistory) => gameHistory as IGameHistory);
-      res.status(200).json(response);
+      gamesHistory.findAll()
+         .then(response => res.status(200).json(response))
+         .catch(err => console.log(err))
    } catch (error) {
       next(error);
    }
@@ -32,14 +32,15 @@ export async function GamesHistorySearch(req: Request, res: Response, next: any)
 }
 export async function GamesHistoryCreate(req: Request, res: Response, next: any) {
    try {
-      const { event, teamA, teamB, scoreA, scoreB, date, group, gender, serie } = req.body;
+      const { gameId, event, teamA, teamB, scoreA, scoreB, date, confrontType, gender, serie } = req.body;
       const newGameHistory = await gamesHistory.create({
+         gameId,
          event,
          teamA,
          teamB,
          scoreA,
          scoreB,
-         group,
+         confrontType,
          serie,
          gender,
          date,
