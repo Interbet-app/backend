@@ -264,13 +264,16 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
 
       //% Salvar o resultado do jogo no histórico
       await gamesHistory.create({
+         gameId: eventId,
          date: gameDate,
          teamA: teamA.name,
          teamB: teamB.name,
          scoreA: A.goals,
          scoreB: B.goals,
-         ref_table: "games",
-         event: event?.name!,
+         serie: "A",
+         confrontType: "A",
+         gender: "Masculino",
+         event: "NDU"
       });
 
       const rankingA = await rankings.findOne({ where: { eventId, teamId: A.id } });
