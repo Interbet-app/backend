@@ -43,10 +43,9 @@ export async function AuthGoogle(req: Request, res: Response, next: any) {
 export async function AuthAdmin(req: Request, res: Response, next: any) {
    try {
       const { method, path } = req;
-      const token = Jwt.getLocals(res, next) as Token;
       const { id } = req.user;
       if (!id) throw new AppError(403, "Authorization to admin is invalid!");
-
+      res = res;
       const data = await maintenances.findAll({ where: { userId: id } });
       let filter = path.substring(1, path.indexOf("/", 1));
       if (filter.length < 2) filter = path.substring(1);

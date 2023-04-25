@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuthUser, AuthAdmin } from "../middlewares";
+import { AuthAdmin } from "../middlewares";
 import * as Control from "../controllers";
 import * as Middle from "../middlewares";
 import { AuthMotionUser } from "../middlewares/motion-auth.middleware";
