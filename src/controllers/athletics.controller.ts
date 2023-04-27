@@ -30,10 +30,11 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
          try {
-            const { name, abbreviation, adminId } = req.body;
+            const { name, abbreviation, adminId, instagram } = req.body;
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Foto é obrigatória!");
             if (!name) throw new AppError(422, "Nome é obrigatório!");
+            if (!instagram) throw new AppError(422, "Instagram é obrigatório!");
             if (!abbreviation) throw new AppError(422, "Parâmetro abbreviation é obrigatório!");
 
             if (!File.FilterExtension(["image/png", "image/jpeg", "image/jpg"], req.file.mimetype))
@@ -51,6 +52,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
                name,
                abbreviation,
                picture: result.Location,
+               instagram,
                createdAt: new Date(),
                updatedAt: new Date(),
                adminId: adminId ? adminId : null,
@@ -71,7 +73,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
       try {
          if (error) throw new AppError(400, error.message);
          if (!req.file) throw new AppError(422, "Foto é obrigatória!");
-         const { athleticId, name, abbreviation, adminId } = req.body;
+         const { athleticId, name, abbreviation, adminId, instagram } = req.body;
          if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
          if (!name) throw new AppError(422, "Nome é obrigatório!");
          if (!abbreviation) throw new AppError(422, "Parâmetro abbreviation é obrigatório!");
@@ -96,6 +98,8 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
          athletic.name = name;
          athletic.abbreviation = abbreviation;
          athletic.picture = result2.Location;
+         athletic.instagram = instagram;
+
          if (adminId) athletic.adminId = adminId;
          athletic.updatedAt = new Date();
          await athletic.save();

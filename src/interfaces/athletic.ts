@@ -4,6 +4,7 @@ export interface IAthletic {
    name: string;
    abbreviation: string;
    picture: string;
+   instagram: string;
    createdAt: Date;
    updatedAt: Date;
 }

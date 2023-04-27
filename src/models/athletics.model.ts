@@ -10,6 +10,7 @@ export const athletics = Database.define<IAthleticModel>("athletics", {
    name: { type: Sequelize.STRING(60), allowNull: false },
    abbreviation: { type: Sequelize.STRING(20), allowNull: false },
    picture: { type: Sequelize.STRING, allowNull: true },
+   instagram: { type: Sequelize.STRING, allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });

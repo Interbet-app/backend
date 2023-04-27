@@ -39,13 +39,15 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
          try {
-            const { name, abbreviation, athleticId, location, adminId } = req.body;
+            const { name, abbreviation, athleticId, location, gender, adminId } = req.body;
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Foto do time é obrigatória!");
             if (!name) throw new AppError(422, "Nome do time é obrigatório!");
             if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
             if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
             if (!location) throw new AppError(422, "Localização do time é obrigatório!");
+            if (!gender) throw new AppError(422, "Gênero do time é obrigatório!");
+
 
             const athletic = await athletics.findByPk(athleticId);
             if (!athletic) throw new AppError(404, "Atlética informada não foi encontrada!");
@@ -69,6 +71,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
                picture: result.Location,
                adminId: adminId ? adminId : null,
                location,
+               gender,
                createdAt: new Date(),
                updatedAt: new Date(),
             });
@@ -86,7 +89,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
    const storage = multer.memoryStorage();
    multer({ storage }).single("picture")(req, res, async (error: any) => {
       try {
-         const { teamId, name, abbreviation, location, athleticId, adminId } = req.body;
+         const { teamId, name, abbreviation, location, gender, athleticId, adminId } = req.body;
          if (error) throw new AppError(400, error.message);
          if (!req.file) throw new AppError(422, "Foto do time é obrigatória!");
          if (!teamId) throw new AppError(422, "Id do time é obrigatório!");
@@ -94,6 +97,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
          if (!location) throw new AppError(422, "Localização do time é obrigatória!");
          if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
+         if (!gender) throw new AppError(422, "Gênero é obrigatório!");
          
          const team = await teams.findByPk(teamId);
          if (!team) return res.status(404).json({ message: "Time não encontrado!" });
@@ -117,6 +121,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
          team.abbreviation = abbreviation;
          team.picture = result2.Location;
          team.location = location;
+         team.gender = gender;
          team.athleticId = athleticId;
          if (adminId) team.adminId = adminId;
          team.updatedAt = new Date();
