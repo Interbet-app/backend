@@ -94,8 +94,7 @@ route.delete("/notifications/:id/", Middle.ID, AuthMotionUser, Control.Notificat
 route.get("/maintenances/me", AuthMotionUser, Control.UserMaintenances);
 route.get("/maintenances", AuthMotionUser, AuthAdmin, Control.GetMaintenances);
 route.get("/maintenances/:group/", AuthMotionUser, AuthAdmin, Control.FindGroupMaintenances);
-route.post("/maintenances", Middle.CreateMaintenance, Control.CreateMaintenance);
-// route.post("/maintenances", AuthMotionUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
+route.post("/maintenances", AuthMotionUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.DeleteMaintenance);
 
 //-Depósitos
