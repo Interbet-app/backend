@@ -50,7 +50,7 @@ export async function AuthAdmin(req: Request, res: Response, next: any) {
       let filter = path.substring(1, path.indexOf("/", 1));
       if (filter.length < 2) filter = path.substring(1);
 
-      const roles = data.filter((maintenance: IMaintenance) => maintenance.path == filter);
+      const roles = data.filter((maintenance: IMaintenance) => maintenance.path == filter || maintenance.path == "ALL");
       if (roles.length === 0) throw new AppError(403, `User is not allowed to access the route '${path}'!`);
 
       const allowed = roles.filter((allow) => allow.method === "ALL" || allow.method == method.toUpperCase());
