@@ -269,7 +269,7 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
 }
 export async function GetUsersBetsInfo(req: Request, res: Response, next: any){
    try {
-      const {orderBy} = req.query || "totalBet";
+      const orderBy = req.query.orderBy || "totalBet";
       const result = await bets.findAll({
          attributes: [
            'userId', 
@@ -370,7 +370,7 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
        };
      }));
  
-     res.status(200).json({ gamesTotalAmountBet: result });
+     res.status(200).json(result);
    } catch (error) {
      next(error);
    }
