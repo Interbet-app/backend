@@ -1,5 +1,5 @@
 export interface IGame {
-   id?: number;
+   id: number;
    eventId: number;
    winnerOddId?: number;
    name: string;

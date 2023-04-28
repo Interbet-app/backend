@@ -8,9 +8,11 @@ const route = Router();
 
 route.get("/bets", Control.GetBets);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
-route.get("/bets/amounts", AuthMotionUser, AuthAdmin, Control.GetBetsSum);
+route.get("/bets/amounts", Control.GetBetsSum);
 route.post("/bets/multiple", Middle.MultipleBets, AuthMotionUser, Control.CreateMultipleBets);
+route.get("/bets/:userId/", Control.GetAnyUserBets);
 route.get("/bets/me", AuthMotionUser, Control.GetUserBets);
+
 route.get("/bets/game/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.GetBetsByGame);
 route.delete("/bets/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.DeleteBet);
 
@@ -92,7 +94,8 @@ route.delete("/notifications/:id/", Middle.ID, AuthMotionUser, Control.Notificat
 route.get("/maintenances/me", AuthMotionUser, Control.UserMaintenances);
 route.get("/maintenances", AuthMotionUser, AuthAdmin, Control.GetMaintenances);
 route.get("/maintenances/:group/", AuthMotionUser, AuthAdmin, Control.FindGroupMaintenances);
-route.post("/maintenances", AuthMotionUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
+route.post("/maintenances", Middle.CreateMaintenance, Control.CreateMaintenance);
+// route.post("/maintenances", AuthMotionUser, AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.DeleteMaintenance);
 
 //-Depósitos
@@ -121,5 +124,9 @@ route.post("/feedback", AuthMotionUser, Control.CreateFeedback);
 route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
+//- Dashboard routes
+route.get("/dashboard/users", Control.GetUsersBetsInfo)
+route.get("/dashboard/profit", Control.GetProfit)
+route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame)
 export default route;
 

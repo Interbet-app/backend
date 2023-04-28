@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
 import { athletics, wallets, teams, odds, bets, games, events } from "../models";
-import { IBet, NewBet } from "../interfaces";
+import { IBet, IGame, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
@@ -10,6 +10,16 @@ import { placeBet, getBalance } from "../services";
 export async function GetUserBets(req: Request, res: Response, next: any) {
    try {
       const { id } = req.user;
+      const result = await bets.findAll({ where: { userId: id } });
+      res.status(200).json({ bets: result as IBet[] });
+   } catch (error) {
+      next(error);
+   }
+}
+
+export async function GetAnyUserBets(req: Request, res: Response, next: any) {
+   try {
+      const id = req.params.userId;
       const result = await bets.findAll({ where: { userId: id } });
       res.status(200).json({ bets: result as IBet[] });
    } catch (error) {
@@ -257,4 +267,116 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
+export async function GetUsersBetsInfo(req: Request, res: Response, next: any){
+   try {
+      const {orderBy} = req.query;
+      const result = await bets.findAll({
+         attributes: [
+           'userId', 
+           [sequelize.fn('COUNT', sequelize.col('userId')), 'totalBet'], 
+           [sequelize.fn('SUM', sequelize.cast(sequelize.col('amount'), 'FLOAT')), 'totalAmount'],
+           [sequelize.literal(`
+             CAST(
+               (SELECT SUM(CASE WHEN result = 'win' THEN amount * payout ELSE 0 END)
+               FROM bets AS b
+               WHERE b.userId = bets.userId
+               GROUP BY b.userId
+               ) AS FLOAT
+             )`), 'totalEarn'],
+           [sequelize.literal(`
+           CONCAT(
+            CAST(
+              COALESCE(
+                (SELECT COUNT(*) 
+                FROM bets AS b
+                WHERE b.userId = bets.userId AND result = 'win'
+                GROUP BY b.userId
+                ), 0
+              ) AS FLOAT
+            ),
+            '/',
+            CAST(
+              COALESCE(
+                (SELECT COUNT(*) 
+                FROM bets AS b
+                WHERE b.userId = bets.userId AND result = 'lose'
+                GROUP BY b.userId
+                ), 0
+              ) AS FLOAT
+            )
+          )
+           `), 'winLoseRatio'],
+         ],
+         group: ['userId'],
+         order: sequelize.literal(`${orderBy} DESC`),
+         limit: 10,
+       });
+      
+      
+      
+      
+      
+       
+       
+       
+      res.status(200).json(result);
+   } catch (error) {
+      next(error);
+   }
 
+}
+export async function GetProfit(_req: Request, res: Response, next: any){
+   try{
+      const result = await bets.findAll({
+        attributes: [
+          [sequelize.literal(`
+            SUM(CASE WHEN result = 'win' THEN -amount * payout
+            WHEN result = 'lose' THEN amount
+            ELSE 0 END
+            )`), 'profit']
+        ],
+      });
+      res.status(200).json(result);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function GetTotalAmountBetByGame(_req: Request, res: Response, next: any) {
+   try {
+     const gameData = await games.findAll();
+ 
+     const result = await Promise.all(gameData.map(async (game : IGame) => {
+       const gameId = game.id;
+       const data = await odds.findAll({ where: { gameId: gameId } });
+       if (!data) throw new AppError(404, "Opções não encontradas!");
+       const searchOdds = data.map((odd) => odd.id!);
+ 
+       const betsData: IBet[] = await bets.findAll({ where: { oddId: { [Op.in]: searchOdds } } });
+       const totalAmount = betsData.reduce((acc, bet)=>acc + Number(bet.amount), 0)
+       const profit = betsData.reduce((acc, bet)=>{
+         if(bet.result === "win"){
+            return acc -(Number(bet.amount)*bet.payout)
+         }
+         if(bet.result === "lose"){
+            return acc + Number(bet.amount)
+         }
+
+         return acc
+         }, 0)
+       return {
+         game: game as IGame,
+         totalAmount,
+         profit
+       };
+     }));
+ 
+     res.status(200).json({ gamesTotalAmountBet: result });
+   } catch (error) {
+     next(error);
+   }
+ }
+ 
+ 
+ 
+
+ 
