@@ -13,10 +13,10 @@ export async function GetMaintenances(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UserMaintenances(_req: Request, res: Response, next: any) {
+export async function UserMaintenances(req: Request, res: Response, next: any) {
    try {
-      const token = Jwt.getLocals(res, next) as Token;
-      const result = await maintenances.findAll({ where: { userId: token.userId } });
+      const { id } = req.user;
+      const result = await maintenances.findAll({ where: { userId: id } });
       res.status(200).json(result);
    } catch (error) {
       next(error);
