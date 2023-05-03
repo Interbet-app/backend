@@ -81,12 +81,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          oddId: Number(oddId),
          gameId: Number(game.id),
          oddValue: odd.payout,
-      });
-
-      console.log({
-         userId: id,
-         bet,
-         response,
+         userToken: motionId
       });
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
