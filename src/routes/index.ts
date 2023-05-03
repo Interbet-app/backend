@@ -11,7 +11,7 @@ route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.get("/bets/amounts", Control.GetBetsSum);
 route.post("/bets/multiple", Middle.MultipleBets, AuthMotionUser, Control.CreateMultipleBets);
 route.get("/bets/:userId/", Control.GetAnyUserBets);
-route.get("/bets/me", AuthMotionUser, Control.GetUserBets);
+route.get("/bets/user/me", AuthMotionUser, Control.GetUserBets);
 
 route.get("/bets/game/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.GetBetsByGame);
 route.delete("/bets/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.DeleteBet);
