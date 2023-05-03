@@ -16,3 +16,4 @@ export * from "./rankings.controller";
 export * from "./games-history.controller";
 export * from "./logs.controller";
 export * from "./feedbacks.controller";
+export * from "./awards.controller";

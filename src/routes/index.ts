@@ -127,5 +127,9 @@ route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 route.get("/dashboard/users", Control.GetUsersBetsInfo)
 route.get("/dashboard/profit", Control.GetProfit)
 route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame)
+
+//- Premiações
+route.post('/awards', Control.CreateAward)
+
 export default route;
 
