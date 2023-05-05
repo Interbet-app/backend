@@ -72,7 +72,7 @@ const xmlBody = ({ userToken, amount, transactionId, betId, gameId, oddValue }: 
   </Method>
   </PKT>`;
 
-export async function placeBet({ amount, betId, gameId, oddValue, userId }: ReqBody) {
+export async function placeBet({ amount, betId, gameId, oddValue, userToken }: Omit<XMLBody, "transactionId">) {
    const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
    const amountInCentes = amount * 100;
 
@@ -81,7 +81,7 @@ export async function placeBet({ amount, betId, gameId, oddValue, userId }: ReqB
          endpoint,
          xmlBody({
             amount: amountInCentes,
-            userToken: userId+"-inter_bet_game-1680806812759",
+            userToken,
             transactionId: new Date().valueOf(),
             betId,
             gameId,
@@ -91,7 +91,6 @@ export async function placeBet({ amount, betId, gameId, oddValue, userId }: ReqB
             headers: { "Content-Type": "text/xml" },
          }
       );
-
       const convertedXML = convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as Response;
 
       return convertedXML;
