@@ -1,10 +1,12 @@
 import axios from "axios";
 import { convertXMLtoJson } from "../utils/xml";
+import { String } from "aws-sdk/clients/acm";
 
 interface XMLBody {
    userToken: string;
    transactionId: number;
-   winReferenceNum: string;
+   betId: string;
+   amount: string;
 }
 
 interface Response {
@@ -14,14 +16,14 @@ interface Response {
    alreadyProcessed: string;
 }
 
-const xmlBody = ({ userToken, transactionId, winReferenceNum }: XMLBody) => `<PKT>
+const xmlBody = ({ userToken, transactionId, betId, amount }: XMLBody) => `<PKT>
 <Method Name="AwardWinnings">
   <Auth Login="" Password="" />
   <Params>
     <Token Type="string" Value="${userToken}" />
     <TransactionID Type="int" Value="${transactionId}" />
-    <WinAmount Type="int" Value="3000" />
-    <WinReferenceNum Type="string" Value="${winReferenceNum}" />
+    <WinAmount Type="int" Value="${amount}" />
+    <WinReferenceNum Type="string" Value="${betId}" />
     <GameReference Type="string" Value="INTER_BET_GAMES" />
     <BetMode Type="string" Value="Live" />
     <Description Type="string" Value="Live bet (Multiple)" />
@@ -33,16 +35,16 @@ const xmlBody = ({ userToken, transactionId, winReferenceNum }: XMLBody) => `<PK
 </Method>
 </PKT>`;
 
-export async function awardWinnings({ userToken, winReferenceNum }: Omit<XMLBody, "transactionId">) {
+export async function awardWinnings(betId : string, userId: string, amount: string) {
    const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
-
    try {
       const response = await axios.post(
          endpoint,
          xmlBody({
-            userToken,
+            userToken: userId + "-inter_bet_game-1680806812759",
             transactionId: new Date().valueOf(),
-            winReferenceNum,
+            betId,
+            amount
          }),
          {
             headers: { "Content-Type": "text/xml" },
@@ -50,7 +52,7 @@ export async function awardWinnings({ userToken, winReferenceNum }: Omit<XMLBody
       );
 
       const convertedXML = convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as Response;
-
+         console.log(convertedXML)
       return convertedXML;
    } catch (error) {
       console.log(error);

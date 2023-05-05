@@ -5,7 +5,14 @@ interface XMLBody {
    userToken: string;
    transactionId: number;
    amount: number;
-   oddId: number;
+   betId: number;
+   gameId: number;
+   oddValue: number;
+}
+interface ReqBody {
+   userId: string;
+   amount: number;
+   betId: number;
    gameId: number;
    oddValue: number;
 }
@@ -17,14 +24,14 @@ interface Response {
    alreadyProcessed: string;
 }
 
-const xmlBody = ({ userToken, amount, transactionId, oddId, gameId, oddValue }: XMLBody) => `<PKT>
+const xmlBody = ({ userToken, amount, transactionId, betId, gameId, oddValue }: XMLBody) => `<PKT>
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
       <Token Type="string" Value="${userToken}" />
       <TransactionID Type="int" Value="${transactionId}" />
       <BetAmount Type="int" Value="${amount}" />
-      <BetReferenceNum Type="string" Value="${oddId}" />
+      <BetReferenceNum Type="string" Value="${betId}" />
       <GameReference Type="string" Value="INTER_BET_GAMES" />
       <BetMode Type="string" Value="Live" />
       <Description Type="string" Value="Marek, Wojciech vs. Duncan, Scott: Vencedor: Wojciech Marek" />
@@ -65,7 +72,7 @@ const xmlBody = ({ userToken, amount, transactionId, oddId, gameId, oddValue }: 
   </Method>
   </PKT>`;
 
-export async function placeBet({ amount, oddId, gameId, oddValue }: Omit<XMLBody, "userToken" | "transactionId">) {
+export async function placeBet({ amount, betId, gameId, oddValue, userId }: ReqBody) {
    const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
    const amountInCentes = amount * 100;
 
@@ -74,9 +81,9 @@ export async function placeBet({ amount, oddId, gameId, oddValue }: Omit<XMLBody
          endpoint,
          xmlBody({
             amount: amountInCentes,
-            userToken: "847737-inter_bet_game-1680806812759",
+            userToken: userId+"-inter_bet_game-1680806812759",
             transactionId: new Date().valueOf(),
-            oddId,
+            betId,
             gameId,
             oddValue,
          }),

@@ -5,7 +5,7 @@ import { IBet, IGame, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
-import { placeBet, getBalance } from "../services";
+import { placeBet, getBalance, awardWinnings } from "../services";
 
 export async function GetUserBets(req: Request, res: Response, next: any) {
    try {
@@ -77,8 +77,9 @@ export async function CreateBet(req: Request, res: Response, next: any) {
 
       const response = await placeBet({
          amount: Number(amount),
-         oddId: Number(oddId),
+         betId: Number(bet.id),
          gameId: Number(game.id),
+         userId: String(id),
          oddValue: odd.payout,
       });
 
@@ -374,6 +375,11 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
    } catch (error) {
      next(error);
    }
+ }
+ export async function RunGame(req: Request, res: Response){
+   const {betId, userId, amount} = req.body
+   const response = await awardWinnings(betId, userId, amount);
+   res.status(201).json(response);
  }
  
  

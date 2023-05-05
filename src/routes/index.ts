@@ -9,6 +9,7 @@ const route = Router();
 route.get("/bets", Control.GetBets);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.get("/bets/amounts", Control.GetBetsSum);
+route.post("/bets/runBet", Control.RunGame)
 route.post("/bets/multiple", Middle.MultipleBets, AuthMotionUser, Control.CreateMultipleBets);
 route.get("/bets/:userId/", Control.GetAnyUserBets);
 route.get("/bets/me", AuthMotionUser, Control.GetUserBets);
