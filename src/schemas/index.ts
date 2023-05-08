@@ -47,6 +47,7 @@ export const create_game = Joi.object({
    name: Joi.string().max(40).required(),
    winnerCommission: Joi.number().required(),
    status: Joi.string().valid("open", "pendent", "closed").required(),
+   gender: Joi.string().valid("Masculino", "Feminino").required(),
    modality: Joi.string().max(60).required(),
    location: Joi.string().max(60).required(),
    startDate: Joi.date().required(),
