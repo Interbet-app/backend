@@ -35,7 +35,27 @@ export async function GetBets(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
+export async function PlaceBet(req: Request, res: Response, next: any){
+   try {
+   const {      
+      amount,
+      betId,
+      gameId,
+      oddValue,
+      userToken} = req.body
+   const response = await placeBet({
+      amount,
+      betId,
+      gameId,
+      oddValue,
+      userToken
+   });
+   res.status(201).json(response);
+} catch (error) {
+   console.log(error);
+   next(error);
+}
+}
 export async function CreateBet(req: Request, res: Response, next: any) {
    try {
       // const token = Jwt.getLocals(res, next) as Token;

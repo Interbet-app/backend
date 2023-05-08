@@ -8,6 +8,7 @@ const route = Router();
 
 route.get("/bets", Control.GetBets);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
+route.post("/bets/placeBet", Control.PlaceBet);
 route.get("/bets/amounts", Control.GetBetsSum);
 route.post("/bets/runBet", Control.RunGame)
 route.post("/bets/multiple", Middle.MultipleBets, AuthMotionUser, Control.CreateMultipleBets);
@@ -23,7 +24,7 @@ route.post("/games/history", AuthMotionUser, AuthAdmin, Middle.CreateGameHistory
 route.delete("/games/history/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/games", Control.GetGames);
-route.post("/games", AuthMotionUser, AuthAdmin, Middle.CreateGame, Control.CreateGame);
+route.post("/games", Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthMotionUser, AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", Control.GamesFilter);
 route.get("/games/filter", Control.GamesFilter);
@@ -37,7 +38,7 @@ route.delete("/games/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.Delete
 route.get("/odds", Control.GetOdds);
 route.get("/odds/:id/", Middle.ID, Control.GetOdd);
 route.get("/odds/game/:id/", Middle.ID, Control.OddsByGame);
-route.post("/odds", AuthMotionUser, AuthAdmin, Middle.CreateOdd, Control.CreateOdd);
+route.post("/odds", Middle.CreateOdd, Control.CreateOdd);
 route.put("/odds", AuthMotionUser, AuthAdmin, Middle.UpdateOdd, Control.UpdateOdd);
 route.delete("/odds/:id/", Middle.ID, AuthMotionUser, AuthAdmin, Control.DeleteOdd);
 
