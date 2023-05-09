@@ -7,6 +7,7 @@ export interface IBet {
    status: "pendent" | "completed";
    result: "pendent" | "win" | "lose";
    bonusPercent: number;
+   award: "not" | "pending" | "completed";
    paid: boolean;
    group?: string;
    createdAt: Date;

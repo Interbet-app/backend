@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
-import { athletics, wallets, teams, odds, bets, games, events } from "../models";
+import { athletics, wallets, teams, odds, bets, games } from "../models";
 import { IBet, IGame, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
@@ -17,7 +17,6 @@ export async function GetUserBets(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
 export async function GetAnyUserBets(req: Request, res: Response, next: any) {
    try {
       const id = req.params.userId;
@@ -35,26 +34,21 @@ export async function GetBets(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function PlaceBet(req: Request, res: Response, next: any){
+export async function PlaceBet(req: Request, res: Response, next: any) {
    try {
-   const {      
-      amount,
-      betId,
-      gameId,
-      oddValue,
-      userToken} = req.body
-   const response = await placeBet({
-      amount,
-      betId,
-      gameId,
-      oddValue,
-      userToken
-   });
-   res.status(201).json(response);
-} catch (error) {
-   console.log(error);
-   next(error);
-}
+      const { amount, betId, gameId, oddValue, userToken } = req.body;
+      const response = await placeBet({
+         amount,
+         betId,
+         gameId,
+         oddValue,
+         userToken,
+      });
+      res.status(201).json(response);
+   } catch (error) {
+      console.log(error);
+      next(error);
+   }
 }
 export async function CreateBet(req: Request, res: Response, next: any) {
    try {
@@ -63,11 +57,8 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       // if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
 
       const { oddId, amount } = req.body;
-
       const { motionId, id } = req.user;
-
       const userBalance = await getBalance({ userToken: motionId });
-
       const balance = Number(userBalance?.balance) / 100;
 
       const odd = await odds.findByPk(oddId);
@@ -91,6 +82,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          bonusPercent: 30,
          group: "0",
          paid: false,
+         award: amount > 150 ? "pending" : "not",
          createdAt: new Date(),
          updatedAt: new Date(),
       });
@@ -101,7 +93,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          betId: Number(bet.id),
          gameId: Number(game.id),
          oddValue: odd.payout,
-         userToken: motionId
+         userToken: motionId,
       });
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
@@ -244,6 +236,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             payout: Number(odd.payout),
             status: "pendent",
             result: "pendent",
+            award: bet.amount > 15 ? "pending" : "not",
             bonusPercent: Number(percent),
             paid: false,
             group: group,
@@ -399,13 +392,4 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
    } catch (error) {
       next(error);
    }
- }
- export async function RunGame(req: Request, res: Response){
-   const {betId, userId, amount} = req.body
-   const response = await awardWinnings(betId, userId, amount);
-   res.status(201).json(response);
- }
- 
- 
- 
-
+}

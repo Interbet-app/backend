@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, events, odds, games, teams, athletics, rankings, gamesHistory } from "../models";
+import { bets, events, odds, games, users, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
+import { awardWinnings, lossSignal } from "../services";
 
 export async function GetGames(_req: Request, res: Response, next: any) {
    try {
@@ -141,21 +142,19 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       if (game.winnerOddId) return res.status(400).json({ message: `Jogo '${gameId}' já foi processado!` });
 
       let options = await odds.findAll({ where: { gameId: gameId } });
-      if (!options)
-         return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${gameId}'!` });
+      if (!options) return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${gameId}'!` });
 
       //? processar a classificação dos times do evento do jogo
       const oddTeams = options.filter((odd) => odd.teamId === teamA.id || odd.teamId === teamB.id);
       if (oddTeams.length < 2)
          throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
-      
+
       //? processar a classificação dos times do evento do jogo
       await UpdateRanking(game.eventId, teamA, teamB, game.startDate.toISOString(), next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
-      if (!winnerOdd)
-         return res.status(404).json({ message: `Opção de aposta vencedora '${winnerOddId}' não foi encontrada!` });
+      if (!winnerOdd) return res.status(404).json({ message: `Opção de aposta vencedora '${winnerOddId}' não foi encontrada!` });
 
       //% 2 -> Percorrer todas as opções de aposta do jogo e proibir novas apostas
       options.forEach(async (option) => {
@@ -186,7 +185,15 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
             aposta.status = "completed";
             aposta.result = aposta.oddId === winnerOddId ? "win" : "lose";
             aposta.updatedAt = new Date();
-            await aposta.save();
+
+            aposta.save().then(async () => {
+               const user = await users.findByPk(aposta.userId);
+               if (!user) throw new AppError(404, `Usuário '${aposta.userId}' não foi encontrado para  atualizar BetMotion!`);
+               //! 9 -> atualizar BetMotion
+               const amount = Number(aposta.amount * aposta.payout) * 100;
+               if (aposta.result === "win") await awardWinnings(aposta.id!, user?.betMotionId, amount, game.name);
+               else await lossSignal(aposta.id!, user?.betMotionId, game.name);
+            });
          }
       }
       res.status(200).json({ message: "Resultado do jogo processado com sucesso!" });
@@ -272,8 +279,8 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
          scoreB: B.goals,
          serie: "A",
          confrontType: "A",
-         gender: "Masculino",
-         event: "NDU"
+         gender: teamA.gender,
+         event: event.name,
       });
 
       const rankingA = await rankings.findOne({ where: { eventId, teamId: A.id } });

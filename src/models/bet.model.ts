@@ -14,6 +14,7 @@ export const bets = Database.define<IBetModel>("bets", {
    status: { type: Sequelize.ENUM("pendent", "completed"), allowNull: false },
    result: { type: Sequelize.ENUM("pendent", "win", "lose"), allowNull: false },
    bonusPercent: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
+   award: { type: Sequelize.ENUM("not", "pending", "completed"), allowNull: false, defaultValue: "not" },
    group: { type: Sequelize.STRING, allowNull: true, defaultValue: "0" },
    paid: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
    createdAt: Sequelize.DATE,

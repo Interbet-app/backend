@@ -1,12 +1,13 @@
 import axios from "axios";
-import { convertXMLtoJson } from "../utils/xml";
-import { String } from "aws-sdk/clients/acm";
+import { convertXMLtoJson } from "../../utils/xml";
+import logger from "../../log";
 
 interface XMLBody {
    userToken: string;
    transactionId: number;
-   betId: string;
-   amount: string;
+   betId: number;
+   amount: number;
+   gameName: string;
 }
 
 interface Response {
@@ -16,7 +17,7 @@ interface Response {
    alreadyProcessed: string;
 }
 
-const xmlBody = ({ userToken, transactionId, betId, amount }: XMLBody) => `<PKT>
+const xmlBody = ({ userToken, transactionId, betId, amount, gameName }: XMLBody) => `<PKT>
 <Method Name="AwardWinnings">
   <Auth Login="" Password="" />
   <Params>
@@ -24,7 +25,7 @@ const xmlBody = ({ userToken, transactionId, betId, amount }: XMLBody) => `<PKT>
     <TransactionID Type="int" Value="${transactionId}" />
     <WinAmount Type="int" Value="${amount}" />
     <WinReferenceNum Type="string" Value="${betId}" />
-    <GameReference Type="string" Value="INTER_BET_GAMES" />
+    <GameReference Type="string" Value="${gameName}" />
     <BetMode Type="string" Value="Live" />
     <Description Type="string" Value="Live bet (Multiple)" />
     <ExternalUserID Type="string" Value="asdasd" />
@@ -35,27 +36,28 @@ const xmlBody = ({ userToken, transactionId, betId, amount }: XMLBody) => `<PKT>
 </Method>
 </PKT>`;
 
-export async function awardWinnings(betId : string, userId: string, amount: string) {
+export async function awardWinnings(betId: number, userId: string, amount: number, gameName: string) {
    const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
    try {
-      const response = await axios.post(
-         endpoint,
-         xmlBody({
-            userToken: userId + "-inter_bet_game-1680806812759",
-            transactionId: new Date().valueOf(),
-            betId,
-            amount
-         }),
-         {
-            headers: { "Content-Type": "text/xml" },
-         }
-      );
+      const xml = xmlBody({
+         userToken: userId + "-inter_bet_game-1680806812759",
+         transactionId: new Date().valueOf(),
+         betId,
+         amount,
+         gameName,
+      });
+
+      const response = await axios.post(endpoint, xml, {
+         headers: { "Content-Type": "text/xml" },
+      });
+
+      logger.info("awardWinnings xml send->" + xml);
+      logger.info("awardWinnings response ->" + JSON.stringify(response.data));
 
       const convertedXML = convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as Response;
-         console.log(convertedXML)
+      logger.info("awardWinnings extract from xml ->" + JSON.stringify(convertedXML));
       return convertedXML;
    } catch (error) {
-      console.log(error);
+      logger.info("awardWinnings error ->" + error);
    }
 }
-

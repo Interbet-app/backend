@@ -1,6 +1,6 @@
 import axios from "axios";
-import { checkStatusOfRequest, convertXMLtoJson } from "../utils/xml";
-import AppError from "../error";
+import { checkStatusOfRequest, convertXMLtoJson } from "../../utils/xml";
+import AppError from "../../error";
 
 interface XMLBody {
    token: string;
@@ -59,4 +59,3 @@ export async function getAccountDetails({ token }: XMLBody) {
       console.log(error);
    }
 }
-

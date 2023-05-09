@@ -10,7 +10,6 @@ export async function AuthMotionUser(req: Request, _: Response, next: NextFuncti
       if (!authorization) throw new AppError(422, "Authorization header is required!");
 
       const [_, token] = authorization.split(" ");
-
       const response = await axios({
          method: "POST",
          url: "https://bmapi-staging.salsaomni.com/games/start.do?language=BR&platform=DESKTOP",
@@ -25,23 +24,11 @@ export async function AuthMotionUser(req: Request, _: Response, next: NextFuncti
          },
       });
 
-      const userInfo = await getAccountDetails({
-         token: response.data.token,
-      });
+      const userInfo = await getAccountDetails({ token: response.data.token });
+      if (!userInfo) throw new AppError(422, "Invalid token!");
 
-      if (!userInfo) {
-         throw new AppError(422, "Invalid token!");
-      }
-
-      const user = await users.findOne({
-         where: {
-            name: userInfo.externalUserID,
-         },
-      });
-
-      if (!user) {
-         throw new AppError(400, "User does not exists.");
-      }
+      const user = await users.findOne({ where: { name: userInfo.externalUserID } });
+      if (!user) throw new AppError(400, "User does not exists.");
 
       req.user = {
          motionId: userInfo.token,
@@ -78,4 +65,3 @@ export async function AuthMotionUser(req: Request, _: Response, next: NextFuncti
 //       next(error);
 //    }
 // }
-

@@ -35,7 +35,6 @@ export async function GetMotionUser(req: Request, res: Response, next: any) {
       if (!authorization) throw new AppError(422, "Authorization header is required!");
 
       const [_, token] = authorization.split(" ");
-
       const response = await axios({
          method: "POST",
          url: "https://bmapi-staging.salsaomni.com/games/start.do?language=BR&platform=DESKTOP",
@@ -50,35 +49,24 @@ export async function GetMotionUser(req: Request, res: Response, next: any) {
          },
       });
 
-      const userInfo = await getAccountDetails({
-         token: response.data.token,
-      });
-
-      if (!userInfo) {
-         throw new AppError(422, "Invalid token!");
-      }
+      const userInfo = await getAccountDetails({ token: response.data.token });
+      if (!userInfo) throw new AppError(422, "Invalid token!");
 
       const userBalanceInfo = await getBalance({ userToken: userInfo.token });
+      if (!userBalanceInfo?.externalUserID) throw new AppError(400, "Erro");
 
-      if (!userBalanceInfo?.externalUserID) {
-         throw new AppError(400, "Erro");
-      }
-
-      const userExists = await users.findOne({
-         where: {
-            name: userBalanceInfo?.externalUserID,
-         },
-      });
-
+      const userExists = await users.findOne({ where: { name: userBalanceInfo?.externalUserID } });
       if (!userExists) {
          const user = await users.create({
             name: userBalanceInfo.externalUserID,
+            betMotionId: userInfo.externalUserID,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
 
          return res.status(200).json({
             token: userBalanceInfo?.token,
+            betMotionId: userInfo.externalUserID,
             balance: Number(userBalanceInfo?.balance) / 100,
             name: user.name,
             athleticId: null,
@@ -87,6 +75,7 @@ export async function GetMotionUser(req: Request, res: Response, next: any) {
 
       res.status(200).json({
          token: userBalanceInfo?.token,
+         betMotionId: userInfo.externalUserID,
          balance: Number(userBalanceInfo?.balance) / 100,
          name: userExists.name,
          athleticId: userExists.athleticId,
@@ -368,4 +357,3 @@ export async function DeleteUser(req: Request, res: Response, next: any) {
 //       next(error);
 //    }
 // }
-

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { convertXMLtoJson } from "../utils/xml";
+import { convertXMLtoJson } from "../../utils/xml";
 
 interface XMLBody {
    userToken: string;
@@ -98,4 +98,3 @@ export async function placeBet({ amount, betId, gameId, oddValue, userToken }: O
       console.log(error);
    }
 }
-

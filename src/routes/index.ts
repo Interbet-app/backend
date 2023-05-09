@@ -10,7 +10,6 @@ route.get("/bets", Control.GetBets);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.post("/bets/placeBet", Control.PlaceBet);
 route.get("/bets/amounts", Control.GetBetsSum);
-route.post("/bets/runBet", Control.RunGame)
 route.post("/bets/multiple", Middle.MultipleBets, AuthMotionUser, Control.CreateMultipleBets);
 route.get("/bets/:userId/", Control.GetAnyUserBets);
 route.get("/bets/user/me", AuthMotionUser, Control.GetUserBets);
@@ -131,7 +130,8 @@ route.get("/dashboard/profit", Control.GetProfit)
 route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame)
 
 //- Premiações
-route.post('/awards', Control.CreateAward)
+route.post('/awards/qr-code', Control.GetAwardQrCode);
+route.post('/awards/qr-code/payment', Control.ConfirmAwardPayment);
 
 export default route;
 
