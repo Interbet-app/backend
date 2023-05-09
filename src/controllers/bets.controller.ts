@@ -131,7 +131,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       //       }
       //    }
       // }
-      res.status(201).json(response);
+      res.status(201).json({ ...response, id: bet.id });
    } catch (error) {
       console.log(error);
       next(error);
@@ -393,3 +393,4 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
       next(error);
    }
 }
+
