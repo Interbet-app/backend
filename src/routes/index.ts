@@ -7,7 +7,6 @@ import { AuthMotionUser } from "../middlewares/motion-auth.middleware";
 const route = Router();
 
 route.get("/bets", Control.GetBets);
-route.get("/bets/details/:id/", Control.GetBet);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.post("/bets/placeBet", Control.PlaceBet);
 route.get("/bets/amounts", Control.GetBetsSum);

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
-import { athletics, wallets, teams, odds, bets, games } from "../models";
+import { athletics, wallets, teams, odds, bets, games, users } from "../models";
 import { IBet, IGame, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
@@ -22,16 +22,6 @@ export async function GetAnyUserBets(req: Request, res: Response, next: any) {
       const id = req.params.userId;
       const result = await bets.findAll({ where: { userId: id } });
       res.status(200).json({ bets: result as IBet[] });
-   } catch (error) {
-      next(error);
-   }
-}
-export async function GetBet(req: Request, res: Response, next: any) {
-   try {
-      const { id } = req.params;
-      const result = await bets.findByPk(id);
-      if (!result) throw new AppError(404, "Aposta não encontrada!");
-      res.status(200).json(result);
    } catch (error) {
       next(error);
    }
@@ -337,6 +327,14 @@ export async function GetUsersBetsInfo(req: Request, res: Response, next: any) {
            `),
                "winLoseRatio",
             ],
+         ],
+         include: [
+            {
+               model: users,
+               attributes: ["name"],
+               required: true,
+               
+            },
          ],
          group: ["userId"],
          order: sequelize.literal(`${orderBy} DESC`),
