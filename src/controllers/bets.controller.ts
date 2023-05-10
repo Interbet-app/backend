@@ -328,20 +328,24 @@ export async function GetUsersBetsInfo(req: Request, res: Response, next: any) {
                "winLoseRatio",
             ],
          ],
-         include: [
-            {
-               model: users,
-               attributes: ["name"],
-               required: true,
-               
-            },
-         ],
          group: ["userId"],
          order: sequelize.literal(`${orderBy} DESC`),
          limit: 10,
       });
 
-      res.status(200).json(result);
+      const response = await Promise.all(result.map(async (data) => {
+         const user = await users.findByPk(data.userId);
+         return {
+            userId: data.userId,
+            totalBet: data.get("totalBet"),
+            totalAmount: data.get("totalAmount"),
+            totalEarn: data.get("totalEarn"),
+            winLoseRatio: data.get("winLoseRatio"),
+            userName: user?.name,
+         };
+      }));
+
+      res.status(200).json(response);
    } catch (error) {
       next(error);
    }

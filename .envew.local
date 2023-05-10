@@ -1,0 +1,33 @@
+# variaveis diversas da API
+PORT=3000
+NODE_ENV="development"
+
+# variaveis do Banco de dados
+DATABASE_NAME='interbet'
+DATABASE_HOST='localhost'
+DATABASE_USER='dscoding'
+DATABASE_PASSWORD='1234'
+
+# variaveis de autenticação da API
+JWT_RSA_SECRET="-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEApAwEPhhwC5LMN+pQ7q53TrIYfA1sv3X/rxY8X5ICk2tkGsFH\nvrv8lTaRKY4B1MA9l3/2lUnAuRgGXw8XMxWIqxpItTqBH5BazUuQbnfrqojkH44t\nFR4+wNVhovbqkkB+dqb+ONW8QemOvmwQZk7hinkWW3UyDeFpL/YJgTsxwKEDDe6U\nJeanBRbiFwTVxGolImZKZUZKUZNuewyTuzm5ZOBsgZg3gJZbO9KtdLsMGGJqBqmv\n//hV1LRZ+38oDGwKiP0cQdt980gEYuNkpKKtjhjwmpr1j01J85Kkw+TaZfKK+b6L\nav3YqcBY4ZEMQ66BHfonOEUaIG0dwVhbu6l/zwIDAQABAoIBAEA7iEm8DdsqPpZC\nRDBA1exVZarlIsiQ7m1i+n69UA7jBM5JEcuIFe1i8VHhDax9HWC9tRJdT33p/0yn\nPwE8lEfSwddcMgTm4/bweHwYrokWkqQcamCTeCTPKCzEG7LqV9ojpvUgE1eHmOHM\ntFsq1br/kJZ8+/1dXm9uGeilAeUXRPn2wX87mnk5ots6m8Cy32frNm1jxrA+eJts\nzIZQRB91An1ltBT/AlMDfFMWpfJCqoi/TDLAPLDccqdEIZnbst62+9wKgk1Ke6cy\nT5Npea+Dei/bNiE7SIC/hkvTcXSTPi+AKVOrb82EJST7FtiGf4bun9xud1iYvAfb\n0ZUPctECgYEA5T1LNq6/JKrhvWoGC9sdcS3GZptd/8dkIncVwwHqV47WAy1pMm1n\nMkV60OuOMZ07+aln7NxHxG9hj5t4uj/wUQAYThyiGsVWYunPPbXRNkLHHA0n0IrK\n9zQolY+5riau+w3QhT4w59hM5qNA/5WtgruYDUSRqQ72rfuaXKomdFkCgYEAtzJ6\nSdKGjj7pWmEPwiqtdhrjIEncR21P3F9fS/++jYtydD0gbgchzHPWCZUv1gM60olG\nEAQH4q5eMr1BT1doxcqZQnAkWBkOSHVRaxpsfuBSrmZtxH5BPbAFTI3Y+dO7sDeb\nIiParufbq9rY7NRWzwXaKEmIfHr6/AhD4gdgMGcCgYEAgYeDw080NBzWVvfcmMBj\nv3rU+09Y6tkYjJzrT/f6GSVdaggzw8mroO0/e2NOQlyM8gI19dF2P9mLr+BydBMC\n0FIUabamJihRKqzgbAcbQuSyqvgIAj8adlojgHbovS2ge70PkOpWKfq/YSbn6EMD\n+rXTMdQH1hXdbuuXCjseZWkCgYEAj43Li+ufqvmbbEogyhsdQC5Dinq2VXZQHTTS\n/T/TdyEtt+5qai3Gi2q971ZrXL29K1uMfmJaN4RBpmrtMZoiLNPcktZDdJF1wsvD\n2DSljiqEP8td+pqgzxEOpfWFcAc9zRFVzEPiSiq/1YQxdivSNnm0gNtWS40m/bYQ\nU59J/cMCgYEAjLSjaNc2rmNgIE85JbjuZhSWYfsWM2JtfapIDYBj3eE0voFuVC23\nS/Y9/gSMPEamOfFIo/6ReJqWVKg8hqVr9wAR/TQMP60rtGyD3GOpigjMegBroCNZ\ntvSU/8K2ZBjRykCnTWPPiAfAl7yUCPJDHRSPWvAaa+9S4yfg30QAZSE=\n-----END RSA PRIVATE KEY-----"
+
+JWT_RSA_PUBLIC="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApAwEPhhwC5LMN+pQ7q53\nTrIYfA1sv3X/rxY8X5ICk2tkGsFHvrv8lTaRKY4B1MA9l3/2lUnAuRgGXw8XMxWI\nqxpItTqBH5BazUuQbnfrqojkH44tFR4+wNVhovbqkkB+dqb+ONW8QemOvmwQZk7h\ninkWW3UyDeFpL/YJgTsxwKEDDe6UJeanBRbiFwTVxGolImZKZUZKUZNuewyTuzm5\nZOBsgZg3gJZbO9KtdLsMGGJqBqmv//hV1LRZ+38oDGwKiP0cQdt980gEYuNkpKKt\njhjwmpr1j01J85Kkw+TaZfKK+b6Lav3YqcBY4ZEMQ66BHfonOEUaIG0dwVhbu6l/\nzwIDAQAB\n-----END PUBLIC KEY-----"
+JWT_EXPIRATION=3600
+
+# variaveis de autenticação social do google
+GOOGLE_CLIENT_ID="222639078186-mgopsj3t52ngijv6e31e4jrqh0i1fo8i.apps.googleusercontent.com"
+
+# variaveis do bucket de armazenamento de arquivos na aws
+AWS_ACCESS_KEY_ID='AKIA34XLLW5SXHIQQDZX'
+AWS_SECRET_ACCESS_KEY='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'
+AWS_REGION='us-east-1'
+AWS_BUCKET='interbet-files'
+
+# variaveis do provedor de pagamentos OpenPix
+OPEN_PIX_APP_ID="5a1a9433-2bb0-47d9-950d-836aa21afa0f"
+OPEN_PIX_HOOK_COMPLETE_KEY="openpix_tdcIiyYCHQkzV5LiUwheoA3XRLTSvvyXvQ60OkS7p6M="
+OPEN_PIX_HOOK_EXPIRE_KEY="openpix_kSGGQQo0V83St8E1+Kh5WL9n5N0JW+5oCNqt5EGI4Ac="
+
+# variáveis do bot do Telegram
+TELEGRAM_BOT_TOKEN="5163204283:AAH6rJTcMyM8wlBGQ2oTq4JfF1j-mnbC-kk"
+TELEGRAM_CHAT_ID="-646993546"
