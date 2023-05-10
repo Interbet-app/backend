@@ -7,6 +7,7 @@ import { AuthMotionUser } from "../middlewares/motion-auth.middleware";
 const route = Router();
 
 route.get("/bets", Control.GetBets);
+route.get("/bets/:id/", Control.GetBet);
 route.post("/bets", AuthMotionUser, Control.CreateBet);
 route.post("/bets/placeBet", Control.PlaceBet);
 route.get("/bets/amounts", Control.GetBetsSum);
@@ -125,13 +126,12 @@ route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
 //- Dashboard routes
-route.get("/dashboard/users", Control.GetUsersBetsInfo)
-route.get("/dashboard/profit", Control.GetProfit)
-route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame)
+route.get("/dashboard/users", Control.GetUsersBetsInfo);
+route.get("/dashboard/profit", Control.GetProfit);
+route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame);
 
 //- Premiações
-route.post('/awards/qr-code', Control.GetAwardQrCode);
-route.post('/awards/qr-code/payment', Control.ConfirmAwardPayment);
+route.post("/awards/qr-code", Control.GetAwardQrCode);
+route.post("/awards/qr-code/payment", Control.ConfirmAwardPayment);
 
 export default route;
-

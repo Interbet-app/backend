@@ -5,7 +5,7 @@ import { IBet, IGame, NewBet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
-import { placeBet, getBalance, awardWinnings } from "../services";
+import { placeBet, getBalance } from "../services";
 
 export async function GetUserBets(req: Request, res: Response, next: any) {
    try {
@@ -22,6 +22,16 @@ export async function GetAnyUserBets(req: Request, res: Response, next: any) {
       const id = req.params.userId;
       const result = await bets.findAll({ where: { userId: id } });
       res.status(200).json({ bets: result as IBet[] });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function GetBet(req: Request, res: Response, next: any) {
+   try {
+      const { id } = req.params;
+      const result = await bets.findByPk(id);
+      if (!result) throw new AppError(404, "Aposta não encontrada!");
+      res.status(200).json(result);
    } catch (error) {
       next(error);
    }
@@ -393,4 +403,3 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
       next(error);
    }
 }
-

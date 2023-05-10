@@ -13,7 +13,7 @@ export async function GetAwardQrCode(req: Request, res: Response, next: any) {
       if (bet.award === "completed") throw new AppError(422, "Prêmio já foi pago");
 
       const url = process.env.NODE_ENV === "production" ? "https://interbet.app" : "http://localhost";
-      const qrcode = await QRCode.toDataURL(`${url}/awards?betId${betId}`);
+      const qrcode = await QRCode.toDataURL(`${url}/awards?betId=${betId}`);
       res.status(200).json({ qrcode });
    } catch (error) {
       next(error);
