@@ -11,7 +11,5 @@ export const Settings = Database.define<ISettingsModel>(
       stage: { type: Sequelize.STRING(60), allowNull: false },
       userMaxBetAmount: { type: Sequelize.DECIMAL(10, 2), allowNull: true, defaultValue: 10000 },
    },
-   {
-      timestamps: false,
-   }
+   { timestamps: false }
 );
