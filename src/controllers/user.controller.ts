@@ -260,9 +260,8 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
 }
 export async function UserSetMaxBet(req: Request, res: Response, next: any) {
    try {
-      const { maxBetAmount } = req.body;
-      const { id } = req.user;
-      const user = await users.findByPk(id);
+      const { maxBetAmount, userId } = req.body;
+      const user = await users.findByPk(userId);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
       if (maxBetAmount) user.maxBetAmount = maxBetAmount;
       user.updatedAt = new Date();
