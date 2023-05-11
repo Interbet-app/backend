@@ -6,6 +6,7 @@ import { Jwt, Token } from "../auth";
 import { RefreshOddsPayout } from "../functions";
 import AppError from "../error";
 import { placeBet, getBalance } from "../services";
+import { Cache } from "../cache";
 
 export async function GetUserBets(req: Request, res: Response, next: any) {
    try {
@@ -59,13 +60,19 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       const { oddId, amount } = req.body;
       const { motionId, id } = req.user;
       const userBalance = await getBalance({ userToken: motionId });
+      const user = await users.findByPk(id);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+
       const balance = Number(userBalance?.balance) / 100;
+      const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
       if (parseFloat(amount) > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
-      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
+      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo da opção excedido!");
+      if (user.maxBetAmount && parseFloat(amount) > Number(user.maxBetAmount))  throw new AppError(400, "Valor máximo do usuário excedido!");
+      if (parseFloat(amount) > globalMaxBetAmount) throw new AppError(400, "Valor máximo da plataforma excedido!");
 
       const game = await games.findByPk(odd.gameId);
       if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
@@ -143,9 +150,15 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       const wallet = await wallets.findOne({ where: { userId: token.userId } });
       if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
 
+      const user = await users.findByPk(token.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+      const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
+
       const Bets = req.body as NewBet[];
       const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
       if (sumAmount > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (user.maxBetAmount && sumAmount > Number(user.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta do usuário excedido!");
+      if (sumAmount > globalMaxBetAmount) throw new AppError(400, "Valor máximo de aposta da plataforma excedido!");
 
       const oddsIds = Bets.map((bet) => bet.oddId);
       const options = await odds.findAll({ where: { id: { [Op.in]: oddsIds } } });

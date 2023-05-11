@@ -125,9 +125,11 @@ route.post("/deposits/complete/callback", Control.OpenPixCallbackComplete);
 route.post("/deposits/expire/callback", Control.OpenPixCallbackExpired);
 
 //- Dashboard routes
-route.get("/dashboard/users", Control.GetUsersBetsInfo);
-route.get("/dashboard/profit", Control.GetProfit);
-route.get("/dashboard/profitByGame", Control.GetTotalAmountBetByGame);
+route.get("/dashboard/users", AuthAdmin, Control.GetUsersBetsInfo);
+route.get("/dashboard/profit", AuthAdmin, Control.GetProfit);
+route.get("/dashboard/profitByGame", AuthAdmin, Control.GetTotalAmountBetByGame);
+route.get("/dashboard/settings", AuthAdmin, Control.GetSettings);
+route.post("/dashboard/settings/:stage", AuthAdmin, Control.SetSettings);
 
 //- Premiações
 route.post("/awards/qr-code", Control.GetAwardQrCode);

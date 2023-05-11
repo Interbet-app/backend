@@ -258,7 +258,20 @@ export async function UserUpdate(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
+export async function UserSetMaxBet(req: Request, res: Response, next: any) {
+   try {
+      const { maxBetAmount } = req.body;
+      const { id } = req.user;
+      const user = await users.findByPk(id);
+      if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
+      if (maxBetAmount) user.maxBetAmount = maxBetAmount;
+      user.updatedAt = new Date();
+      await user.save();
+      res.status(200).json({ message: "Valor máximo de aposta alterado com sucesso!" });
+   } catch (error) {
+      next(error);
+   }
+}
 // export async function UserProfile(req: Request, res: Response, next: any) {
 //    try {
 //       const token = Jwt.getLocals(res, next) as Token;

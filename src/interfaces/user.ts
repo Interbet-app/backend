@@ -3,6 +3,7 @@ export interface IUser {
    athleticId?: number;
    name: string;
    betMotionId: string;
+   maxBetAmount?: number;
    createdAt: Date;
    updatedAt: Date;
 }

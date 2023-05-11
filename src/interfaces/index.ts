@@ -15,3 +15,4 @@ export * from "./player";
 export * from "./ranking";
 export * from "./game-history";
 export * from "./feedback";
+export * from "./settings";
