@@ -1,24 +1,23 @@
-import { Request, Response } from "express";
-import sequelize, { Op } from "sequelize";
-import { athletics, wallets, teams, odds, bets, games, users } from "../models";
-import { IBet, IGame, NewBet } from "../interfaces";
+import { NextFunction, Request, Response } from "express";
 import { Jwt, Token } from "../auth";
+import sequelize, { Op } from "sequelize";
+import { odds, bets, games, users } from "../models";
+import { IBet, IGame, NewBet } from "../interfaces";
 import { RefreshOddsPayout } from "../functions";
-import AppError from "../error";
-import { placeBet, getBalance } from "../services";
+import { PlaceBet, GetBalance } from "../services/betmotion";
 import { Cache } from "../cache";
+import AppError from "../error";
 
-export async function GetUserBets(req: Request, res: Response, next: any) {
+export async function GetUserBets(_req: Request, res: Response, next: NextFunction) {
    try {
-      const { id } = req.user;
-      const result = await bets.findAll({ where: { userId: id } });
-
+      const { userId } = (await Jwt.getLocals(res, next)) as Token;
+      const result = await bets.findAll({ where: { userId: userId } });
       res.status(200).json({ bets: result as IBet[] });
    } catch (error) {
       next(error);
    }
 }
-export async function GetAnyUserBets(req: Request, res: Response, next: any) {
+export async function GetAnyUserBets(req: Request, res: Response, next: NextFunction) {
    try {
       const id = req.params.userId;
       const result = await bets.findAll({ where: { userId: id } });
@@ -27,7 +26,7 @@ export async function GetAnyUserBets(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetBets(_req: Request, res: Response, next: any) {
+export async function GetBets(_req: Request, res: Response, next: NextFunction) {
    try {
       const result = await bets.findAll();
       res.status(200).json({ bets: result as IBet[] });
@@ -35,10 +34,10 @@ export async function GetBets(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function PlaceBet(req: Request, res: Response, next: any) {
+export async function BetPlaceBet(req: Request, res: Response, next: NextFunction) {
    try {
       const { amount, betId, gameId, oddValue, userToken } = req.body;
-      const response = await placeBet({
+      const response = await PlaceBet({
          amount,
          betId,
          gameId,
@@ -47,22 +46,18 @@ export async function PlaceBet(req: Request, res: Response, next: any) {
       });
       res.status(201).json(response);
    } catch (error) {
-      console.log(error);
       next(error);
    }
 }
-export async function CreateBet(req: Request, res: Response, next: any) {
+export async function CreateBet(req: Request, res: Response, next: NextFunction) {
    try {
-      // const token = Jwt.getLocals(res, next) as Token;
-      // const wallet = await wallets.findOne({ where: { userId: 310 } });
-      // if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
-
       const { oddId, amount } = req.body;
-      const { motionId, id } = req.user;
-      const userBalance = await getBalance({ userToken: motionId });
-      const user = await users.findByPk(id);
+      const { userId } = Jwt.getLocals(res, next) as Token;
+
+      const user = await users.findByPk(userId);
       if (!user) throw new AppError(404, "Usuário não encontrado!");
 
+      const userBalance = await GetBalance(user.betmotionUserToken!);
       const balance = Number(userBalance?.balance) / 100;
       const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
@@ -71,7 +66,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
       if (parseFloat(amount) > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
       if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo da opção excedido!");
-      if (user.maxBetAmount && parseFloat(amount) > Number(user.maxBetAmount))  throw new AppError(400, "Valor máximo do usuário excedido!");
+      if (user.maxBetAmount && parseFloat(amount) > Number(user.maxBetAmount)) throw new AppError(400, "Valor máximo do usuário excedido!");
       if (parseFloat(amount) > globalMaxBetAmount) throw new AppError(400, "Valor máximo da plataforma excedido!");
 
       const game = await games.findByPk(odd.gameId);
@@ -80,7 +75,7 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       if (game.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
 
       const bet = await bets.create({
-         userId: Number(id),
+         userId: user.id!,
          oddId: oddId,
          amount: Number(amount),
          payout: Number(odd.payout),
@@ -95,12 +90,12 @@ export async function CreateBet(req: Request, res: Response, next: any) {
       });
       if (!bet) throw new AppError(500, "Aposta não foi criada!");
 
-      const response = await placeBet({
+      const response = await PlaceBet({
          amount: Number(amount),
          betId: Number(bet.id),
          gameId: Number(game.id),
          oddValue: odd.payout,
-         userToken: motionId,
+         userToken: user.betmotionUserToken!,
       });
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
@@ -122,42 +117,27 @@ export async function CreateBet(req: Request, res: Response, next: any) {
          });
       }
 
-      // //! Não é odd de empate
-      // if (odd.teamId > 0) {
-      //    const team = await teams.findOne({ where: { id: odd.teamId } });
-      //    if (team) {
-      //       const athletic = await athletics.findByPk(team.athleticId);
-      //       if (athletic && athletic.adminId) {
-      //          const wallet = await wallets.findOne({ where: { userId: athletic.adminId } });
-      //          const commission = Number(amount) * 0.01; //! 1% de comissão para a atlética
-      //          if (wallet) {
-      //             wallet.balance = Number(wallet.balance) + Number(commission);
-      //             wallet.updatedAt = new Date();
-      //             await wallet.save();
-      //          }
-      //       }
-      //    }
-      // }
       res.status(201).json({ ...response, id: bet.id });
    } catch (error) {
-      console.log(error);
       next(error);
    }
 }
-export async function CreateMultipleBets(req: Request, res: Response, next: any) {
+export async function CreateMultipleBets(req: Request, res: Response, next: NextFunction) {
    try {
-      const token = Jwt.getLocals(res, next) as Token;
-      const wallet = await wallets.findOne({ where: { userId: token.userId } });
-      if (!wallet) throw new AppError(404, "Carteira do usuário não encontrada!");
+      const Bets = req.body as NewBet[];
+      const { userId } = Jwt.getLocals(res, next) as Token;
 
-      const user = await users.findByPk(token.userId);
+      const user = await users.findByPk(userId);
       if (!user) throw new AppError(404, "Usuário não encontrado!");
+
+      const userBalance = await GetBalance(user.betmotionUserToken!);
+      const balance = Number(userBalance?.balance) / 100;
       const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
-      const Bets = req.body as NewBet[];
       const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
-      if (sumAmount > Number(wallet.balance) + Number(wallet.bonus)) throw new AppError(400, "Usuário não tem saldo suficiente!");
-      if (user.maxBetAmount && sumAmount > Number(user.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta do usuário excedido!");
+      if (sumAmount > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
+      if (user.maxBetAmount && sumAmount > Number(user.maxBetAmount))
+         throw new AppError(400, "Valor máximo de aposta do usuário excedido!");
       if (sumAmount > globalMaxBetAmount) throw new AppError(400, "Valor máximo de aposta da plataforma excedido!");
 
       const oddsIds = Bets.map((bet) => bet.oddId);
@@ -193,17 +173,6 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
          const odd = await odds.findByPk(bet.oddId);
          if (!odd) throw new AppError(404, "Opção não encontrada!");
 
-         //! atualizar carteira do usuário
-         let percent = 0;
-         const rest = Number(wallet.balance) - Number(bet.amount);
-         if (rest < 0) {
-            percent = (Math.abs(rest) * 100) / Number(bet.amount);
-            wallet.bonus = Number(wallet.bonus) - Math.abs(rest);
-            wallet.balance = 0;
-         } else wallet.balance = Number(rest);
-         wallet.updatedAt = new Date();
-         await wallet.save();
-
          //% atualizar a odd com os valores da aposta
          odd.amount = Number(odd.amount) + Number(bet.amount);
          odd.payment = Number(odd.payment) + (Number(bet.amount) + Number(bet.amount) * odd.payout);
@@ -224,38 +193,31 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
             });
          }
 
-         //% creditar comissão para a atlética
-         if (odd.teamId > 0) {
-            const team = await teams.findOne({ where: { id: odd.teamId } });
-            if (team) {
-               const athletic = await athletics.findByPk(team.athleticId);
-               if (athletic && athletic.adminId) {
-                  const wallet = await wallets.findOne({ where: { userId: athletic.adminId } });
-                  const commission = Number(bet.amount) * 0.01; //! 1% de comissão para a atlética
-                  if (wallet) {
-                     wallet.balance = Number(wallet.balance) + Number(commission);
-                     wallet.updatedAt = new Date();
-                     await wallet.save();
-                  }
-               }
-            }
-         }
-
          //% Salvar aposta
          const result = await bets.create({
-            userId: token.userId,
+            userId: user.id!,
             oddId: bet.oddId,
             amount: Number(bet.amount),
             payout: Number(odd.payout),
             status: "pendent",
             result: "pendent",
             award: bet.amount > 15 ? "pending" : "not",
-            bonusPercent: Number(percent),
+            bonusPercent: 30,
             paid: false,
             group: group,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
+
+         //% Enviar aposta para a Betmotion
+         await PlaceBet({
+            amount: Number(bet.amount),
+            betId: Number(result.id),
+            gameId: Number(odd.gameId),
+            oddValue: odd.payout,
+            userToken: user.betmotionUserToken!,
+         });
+
          return created.push(result as IBet);
       });
 
@@ -264,7 +226,7 @@ export async function CreateMultipleBets(req: Request, res: Response, next: any)
       next(error);
    }
 }
-export async function DeleteBet(req: Request, res: Response, next: any) {
+export async function DeleteBet(req: Request, res: Response, next: NextFunction) {
    try {
       const betId = parseInt(req.params.id, 10);
       await bets.destroy({ where: { id: betId } });
@@ -275,7 +237,7 @@ export async function DeleteBet(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetBetsSum(_req: Request, res: Response, next: any) {
+export async function GetBetsSum(_req: Request, res: Response, next: NextFunction) {
    try {
       const amount = await bets.sum("amount");
       res.status(200).json({ amount: amount });
@@ -283,7 +245,7 @@ export async function GetBetsSum(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetBetsByGame(req: Request, res: Response, next: any) {
+export async function GetBetsByGame(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);
       const data = await odds.findAll({ where: { gameId: gameId } });
@@ -295,7 +257,7 @@ export async function GetBetsByGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetUsersBetsInfo(req: Request, res: Response, next: any) {
+export async function GetUsersBetsInfo(req: Request, res: Response, next: NextFunction) {
    try {
       const orderBy = req.query.orderBy || "totalBet";
       const result = await bets.findAll({
@@ -346,24 +308,26 @@ export async function GetUsersBetsInfo(req: Request, res: Response, next: any) {
          limit: 10,
       });
 
-      const response = await Promise.all(result.map(async (data) => {
-         const user = await users.findByPk(data.userId);
-         return {
-            userId: data.userId,
-            totalBet: data.get("totalBet"),
-            totalAmount: data.get("totalAmount"),
-            totalEarn: data.get("totalEarn"),
-            winLoseRatio: data.get("winLoseRatio"),
-            userName: user?.name,
-         };
-      }));
+      const response = await Promise.all(
+         result.map(async (data) => {
+            const user = await users.findByPk(data.userId);
+            return {
+               userId: data.userId,
+               totalBet: data.get("totalBet"),
+               totalAmount: data.get("totalAmount"),
+               totalEarn: data.get("totalEarn"),
+               winLoseRatio: data.get("winLoseRatio"),
+               userName: user?.name,
+            };
+         })
+      );
 
       res.status(200).json(response);
    } catch (error) {
       next(error);
    }
 }
-export async function GetProfit(_req: Request, res: Response, next: any) {
+export async function GetProfit(_req: Request, res: Response, next: NextFunction) {
    try {
       const result = await bets.findAll({
          attributes: [
@@ -382,7 +346,7 @@ export async function GetProfit(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetTotalAmountBetByGame(_req: Request, res: Response, next: any) {
+export async function GetTotalAmountBetByGame(_req: Request, res: Response, next: NextFunction) {
    try {
       const gameData = await games.findAll();
 
@@ -396,14 +360,9 @@ export async function GetTotalAmountBetByGame(_req: Request, res: Response, next
             const betsData: IBet[] = await bets.findAll({ where: { oddId: { [Op.in]: searchOdds } } });
             const totalAmount = betsData.reduce((acc, bet) => acc + Number(bet.amount), 0);
             const profit = betsData.reduce((acc, bet) => {
-               if (bet.result === "win") {
-                  return acc - Number(bet.amount) * bet.payout;
-               }
-               if (bet.result === "lose") {
-                  return acc + Number(bet.amount);
-               }
-
-               return acc;
+               if (bet.result === "win") return acc - Number(bet.amount) * bet.payout;
+               else if (bet.result === "lose") return acc + Number(bet.amount);
+               else return acc;
             }, 0);
             return {
                game: game as IGame,

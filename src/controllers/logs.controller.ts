@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 
-export async function ShowLogs(req: Request, res: Response, next: any) {
+export async function ShowLogs(req: Request, res: Response, next: NextFunction) {
    try {
       const { level } = req.query;
       if (!level) return res.status(400).json({ message: "Nível inexistente!" });
@@ -26,7 +26,7 @@ export async function ShowLogs(req: Request, res: Response, next: any) {
    }
 }
 
-export async function FlushLogs(req: Request, res: Response, next: any) {
+export async function FlushLogs(req: Request, res: Response, next: NextFunction) {
    try {
       const { level } = req.query;
       if (!level) return res.status(400).json({ message: "Nível inexistente!" });

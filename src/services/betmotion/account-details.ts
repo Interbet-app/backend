@@ -1,12 +1,8 @@
-import axios from "axios";
+import Betmotion from "./api";
 import { checkStatusOfRequest, convertXMLtoJson } from "../../utils/xml";
-import AppError from "../../error";
+import logger from "../../log";
 
-interface XMLBody {
-   token: string;
-}
-
-interface Response {
+interface IAccountDetails {
    token: string;
    loginName: string;
    currency: string;
@@ -16,7 +12,7 @@ interface Response {
    affiliationPath: string;
 }
 
-const xmlBody = ({ token }: XMLBody) => `<PKT>
+const XmlTemplate = (token: string) => `<PKT>
 <Method Name="GetAccountDetails">
   <Auth Login="" Password="" />
   <Params>
@@ -26,23 +22,10 @@ const xmlBody = ({ token }: XMLBody) => `<PKT>
 </Method>
 </PKT>`;
 
-export async function getAccountDetails({ token }: XMLBody) {
-   const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
-
+export async function AccountDetails(token: string) {
    try {
-      const response = await axios.post(
-         endpoint,
-         xmlBody({
-            token,
-         }),
-         {
-            headers: { "Content-Type": "text/xml" },
-         }
-      );
-
-      if (!checkStatusOfRequest(response.data).ok) {
-         return null;
-      }
+      const response = await Betmotion.post("/api/inter-bet/handle.do", XmlTemplate(token));
+      if (!checkStatusOfRequest(response.data).ok) return null;
 
       const convertedXML = convertXMLtoJson(response.data, [
          "token",
@@ -52,10 +35,10 @@ export async function getAccountDetails({ token }: XMLBody) {
          "externalUserType",
          "country",
          "affiliationPath",
-      ]) as Response;
+      ]) as IAccountDetails;
 
       return convertedXML;
    } catch (error) {
-      console.log(error);
+      logger.error("BetmotionAccountDetails ->" + error);
    }
 }

@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { gamesHistory } from "../models";
 import { IGameHistory } from "../interfaces";
 
-export async function GamesHistory(_req: Request, res: Response, next: any) {
+export async function GamesHistory(_req: Request, res: Response, next: NextFunction) {
    try {
       gamesHistory.findAll()
          .then(response => res.status(200).json(response))
@@ -12,7 +12,7 @@ export async function GamesHistory(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GamesHistorySearch(req: Request, res: Response, next: any) {
+export async function GamesHistorySearch(req: Request, res: Response, next: NextFunction) {
    try {
       const { event, teamA, teamB } = req.query;
       const history = await gamesHistory.findAll({
@@ -30,7 +30,7 @@ export async function GamesHistorySearch(req: Request, res: Response, next: any)
       next(error);
    }
 }
-export async function GamesHistoryCreate(req: Request, res: Response, next: any) {
+export async function GamesHistoryCreate(req: Request, res: Response, next: NextFunction) {
    try {
       const { gameId, event, teamA, teamB, scoreA, scoreB, date, confrontType, gender, serie } = req.body;
       const newGameHistory = await gamesHistory.create({
@@ -50,7 +50,7 @@ export async function GamesHistoryCreate(req: Request, res: Response, next: any)
       next(error);
    }
 }
-export async function GamesHistoryDelete(req: Request, res: Response, next: any) {
+export async function GamesHistoryDelete(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       await gamesHistory.destroy({ where: { id } });

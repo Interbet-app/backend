@@ -1,10 +1,10 @@
 export interface IUser {
    id?: number;
-   athleticId?: number;
    name: string;
-   betMotionId: string;
+   athleticId?: number;
+   betmotionUserID?: string;
+   betmotionUserToken?: string;
    maxBetAmount?: number;
    createdAt: Date;
    updatedAt: Date;
 }
-

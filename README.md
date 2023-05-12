@@ -16,7 +16,6 @@
 </p>
 
 ## 📡 Links para referencia
-  - [Desenvolvimento](https://interbet-api.herokuapp.com/) - Heroku
   - [Produção](https://api.v2.interbet.app/) - AWS
 
 ## ⚙️ Instalação

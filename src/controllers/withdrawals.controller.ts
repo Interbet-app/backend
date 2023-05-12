@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Token, Jwt } from "../auth";
 import { IWithdrawal } from "../interfaces";
 import { deposits, wallets, Withdrawals, bets } from "../models";
 import AppError from "../error";
 
-export async function UserWithdrawals(_req: Request, res: Response, next: any) {
+export async function UserWithdrawals(_req: Request, res: Response, next: NextFunction) {
    try {
       const { userId } = Jwt.getLocals(res, next) as Token;
       const withdrawals = await Withdrawals.findAll({ where: { userId } });
@@ -13,7 +13,7 @@ export async function UserWithdrawals(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateWithdrawal(req: Request, res: Response, next: any) {
+export async function CreateWithdrawal(req: Request, res: Response, next: NextFunction) {
    try {
       const { userId } = Jwt.getLocals(res, next) as Token;
       const { amount, pixKey, pixKeyType } = req.body;

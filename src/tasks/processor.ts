@@ -1,26 +1,14 @@
 import CronJob from "cron";
 import logger from "../log";
-import { CrediteUserBets } from "./bets.task";
-import { CrediteCompletedDeposits } from "./deposits.task";
-import { CrediteCommissions, CloseGames } from "./game.task";
-import { TelegramTasks } from "./telegram.task";
+import { CloseGames } from "./game.task";
+
 
 async function FiveTasks() {
-   //? creditar apostas vencedoras aos usuários
-   await CrediteUserBets();
 
-   //? creditar comissões aos administradores de times
-   await CrediteCommissions();
 }
 async function OneTasks() {
    //? fechar jogos que já terminaram
    await CloseGames();
-
-   //? creditar depósitos concluídos aos usuários
-   await CrediteCompletedDeposits();
-
-   //? enviar notificações de retiradas solicitadas para o Chat do Telegram
-   await TelegramTasks();
 }
 
 export class TaskProcessor {

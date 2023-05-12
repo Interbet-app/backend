@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { maintenances } from "../models";
-import { Jwt, Token} from "../auth";
+import { Jwt, Token } from "../auth";
 import { IMaintenance } from "../interfaces";
 import AppError from "../error";
 
-export async function GetMaintenances(_req: Request, res: Response, next: any) {
+export async function GetMaintenances(_req: Request, res: Response, next: NextFunction) {
    try {
       const result = await maintenances.findAll();
       res.status(200).json({ maintenances: result as IMaintenance[] });
@@ -13,26 +13,26 @@ export async function GetMaintenances(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UserMaintenances(req: Request, res: Response, next: any) {
+export async function UserMaintenances(_req: Request, res: Response, next: NextFunction) {
    try {
-      const { id } = req.user;
-      const result = await maintenances.findAll({ where: { userId: id } });
+      const { userId } = (await Jwt.getLocals(res, next)) as Token;
+      const result = await maintenances.findAll({ where: { userId } });
       res.status(200).json(result);
    } catch (error) {
       next(error);
    }
 }
-export async function CreateMaintenance(req: Request, res: Response, next: any) {
+export async function CreateMaintenance(req: Request, res: Response, next: NextFunction) {
    try {
       const { userId, path, group, method } = req.body;
-      const maintenance = await maintenances.create({ userId, path, group, method,createdAt: new Date(), updatedAt: new Date() });
+      const maintenance = await maintenances.create({ userId, path, group, method, createdAt: new Date(), updatedAt: new Date() });
       if (!maintenance) throw new AppError(500, "Falha ao criar regra!");
       res.status(201).json(maintenance as IMaintenance);
    } catch (error) {
       next(error);
    }
 }
-export async function DeleteMaintenance(req: Request, res: Response, next: any) {
+export async function DeleteMaintenance(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       await maintenances.destroy({ where: { id } });
@@ -41,21 +41,19 @@ export async function DeleteMaintenance(req: Request, res: Response, next: any) 
       next(error);
    }
 }
-export async function FindGroupMaintenances(req: Request, res: Response, next: any) {
+export async function FindGroupMaintenances(req: Request, res: Response, next: NextFunction) {
    try {
       const group = req.params.group;
       if (!group) throw new AppError(422, "Parâmetro group é obrigatório!");
       const result = await maintenances.findAll({
          where: {
             group: {
-               [Op.like]: `%${group}%`
-      } } });
+               [Op.like]: `%${group}%`,
+            },
+         },
+      });
       res.status(200).json({ maintenances: result as IMaintenance[] });
    } catch (error) {
       next(error);
    }
 }
-
-
-
-

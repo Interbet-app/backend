@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { adds } from "../models";
 import { File } from "../functions";
 import { S3 } from "../aws";
@@ -6,7 +6,7 @@ import AppError from "../error";
 import multer from "multer";
 import { IAdds } from "../interfaces";
 
-export async function GetAdds(_req: Request, res: Response, next: any) {
+export async function GetAdds(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await adds.findAll();
       res.status(200).json({ adds: data as IAdds[] });
@@ -14,7 +14,7 @@ export async function GetAdds(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateAdds(req: Request, res: Response, next: any) {
+export async function CreateAdds(req: Request, res: Response, next: NextFunction) {
    const storage = multer.memoryStorage();
    multer({ storage }).single("image")(req, res, async (error: any) => {
       try {
@@ -48,7 +48,7 @@ export async function CreateAdds(req: Request, res: Response, next: any) {
       }
    });
 }
-export async function DeleteAdds(req: Request, res: Response, next: any) {
+export async function DeleteAdds(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       const add = await adds.findByPk(id);

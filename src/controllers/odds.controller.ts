@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction,Request, Response } from "express";
 import { odds } from "../models";
 import { IOdd } from "../interfaces";
 import AppError from "../error";
 
-export async function GetOdds(_req: Request, res: Response, next: any) {
+export async function GetOdds(_req: Request, res: Response, next: NextFunction) {
    try {
       const result = await odds.findAll();
       res.status(200).json({ odds: result as IOdd[] }); 
@@ -11,7 +11,7 @@ export async function GetOdds(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function OddsByGame(_req: Request, res: Response, next: any) {
+export async function OddsByGame(_req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(_req.params.id, 10);
       const result = await odds.findAll({ where: { gameId } });
@@ -20,7 +20,7 @@ export async function OddsByGame(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetOdd(req: Request, res: Response, next: any) {
+export async function GetOdd(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       const odd = await odds.findByPk(id);
@@ -30,7 +30,7 @@ export async function GetOdd(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateOdd(req: Request, res: Response, next: any) {
+export async function CreateOdd(req: Request, res: Response, next: NextFunction) {
    try {
       const { gameId, teamId, name, payout, maxBetAmount, offer, status } = req.body;
       const odd = await odds.create({
@@ -54,7 +54,7 @@ export async function CreateOdd(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdateOdd(req: Request, res: Response, next: any) {
+export async function UpdateOdd(req: Request, res: Response, next: NextFunction) {
    try {
       const { oddId, gameId, name, teamId, payout, maxBetAmount, offer, status } = req.body;
       const odd = await odds.findByPk(oddId);
@@ -75,7 +75,7 @@ export async function UpdateOdd(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function DeleteOdd(req: Request, res: Response, next: any) {
+export async function DeleteOdd(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       await odds.destroy({ where: { id } });

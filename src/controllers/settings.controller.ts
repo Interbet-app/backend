@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { Cache } from "../cache";
 import { Settings } from "../models";
 import AppError from "../error";
 
-export async function GetSettings(req: Request, res: Response, next: any) {
+export async function GetSettings(req: Request, res: Response, next: NextFunction) {
    try {
       const { stage } = req.params;
       const result = await Settings.findOne({ where: { stage } });
@@ -15,7 +15,7 @@ export async function GetSettings(req: Request, res: Response, next: any) {
    }
 }
 
-export async function SetSettings(req: Request, res: Response, next: any) {
+export async function SetSettings(req: Request, res: Response, next: NextFunction) {
    try {
       const { stage } = req.params;
       const { userMaxBetAmount } = req.body;

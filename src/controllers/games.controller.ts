@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { bets, events, odds, games, users, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
-import { awardWinnings, lossSignal } from "../services";
+import { BetWinner, BetLoss } from "../services/betmotion";
 
-export async function GetGames(_req: Request, res: Response, next: any) {
+export async function GetGames(_req: Request, res: Response, next: NextFunction) {
    try {
       const result = await games.findAll();
       res.status(200).json({ games: result as IGame[] });
@@ -13,7 +13,7 @@ export async function GetGames(_req: Request, res: Response, next: any) {
       next(err);
    }
 }
-export async function GameDetails(req: Request, res: Response, next: any) {
+export async function GameDetails(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);
       const game = await games.findByPk(gameId);
@@ -24,7 +24,7 @@ export async function GameDetails(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GamesFilter(req: Request, res: Response, next: any) {
+export async function GamesFilter(req: Request, res: Response, next: NextFunction) {
    try {
       const { modality, category, athleticId, status } = req.query;
       const gamesIds = [] as number[];
@@ -73,7 +73,7 @@ export async function GamesFilter(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateGame(req: Request, res: Response, next: any) {
+export async function CreateGame(req: Request, res: Response, next: NextFunction) {
    try {
       const { eventId, name, status, modality, location, startDate, winnerCommission } = req.body;
       const event = await events.findByPk(eventId);
@@ -94,7 +94,7 @@ export async function CreateGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetGame(req: Request, res: Response, next: any) {
+export async function GetGame(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       const game = await games.findByPk(id);
@@ -104,7 +104,7 @@ export async function GetGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdateGame(req: Request, res: Response, next: any) {
+export async function UpdateGame(req: Request, res: Response, next: NextFunction) {
    try {
       const { gameId, name, eventId, status, modality, location, startDate } = req.body;
       const game = await games.findByPk(gameId);
@@ -123,7 +123,7 @@ export async function UpdateGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function DeleteGame(req: Request, res: Response, next: any) {
+export async function DeleteGame(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       await games.destroy({ where: { id } });
@@ -132,7 +132,7 @@ export async function DeleteGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function ProcessGame(req: Request, res: Response, next: any) {
+export async function ProcessGame(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);
       const { winnerOddId, teamA, teamB } = req.body;
@@ -191,8 +191,8 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
                if (!user) throw new AppError(404, `Usuário '${aposta.userId}' não foi encontrado para  atualizar BetMotion!`);
                //! 9 -> atualizar BetMotion
                const amount = Number(aposta.amount * aposta.payout) * 100;
-               if (aposta.result === "win") await awardWinnings(aposta.id!, user?.betMotionId, amount, game.name);
-               else await lossSignal(aposta.id!, user?.betMotionId, game.name);
+               if (aposta.result === "win") await BetWinner(aposta.id!, user.betmotionUserToken!, amount, game.name);
+               else await BetLoss(aposta.id!, user.betmotionUserToken!, game.name);
             });
          }
       }
@@ -201,7 +201,7 @@ export async function ProcessGame(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function TeamLastGames(req: Request, res: Response, next: any) {
+export async function TeamLastGames(req: Request, res: Response, next: NextFunction) {
    try {
       const { teamId, limit } = req.query;
       let options = await odds.findAll({ where: { teamId: Number(teamId), status: "lock" } });
@@ -233,7 +233,7 @@ export async function TeamLastGames(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function AthleticLastGames(req: Request, res: Response, next: any) {
+export async function AthleticLastGames(req: Request, res: Response, next: NextFunction) {
    try {
       const { athleticId, teamId, limit } = req.query;
       if (!athleticId && !teamId) throw new AppError(422, "Informe ao menos um parâmetro! athleticId ou teamId");
@@ -260,7 +260,7 @@ export async function AthleticLastGames(req: Request, res: Response, next: any) 
       next(error);
    }
 }
-async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: string, next: any) {
+async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: string, next: NextFunction) {
    try {
       const event = await events.findByPk(eventId);
       if (!event) throw new AppError(404, "Evento não foi encontrado!");

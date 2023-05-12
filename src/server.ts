@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { TaskProcessor } from "./tasks/processor";
 import { Settings } from "./models";
 import { Cache } from "./cache";
-import { WsSocket } from "./api-ws";
+
 
 const stage = process.env.NODE_ENV || "development";
 
@@ -30,12 +30,10 @@ dotenv.config();
       Cache.set(`settings.userMaxBetAmount`, settings.userMaxBetAmount);
 
       const port = process.env.PORT || 4000;
-      const server = api.listen(port, () => {
+      api.listen(port, () => {
          logger.info(`Servidor iniciado na porta ${port}!`);
       });
 
-      //? Iniciar websocket
-      //const wss = new WsSocket(server);
    } catch (error) {
       logger.error(error);
    }

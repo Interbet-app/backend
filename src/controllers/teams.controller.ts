@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { athletics, teams } from "../models";
 import { ITeam } from "../interfaces";
@@ -7,7 +7,7 @@ import { File } from "../functions";
 import multer from "multer";
 import AppError from "../error";
 
-export async function GetTeams(_req: Request, res: Response, next: any) {
+export async function GetTeams(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await teams.findAll();
       res.status(200).json({ teams: data as ITeam[] });
@@ -15,7 +15,7 @@ export async function GetTeams(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function GetTeam(req: Request, res: Response, next: any) {
+export async function GetTeam(req: Request, res: Response, next: NextFunction) {
    try {
       const teamId = parseInt(req.params.id);
       const team = await teams.findByPk(teamId);
@@ -24,7 +24,7 @@ export async function GetTeam(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function FindTeams(req: Request, res: Response, next: any) {
+export async function FindTeams(req: Request, res: Response, next: NextFunction) {
    try {
       const name = req.params.name as string;
       if (!name) return res.status(422).json({message:"Informe o nome pelo qual deseja pesquisar!"});
@@ -34,7 +34,7 @@ export async function FindTeams(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateTeam(req: Request, res: Response, next: any) {
+export async function CreateTeam(req: Request, res: Response, next: NextFunction) {
    try {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
@@ -85,7 +85,7 @@ export async function CreateTeam(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdateTeam(req: Request, res: Response, next: any) {
+export async function UpdateTeam(req: Request, res: Response, next: NextFunction) {
    const storage = multer.memoryStorage();
    multer({ storage }).single("picture")(req, res, async (error: any) => {
       try {
@@ -132,7 +132,7 @@ export async function UpdateTeam(req: Request, res: Response, next: any) {
       }
    });
 }
-export async function DeleteTeam(req: Request, res: Response, next: any) {
+export async function DeleteTeam(req: Request, res: Response, next: NextFunction) {
    try {
       const teamId = parseInt(req.params.id, 10);
       const team = await teams.findByPk(teamId);

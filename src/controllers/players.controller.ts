@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { players } from "../models";
 import { IPlayer } from "../interfaces";
 import AppError from "../error";
 
-export async function GetPlayers(_req: Request, res: Response, next: any) {
+export async function GetPlayers(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await players.findAll();
       const response = data.map((player: any) => player as IPlayer);
@@ -12,7 +12,7 @@ export async function GetPlayers(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function TeamPlayers(req: Request, res: Response, next: any) {
+export async function TeamPlayers(req: Request, res: Response, next: NextFunction) {
    try {
       const teamId = parseInt(req.params.id, 10);
       const result = await players.findAll({ where: { teamId } });
@@ -21,7 +21,7 @@ export async function TeamPlayers(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreatePlayer(req: Request, res: Response, next: any) {
+export async function CreatePlayer(req: Request, res: Response, next: NextFunction) {
    try {
       const { name, position, teamId, holder } = req.body;
       const player = await players.create({
@@ -37,7 +37,7 @@ export async function CreatePlayer(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdatePlayer(req: Request, res: Response, next: any) {
+export async function UpdatePlayer(req: Request, res: Response, next: NextFunction) {
    try {
       const { playerId, name, position, teamId, holder } = req.body;
       const player = await players.findByPk(playerId);
@@ -53,7 +53,7 @@ export async function UpdatePlayer(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function DeletePlayer(req: Request, res: Response, next: any) {
+export async function DeletePlayer(req: Request, res: Response, next: NextFunction) {
    try {
       const playerId = req.params.id;
       const player = await players.findByPk(playerId);

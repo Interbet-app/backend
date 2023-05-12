@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
 import { athletics, bets, odds, rankings, teams, users } from "../models";
 import { IRanking } from "../interfaces";
 
-export async function EventRanking(req: Request, res: Response, next: any) {
+export async function EventRanking(req: Request, res: Response, next: NextFunction) {
    try {
       const eventId = parseInt(req.params.id, 10);
       const { limit, offset } = req.query;
@@ -19,7 +19,7 @@ export async function EventRanking(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UsersBetsRanking(_req: Request, res: Response, next: any) {
+export async function UsersBetsRanking(_req: Request, res: Response, next: NextFunction) {
    try {
       const ranking = await bets.findAll({
          attributes: ["userId", [sequelize.fn("sum", sequelize.col("amount")), "amount"]],
@@ -44,7 +44,7 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: any) 
    }
 }
 
-export async function AthleticsRanking(_req: Request, res: Response, next: any) {
+export async function AthleticsRanking(_req: Request, res: Response, next: NextFunction) {
    try {
       const athleticsAll = await athletics.findAll();
       const athleticIds = athleticsAll.map((pos) => pos.id!);

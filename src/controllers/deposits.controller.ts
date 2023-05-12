@@ -1,12 +1,12 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { users, deposits } from "../models";
 import { IDeposit } from "../interfaces";
 import { Jwt, Token } from "../auth";
-import { OpenPix } from "../payments";
+//import { OpenPix } from "../payments";
 import AppError from "../error";
-import logger from "../log";
 
-export async function UserDeposits(_req: Request, res: Response, next: any) {
+
+export async function UserDeposits(_req: Request, res: Response, next: NextFunction) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const data = await deposits.findAll({
@@ -19,7 +19,7 @@ export async function UserDeposits(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UserDepositDetails(req: Request, res: Response, next: any) {
+export async function UserDepositDetails(req: Request, res: Response, next: NextFunction) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const depositId = parseInt(req.params.id, 10);
@@ -32,7 +32,7 @@ export async function UserDepositDetails(req: Request, res: Response, next: any)
       next(error);
    }
 }
-export async function CreateDeposit(req: Request, res: Response, next: any) {
+export async function CreateDeposit(req: Request, res: Response, next: NextFunction) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findOne({ where: { id: token.userId } });
@@ -57,21 +57,21 @@ export async function CreateDeposit(req: Request, res: Response, next: any) {
          updatedAt: new Date(),
       });
 
-      const Pix = new OpenPix();
-      const payment = await Pix.CreatePayment(deposit.uniqueId, amountInCents, "Depósito Interbet");
-      if (payment instanceof AppError) throw payment;
-      deposit.externalStatus = payment.status;
-      deposit.externalUrl = payment.paymentLinkUrl;
-      deposit.externalQrCode = payment.qrCode;
-      deposit.externalQrCodeContent = payment.brCode;
-      deposit.expireAt = expire;
-      await deposit.save();
+      // const Pix = new OpenPix();
+      // const payment = await Pix.CreatePayment(deposit.uniqueId, amountInCents, "Depósito Interbet");
+      // if (payment instanceof AppError) throw payment;
+      // deposit.externalStatus = payment.status;
+      // deposit.externalUrl = payment.paymentLinkUrl;
+      // deposit.externalQrCode = payment.qrCode;
+      // deposit.externalQrCodeContent = payment.brCode;
+      // deposit.expireAt = expire;
+      // await deposit.save();
       res.status(200).json(deposit as IDeposit);
    } catch (error) {
       next(error);
    }
 }
-export async function OpenPixCallbackComplete(req: Request, res: Response, next: any) {
+export async function OpenPixCallbackComplete(req: Request, res: Response, next: NextFunction) {
    try {
       const { evento } = req.body;
       if (evento == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
@@ -80,8 +80,8 @@ export async function OpenPixCallbackComplete(req: Request, res: Response, next:
       const { value, correlationID, status } = req.body.pix.charge;
       const { transactionID } = req.body.charge;
 
-      const Pix = new OpenPix();
-      if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
+      // const Pix = new OpenPix();
+      // if (!Pix.VerifySignature(req.body, signature, "complete")) throw new AppError(401, "Assinatura HMAC inválida!");
 
       const deposit = await deposits.findOne({ where: { uniqueId: correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${correlationID}`);
@@ -100,15 +100,15 @@ export async function OpenPixCallbackComplete(req: Request, res: Response, next:
    }
 }
 
-export async function OpenPixCallbackExpired(req: Request, res: Response, next: any) {
+export async function OpenPixCallbackExpired(req: Request, res: Response, next: NextFunction) {
    try {
       const { event, charge } = req.body;
       if (event == "teste_webhook") return res.status(200).json({ message: "Webhook testado com sucesso!" });
       if (event != "OPENPIX:CHARGE_EXPIRED") throw new AppError(400, "Evento inválido!");
       
-      const Pix = new OpenPix();
-      const signature = req.headers["x-openpix-signature"] as string;
-      if (!Pix.VerifySignature(req.body, signature, "expire")) throw new AppError(401, "Assinatura HMAC inválida!");
+      // const Pix = new OpenPix();
+      // const signature = req.headers["x-openpix-signature"] as string;
+      // if (!Pix.VerifySignature(req.body, signature, "expire")) throw new AppError(401, "Assinatura HMAC inválida!");
 
       const deposit = await deposits.findOne({ where: { uniqueId: charge.correlationID } });
       if (!deposit) throw new AppError(404, `Depósito não foi encontrado! ${charge.correlationID}`);

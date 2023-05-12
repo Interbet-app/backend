@@ -1,35 +1,30 @@
-import axios from "axios";
-import { convertXMLtoJson } from "../../utils/xml";
-
-interface XMLBody {
+export interface IPlaceBet {
    userToken: string;
-   transactionId: number;
-   amount: number;
-   betId: number;
-   gameId: number;
-   oddValue: number;
-}
-interface ReqBody {
-   userId: string;
    amount: number;
    betId: number;
    gameId: number;
    oddValue: number;
 }
 
-interface Response {
-   token: string;
-   balance: string;
-   extTransactionID: string;
-   alreadyProcessed: string;
+export interface IBetLoss {
+   userToken: string;
+   betId: number;
+   gameName: string;
 }
 
-const xmlBody = ({ userToken, amount, transactionId, betId, gameId, oddValue }: XMLBody) => `<PKT>
+export interface IBetWinner {
+   userToken: string;
+   betId: number;
+   amount: number;
+   gameName: string;
+}
+
+export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPlaceBet) => `<PKT>
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
       <Token Type="string" Value="${userToken}" />
-      <TransactionID Type="int" Value="${transactionId}" />
+      <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="${amount}" />
       <BetReferenceNum Type="string" Value="${betId}" />
       <GameReference Type="string" Value="INTER_BET_GAMES" />
@@ -72,29 +67,41 @@ const xmlBody = ({ userToken, amount, transactionId, betId, gameId, oddValue }: 
   </Method>
   </PKT>`;
 
-export async function placeBet({ amount, betId, gameId, oddValue, userToken }: Omit<XMLBody, "transactionId">) {
-   const endpoint = "https://bmapi-staging.salsaomni.com/api/inter-bet/handle.do";
-   const amountInCentes = amount * 100;
+export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
+<Method Name="LossSignal">
+  <Auth Login="" Password="" />
+  <Params>
+    <Token Type="string" Value="${userToken}" />
+      <TransactionID Type="int" Value="${new Date().valueOf()}" />
+      <BetAmount Type="int" Value="0" />
+      <BetReferenceNum Type="string" Value="${betId}" />
+      <GameReference Type="string" Value="${gameName}" />
+      <BetMode Type="string" Value="Live" />
+      <Description Type="string" Value="${gameName}" />
+      <ExternalUserID Type="string" Value="ABC123456" />
+      <FrontendType Type="int" Value="2" />
+      <BetStatus Type="string" Value="N" />
+      <SportIDs Type="string" Value="1" />
+      <SiteId Type="string" Value="5" />
+      </Params>
+</Method>
+</PKT>`;
 
-   try {
-      const response = await axios.post(
-         endpoint,
-         xmlBody({
-            amount: amountInCentes,
-            userToken,
-            transactionId: new Date().valueOf(),
-            betId,
-            gameId,
-            oddValue,
-         }),
-         {
-            headers: { "Content-Type": "text/xml" },
-         }
-      );
-      const convertedXML = convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as Response;
-
-      return convertedXML;
-   } catch (error) {
-      console.log(error);
-   }
-}
+export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner) => `<PKT>
+<Method Name="AwardWinnings">
+  <Auth Login="" Password="" />
+  <Params>
+    <Token Type="string" Value="${userToken}" />
+    <TransactionID Type="int" Value="${new Date().valueOf()}" />
+    <WinAmount Type="int" Value="${amount}" />
+    <WinReferenceNum Type="string" Value="${betId}" />
+    <GameReference Type="string" Value="${gameName}" />
+    <BetMode Type="string" Value="Live" />
+    <Description Type="string" Value="Live bet (Multiple)" />
+    <ExternalUserID Type="string" Value="asdasd" />
+    <FrontendType Type="int" Value="4" />
+    <BetStatus Type="string" Value="S" />
+    <SportIDs Type="string" Value="1" />
+  </Params>
+</Method>
+</PKT>`;

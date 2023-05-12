@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { feedbacks } from "../models";
 import { IFeedback } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import AppError from "../error";
 
-export async function GetAllFeedbacks(_req: Request, res: Response, next: any) {
+export async function GetAllFeedbacks(_req: Request, res: Response, next: NextFunction) {
    try {
       const feedback = await feedbacks.findAll();
       const response = feedback.map((feedback) => feedback as IFeedback);
@@ -13,7 +13,7 @@ export async function GetAllFeedbacks(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateFeedback(req: Request, res: Response, next: any) {
+export async function CreateFeedback(req: Request, res: Response, next: NextFunction) {
    try {
       const token = Jwt.getLocals(res, next) as Token;
       const { message } = req.body;

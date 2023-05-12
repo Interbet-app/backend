@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { events } from "../models";
 import { IEvent } from "../interfaces";
 import AppError from "../error";
 
-export async function GetEvents(_req: Request, res: Response, next: any) {
+export async function GetEvents(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await events.findAll();
       res.status(200).json({ events: data as IEvent[] });
@@ -11,7 +11,7 @@ export async function GetEvents(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateEvent(req: Request, res: Response, next: any) {
+export async function CreateEvent(req: Request, res: Response, next: NextFunction) {
    try {
       const { name, description, title, location } = req.body;
       const event = await events.create({
@@ -28,7 +28,7 @@ export async function CreateEvent(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function DeleteEvent(req: Request, res: Response, next: any) {
+export async function DeleteEvent(req: Request, res: Response, next: NextFunction) {
    try {
       const id = parseInt(req.params.id, 10);
       const event = await events.destroy({ where: { id } });

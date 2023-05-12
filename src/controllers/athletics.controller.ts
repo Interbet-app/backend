@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { athletics, teams } from "../models";
 import { IAthletic } from "../interfaces";
@@ -7,7 +7,7 @@ import { File } from "../functions";
 import multer from "multer";
 import AppError from "../error";
 
-export async function GetAthletics(_req: Request, res: Response, next: any) {
+export async function GetAthletics(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await athletics.findAll();
       res.status(200).json({ athletics: data as IAthletic[] });
@@ -15,7 +15,7 @@ export async function GetAthletics(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function FindAthletics(req: Request, res: Response, next: any) {
+export async function FindAthletics(req: Request, res: Response, next: NextFunction) {
    try {
       const name = req.params.name as string;
       if (!name) throw new AppError(422, "Informe o nome pelo qual deseja pesquisar!");
@@ -25,7 +25,7 @@ export async function FindAthletics(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateAthletic(req: Request, res: Response, next: any) {
+export async function CreateAthletic(req: Request, res: Response, next: NextFunction) {
    try {
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
@@ -67,7 +67,7 @@ export async function CreateAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdateAthletic(req: Request, res: Response, next: any) {
+export async function UpdateAthletic(req: Request, res: Response, next: NextFunction) {
    const storage = multer.memoryStorage();
    multer({ storage }).single("picture")(req, res, async (error: any) => {
       try {
@@ -110,7 +110,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: any) {
       }
    });
 }
-export async function DeleteAthletic(req: Request, res: Response, next: any) {
+export async function DeleteAthletic(req: Request, res: Response, next: NextFunction) {
    try {
       const athleticId = parseInt(req.params.id, 10);
       if (!athleticId) throw new AppError(422, "!");
@@ -126,7 +126,7 @@ export async function DeleteAthletic(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function SetAthleticAndTeamAdminId(req: Request, res: Response, next: any) {
+export async function SetAthleticAndTeamAdminId(req: Request, res: Response, next: NextFunction) {
    try {
       const { teamId, athleticId, adminId } = req.body;
       if (!teamId) throw new AppError(422, "Id do time é obrigatório!");

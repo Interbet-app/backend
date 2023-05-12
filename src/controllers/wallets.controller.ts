@@ -1,19 +1,28 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import sequelize from "sequelize";
-import { wallets } from "../models";
+import { users, wallets } from "../models";
 import { IWallet } from "../interfaces";
 import { Jwt, Token } from "../auth";
 import AppError from "../error";
+import { GetBalance } from "../services/betmotion";
 
-export async function GetMotionWallet(_req: Request, res: Response, next: any) {
+export async function GetMotionWallet(_req: Request, res: Response, next: NextFunction) {
    try {
-      res.status(200).json({ ok: true });
+      const { userId } = (await Jwt.getLocals(res, next)) as Token;
+
+      const user = await users.findByPk(userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+      if (!user.betmotionUserID) throw new AppError(404, "Usuário não possui conta na Betmotion!");
+
+      const balance = await GetBalance(user.betmotionUserToken!);
+      if (!balance?.externalUserID) throw new AppError(404, "Usuário não possui conta na Betmotion!");
+
+      res.status(200).json({ ok: true, balance: Number(balance?.balance) / 100 });
    } catch (error) {
       next(error);
    }
 }
-
-export async function GetWallet(_req: Request, res: Response, next: any) {
+export async function GetWallet(_req: Request, res: Response, next: NextFunction) {
    try {
       const token = (await Jwt.getLocals(res, next)) as Token;
       const wallet = await wallets.findOne({ where: { userId: token.userId } });
@@ -29,7 +38,7 @@ export async function GetWallet(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function CreateWallet(req: Request, res: Response, next: any) {
+export async function CreateWallet(req: Request, res: Response, next: NextFunction) {
    try {
       const { userId, balance, score, bonus } = req.body;
       const wallet = await wallets.findOne({ where: { userId } });
@@ -47,7 +56,7 @@ export async function CreateWallet(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function UpdateWallet(req: Request, res: Response, next: any) {
+export async function UpdateWallet(req: Request, res: Response, next: NextFunction) {
    try {
       const { walletId, balance, bonus, score, updatedAt } = req.body;
       const wallet = await wallets.findByPk(walletId);
@@ -67,7 +76,7 @@ export async function UpdateWallet(req: Request, res: Response, next: any) {
       next(error);
    }
 }
-export async function SumBalances(_req: Request, res: Response, next: any) {
+export async function SumBalances(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await wallets.findOne({
          attributes: [
@@ -81,4 +90,3 @@ export async function SumBalances(_req: Request, res: Response, next: any) {
       next(error);
    }
 }
-
