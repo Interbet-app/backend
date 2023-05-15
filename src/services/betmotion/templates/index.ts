@@ -19,11 +19,12 @@ export interface IBetWinner {
    gameName: string;
 }
 
+//? XML para informar uma aposta realizada pelo usuário
 export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPlaceBet) => `<PKT>
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
-      <Token Type="string" Value="${userToken}" />
+      <Token Type="string" Value="${userToken}" /> //? timestamp da hora ddo envio
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="${amount}" />
       <BetReferenceNum Type="string" Value="${betId}" />
@@ -67,6 +68,7 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPla
   </Method>
   </PKT>`;
 
+//? XML para informar o resultado de uma aposta perdida
 export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
 <Method Name="LossSignal">
   <Auth Login="" Password="" />
@@ -74,7 +76,7 @@ export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
     <Token Type="string" Value="${userToken}" />
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="0" />
-      <BetReferenceNum Type="string" Value="${betId}" />
+      <BetReferenceNum Type="string" Value="${betId}" /> //? id da aposta na tabela de bets
       <GameReference Type="string" Value="${gameName}" />
       <BetMode Type="string" Value="Live" />
       <Description Type="string" Value="${gameName}" />
@@ -87,6 +89,7 @@ export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
 </Method>
 </PKT>`;
 
+//? XML para informar o resultado de uma aposta ganhadora
 export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner) => `<PKT>
 <Method Name="AwardWinnings">
   <Auth Login="" Password="" />

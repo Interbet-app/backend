@@ -1,7 +1,6 @@
 import { Response } from "express";
 import AppError from "../error";
 import jwt, { VerifyOptions } from "jsonwebtoken";
-import logger from "../log";
 
 export type Token = {
    userId: number;

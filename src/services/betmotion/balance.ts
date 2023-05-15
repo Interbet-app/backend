@@ -9,6 +9,7 @@ interface IBalanceResponse {
    balance: string;
 }
 
+//? XML para obter o saldo do usuário
 const XmlParse = (userToken: string) => `<PKT>
 <Method Name="GetBalance">
   <Auth Login="" Password="" />
@@ -28,3 +29,4 @@ export async function GetBalance(userToken: string) {
       logger.error("BetmotionGetBalance ->" + error);
    }
 }
+

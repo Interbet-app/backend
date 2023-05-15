@@ -12,6 +12,7 @@ interface IAccountDetails {
    affiliationPath: string;
 }
 
+//? XML para obter os dados da conta do usuário
 const XmlTemplate = (token: string) => `<PKT>
 <Method Name="GetAccountDetails">
   <Auth Login="" Password="" />
@@ -42,3 +43,4 @@ export async function AccountDetails(token: string) {
       logger.error("BetmotionAccountDetails ->" + error);
    }
 }
+

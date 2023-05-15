@@ -28,3 +28,4 @@ export async function SignIn(token: string): Promise<ISignInResponse> {
       return { token: null };
    }
 }
+

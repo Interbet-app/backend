@@ -75,11 +75,6 @@ route.post("/user/max-bet-amount", Control.UserSetMaxBet);
 route.get("/user/me", Control.SignInBetMotion);
 route.get("/logout", AuthUser, Control.Logout);
 
-route.get("/wallet", AuthUser, Control.GetWallet);
-route.get("/wallet/balances", AuthAdmin, Control.SumBalances);
-route.post("/wallet", AuthAdmin, Control.CreateWallet);
-route.put("/wallet", AuthAdmin, Middle.UpdateWallet, Control.UpdateWallet);
-
 //- Notificações
 route.get("/notifications", AuthUser, Control.UserNotifications);
 route.put("/notifications/:id/", Middle.ID, AuthUser, Control.NotificationMarkAsRead);
@@ -91,15 +86,6 @@ route.get("/maintenances", AuthAdmin, Control.GetMaintenances);
 route.get("/maintenances/:group/", AuthAdmin, Control.FindGroupMaintenances);
 route.post("/maintenances", AuthAdmin, Middle.CreateMaintenance, Control.CreateMaintenance);
 route.delete("/maintenances/:id/", Middle.ID, AuthAdmin, Control.DeleteMaintenance);
-
-//-Depósitos
-route.get("/deposits", AuthUser, Control.UserDeposits);
-route.get("/deposits/:id/", Middle.ID, AuthUser, Control.UserDepositDetails);
-route.post("/deposits", Middle.CreateDeposit, AuthUser, Control.CreateDeposit);
-
-//-Retiradas
-route.get("/withdrawals", AuthUser, Control.UserWithdrawals);
-route.post("/withdrawals", AuthUser, Control.CreateWithdrawal);
 
 //- Classificações
 route.get("/ranking/bets", Control.UsersBetsRanking);

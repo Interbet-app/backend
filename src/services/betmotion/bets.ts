@@ -44,3 +44,4 @@ export async function BetWinner(betId: number, userToken: string, amount: number
       logger.info("awardWinnings error ->" + error);
    }
 }
+

@@ -5,23 +5,6 @@ export const ID = Joi.object({
       "any.required": "Parâmetro 'id' é obrigatório!",
    }),
 });
-export const google_oauth = Joi.object({
-   affiliateId: Joi.number().optional(),
-});
-
-export const facebook_oauth = Joi.object().keys({
-   accessToken: Joi.string().required(),
-   id: Joi.string().required(),
-   email: Joi.string().required(),
-   name: Joi.string().required(),
-   picture: Joi.string().required(),
-   affiliateId: Joi.number().optional(),
-});
-
-export const instagram_oauth = Joi.object().keys({
-   code: Joi.string().required(),
-   affiliateId: Joi.number().optional(),
-});
 
 export const update_user = Joi.object({
    name: Joi.string().max(60).required(),
@@ -85,13 +68,6 @@ export const update_odd = Joi.object({
    status: Joi.string().valid("open", "lock").optional(),
 });
 
-export const update_wallet = Joi.object({
-   walletId: Joi.number().required(),
-   balance: Joi.number().required(),
-   score: Joi.number().required(),
-   bonus: Joi.number().required(),
-   updatedAt: Joi.date().required(),
-});
 
 export const create_player = Joi.object({
    teamId: Joi.number().required(),
@@ -115,10 +91,6 @@ export const multiple_bets = Joi.array().items(
    })
 );
 
-export const create_deposit = Joi.object({
-   amount: Joi.number().required(),
-});
-
 export const process_game = Joi.object({
    winnerOddId: Joi.number().required(),
    teamA: Joi.object({
@@ -141,6 +113,4 @@ export const create_game_history = Joi.object({
    gender: Joi.string().required(),
    serie: Joi.string().required(),
    date: Joi.date().optional(),
-
-
 });
