@@ -191,8 +191,8 @@ export async function ProcessGame(req: Request, res: Response, next: NextFunctio
                if (!user) throw new AppError(404, `Usuário '${aposta.userId}' não foi encontrado para  atualizar BetMotion!`);
                //! 9 -> atualizar BetMotion
                const amount = Number(aposta.amount * aposta.payout) * 100;
-               if (aposta.result === "win") await BetWinner(aposta.id!, user.betmotionUserToken!, amount, game.name);
-               else await BetLoss(aposta.id!, user.betmotionUserToken!, game.name);
+               if (aposta.result === "win") await BetWinner(aposta.id!, user.betmotionUserID!, amount, game.name);
+               else await BetLoss(aposta.id!, user.betmotionUserID!, game.name);
             });
          }
       }

@@ -27,14 +27,16 @@ export async function SignInBetMotion(req: Request, res: Response, next: NextFun
       const betmotionUser = await AccountDetails(betmotionToken.token);
       if (!betmotionUser) throw new AppError(400, "Não foi possível obter informações do usuário!");
 
+      const betmotionUserID = betmotionUser.token.substring(0, betmotionUser.token.indexOf("me-") + 3);
+
       const balanceInfo = await GetBalance(betmotionUser.token);
       if (!balanceInfo?.externalUserID) throw new AppError(400, "Não foi possível obter saldo do usuário!");
 
-      let interbetUser = await users.findOne({ where: { betmotionUserID: balanceInfo.externalUserID } });
+      let interbetUser = await users.findOne({ where: { betmotionUserID } });
       if (!interbetUser) {
          interbetUser = await users.create({
             name: betmotionUser.loginName,
-            betmotionUserID: betmotionUser.externalUserID,
+            betmotionUserID: betmotionUserID,
             betmotionUserToken: betmotionToken.token,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -44,8 +46,10 @@ export async function SignInBetMotion(req: Request, res: Response, next: NextFun
          await interbetUser.save();
       }
 
+      const token = await Jwt.sign(interbetUser.id!, next);
+
       res.status(200).json({
-         token: Jwt.sign(interbetUser.id!, next),
+         token: token,
          betmotionToken: betmotionUser.token,
          betmotionUserID: balanceInfo?.externalUserID,
          balance: Number(balanceInfo?.balance) / 100,

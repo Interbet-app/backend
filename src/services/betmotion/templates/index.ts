@@ -24,7 +24,7 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPla
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
-      <Token Type="string" Value="${userToken}" /> //? timestamp da hora ddo envio
+      <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora ddo envio
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="${amount}" />
       <BetReferenceNum Type="string" Value="${betId}" />
@@ -73,7 +73,7 @@ export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
 <Method Name="LossSignal">
   <Auth Login="" Password="" />
   <Params>
-    <Token Type="string" Value="${userToken}" />
+    <Token Type="string" Value="${userToken + new Date().valueOf()}" />
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="0" />
       <BetReferenceNum Type="string" Value="${betId}" /> //? id da aposta na tabela de bets
@@ -94,7 +94,7 @@ export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner)
 <Method Name="AwardWinnings">
   <Auth Login="" Password="" />
   <Params>
-    <Token Type="string" Value="${userToken}" />
+    <Token Type="string" Value="${userToken + new Date().valueOf()}" />
     <TransactionID Type="int" Value="${new Date().valueOf()}" />
     <WinAmount Type="int" Value="${amount}" />
     <WinReferenceNum Type="string" Value="${betId}" />

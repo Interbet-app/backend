@@ -18,6 +18,7 @@ export async function SignIn(token: string): Promise<ISignInResponse> {
          {
             headers: {
                Authorization: `Bearer ${token}`,
+               "Content-Type": "application/json",
             },
          }
       );
@@ -28,4 +29,3 @@ export async function SignIn(token: string): Promise<ISignInResponse> {
       return { token: null };
    }
 }
-
