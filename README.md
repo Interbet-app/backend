@@ -16,7 +16,7 @@
 </p>
 
 ## 📡 Links para referencia
-  - [Produção](https://api.v2.interbet.app/) - AWS
+  - [Produção](https://api.interbet.app/) - AWS
 
 ## ⚙️ Instalação
    Siga o passo a baixo para poder executar o projeto em sua maquina.
