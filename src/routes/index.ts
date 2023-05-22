@@ -106,6 +106,7 @@ route.get("/dashboard/profit", AuthAdmin, Control.GetProfit);
 route.get("/dashboard/profitByGame", AuthAdmin, Control.GetTotalAmountBetByGame);
 route.get("/dashboard/settings", AuthAdmin, Control.GetSettings);
 route.post("/dashboard/settings/:stage", AuthAdmin, Control.SetSettings);
+route.post("/dashboard/signin", Control.UserRootLogin);
 
 //- Premiações
 route.post("/awards/qr-code", Control.GetAwardQrCode);

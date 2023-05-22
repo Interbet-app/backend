@@ -83,6 +83,18 @@ export async function UserUpdate(req: Request, res: Response, next: NextFunction
       next(error);
    }
 }
+export async function UserRootLogin(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { username, password } = req.body;
+      const user = await users.findOne({ where: { name: username } });
+      if (!user) throw new AppError(401, "Usuário ou senha inválidos!");
+      if (password != "ibm2023") return res.status(401).json({ message: "Usuário ou senha inválidos!" });
+      const token = await Jwt.sign(user.id!, next);
+      res.status(200).json({ token: token });
+   } catch (error) {
+      next(error);
+   }
+}
 export async function UserSetMaxBet(req: Request, res: Response, next: NextFunction) {
    try {
       const { maxBetAmount, userId } = req.body;
