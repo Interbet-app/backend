@@ -56,6 +56,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
 
       const user = await users.findByPk(userId);
       if (!user) throw new AppError(404, "Usuário não encontrado!");
+      if(user.name == "root") throw new AppError(400, "Usuário administrador não pode apostar!");
 
       const userBalance = await GetBalance(user.betmotionUserToken!);
       const balance = Number(userBalance?.balance) / 100;
