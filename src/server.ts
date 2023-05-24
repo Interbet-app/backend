@@ -24,8 +24,9 @@ dotenv.config();
 
       //? Carregar configurações para o cache
       const settings = await Settings.findOne({ where: { stage } });
+      console.log(settings)
+
       if (!settings) throw new Error("Configurações não encontradas!");
-      
       //% Valor máximo global de uma aposta
       Cache.set(`settings.userMaxBetAmount`, settings.userMaxBetAmount);
 
