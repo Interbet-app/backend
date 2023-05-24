@@ -65,9 +65,14 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
       if (parseFloat(amount) > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
-      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo da opção excedido!");
-      if (user.maxBetAmount && parseFloat(amount) > Number(user.maxBetAmount)) throw new AppError(400, "Valor máximo do usuário excedido!");
-      if (parseFloat(amount) > globalMaxBetAmount) throw new AppError(400, "Valor máximo da plataforma excedido!");
+      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite");
+      if (user.maxBetAmount && parseFloat(amount) > Number(user.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite");
+      if (parseFloat(amount) > globalMaxBetAmount) throw new AppError(400, "Essa aposta excede o limite");
+
+      const gameOdds = await odds.findAll({ where: { gameId: odd.gameId } });
+      const ids = gameOdds.map((odd) => odd.id!);
+      const userGameBetAmount = await bets.sum("amount", { where: { userId: userId, oddId: { [Op.in]: ids } } }) as number;
+      if (user.maxBetAmount && (userGameBetAmount + amount) > Number(user.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite");
 
       const game = await games.findByPk(odd.gameId);
       if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
