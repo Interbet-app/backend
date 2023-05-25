@@ -13,6 +13,7 @@ export const teams = Database.define<ITeamModel>("teams", {
    location: { type: Sequelize.STRING(80), allowNull: false },
    picture: { type: Sequelize.STRING, allowNull: true },
    gender: { type: Sequelize.STRING, allowNull: true },
+   sport: { type: Sequelize.STRING, allowNull: true },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });

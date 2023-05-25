@@ -6,6 +6,7 @@ export interface ITeam {
    abbreviation: string;
    location: string;
    picture: string;
+   sport : string;
    gender: string;
    createdAt: Date;
    updatedAt: Date;
