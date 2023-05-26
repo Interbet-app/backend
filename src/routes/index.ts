@@ -104,7 +104,7 @@ route.post("/feedback", AuthUser, Control.CreateFeedback);
 route.get("/dashboard/users", AuthAdmin, Control.GetUsersBetsInfo);
 route.get("/dashboard/profit", AuthAdmin, Control.GetProfit);
 route.get("/dashboard/profitByGame", AuthAdmin, Control.GetTotalAmountBetByGame);
-route.get("/dashboard/settings", AuthAdmin, Control.GetSettings);
+route.get("/dashboard/settings/:stage", AuthAdmin, Control.GetSettings);
 route.post("/dashboard/settings/:stage", AuthAdmin, Control.SetSettings);
 route.post("/dashboard/signin", Control.UserRootLogin);
 
