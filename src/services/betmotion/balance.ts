@@ -7,6 +7,7 @@ interface IBalanceResponse {
    currency: string;
    externalUserID: string;
    balance: string;
+   Success: string;
 }
 
 //? XML para obter o saldo do usuário
@@ -26,7 +27,7 @@ export async function GetBalance(userToken: string) {
       const response = await Betmotion.post("/api/inter-bet/handle.do", XmlParse(userToken));
       
       logger.info("BetmotionGetBalance ->" + JSON.stringify(response.data));
-      return convertXMLtoJson(response.data, ["token", "balance", "currency", "externalUserID"]) as IBalanceResponse;
+      return convertXMLtoJson(response.data, ["token", "balance", "currency", "externalUserID", "Success"]) as IBalanceResponse;
 
    } catch (error) {
       logger.error("BetmotionGetBalance ->" + error);
