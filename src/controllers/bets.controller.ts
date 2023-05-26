@@ -7,6 +7,7 @@ import { RefreshOddsPayout } from "../functions";
 import { PlaceBet, GetBalance } from "../services/betmotion";
 import { Cache } from "../cache";
 import AppError from "../error";
+import logger from "../log";
 
 export async function GetUserBets(_req: Request, res: Response, next: NextFunction) {
    try {
@@ -59,6 +60,8 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (user.name == "root") throw new AppError(400, "Usuário administrador não pode apostar!");
 
       const userBalance = await GetBalance(user.betmotionUserToken!);
+
+      logger.info("betmotion balance return", JSON.stringify(userBalance));
       if (userBalance?.Success === "0") throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
 
       const balance = Number(userBalance?.balance) / 100;
