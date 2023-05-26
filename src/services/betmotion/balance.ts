@@ -22,15 +22,16 @@ const XmlParse = (userToken: string) => `<PKT>
 </Method>
 </PKT>`;
 
-export async function GetBalance(userToken: string) {
+export async function GetBalance(userToken: string): Promise<IBalanceResponse | null> {
    try {
       const response = await Betmotion.post("/api/inter-bet/handle.do", XmlParse(userToken));
-      
-      logger.info("BetmotionGetBalance ->" + JSON.stringify(response.data));
-      return convertXMLtoJson(response.data, ["token", "balance", "currency", "externalUserID", "Success"]) as IBalanceResponse;
 
+      logger.info("BetmotionGetBalance ->" + JSON.stringify(response.data));
+      const result = convertXMLtoJson(response.data, ["token", "balance", "currency", "externalUserID", "Success"]);
+      if (result == undefined) return null;
+      else return result as IBalanceResponse;
    } catch (error) {
       logger.error("BetmotionGetBalance ->" + error);
+      return null;
    }
 }
-

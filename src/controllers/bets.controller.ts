@@ -60,10 +60,9 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (user.name == "root") throw new AppError(400, "Usuário administrador não pode apostar!");
 
       const userBalance = await GetBalance(user.betmotionUserToken!);
-
       logger.info("betmotion balance return", JSON.stringify(userBalance));
+      if (userBalance == null) throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
       if (userBalance?.Success === "0") throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
-
       const balance = Number(userBalance?.balance) / 100;
       const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
@@ -129,110 +128,6 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       }
 
       res.status(201).json({ ...response, id: bet.id });
-   } catch (error) {
-      next(error);
-   }
-}
-export async function CreateMultipleBets(req: Request, res: Response, next: NextFunction) {
-   try {
-      const Bets = req.body as NewBet[];
-      const { userId } = Jwt.getLocals(res, next) as Token;
-
-      const user = await users.findByPk(userId);
-      if (!user) throw new AppError(404, "Usuário não encontrado!");
-
-      const userBalance = await GetBalance(user.betmotionUserToken!);
-      const balance = Number(userBalance?.balance) / 100;
-      const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
-
-      const sumAmount = Bets.reduce((prev, cur) => Number(prev) + Number(cur.amount), 0);
-      if (sumAmount > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
-      if (user.maxBetAmount && sumAmount > Number(user.maxBetAmount))
-         throw new AppError(400, "Valor máximo de aposta do usuário excedido!");
-      if (sumAmount > globalMaxBetAmount) throw new AppError(400, "Valor máximo de aposta da plataforma excedido!");
-
-      const oddsIds = Bets.map((bet) => bet.oddId);
-      const options = await odds.findAll({ where: { id: { [Op.in]: oddsIds } } });
-      const gameIds = options.map((option) => option.gameId);
-
-      //! Evitar apostas em duas opções de um mesmo jogo, ja que não haveria chance de vitória neste caso
-      const removeDuplicateGames = [...new Set(gameIds)];
-      if (gameIds.length != removeDuplicateGames.length) throw new AppError(400, "Voce não pode apostar em duas opções do mesmo jogo!");
-
-      //! Verificar se os jogos estão abertos
-      const jogos = await games.findAll({ where: { id: { [Op.in]: gameIds } } });
-      jogos.forEach((jogo) => {
-         if (jogo.status !== "open") return res.status(400).json({ message: "Jogo não está mais disponível" });
-         if (jogo.startDate < new Date()) return res.status(400).json({ message: "Jogo não está mais disponível" });
-      });
-
-      //! Verificar se os valores das apostas são menores que o valor máximo de opção
-      Bets.forEach((bet) => {
-         const odd = options.find((option) => option.id === bet.oddId);
-         if (odd) {
-            if (bet.amount > Number(odd.maxBetAmount)) throw new AppError(400, "Valor máximo de aposta excedido!");
-            if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
-         }
-      });
-
-      //? Criar apostas
-      const created = [] as IBet[];
-      const group = Date.now().toString();
-
-      Bets.forEach(async (bet: NewBet) => {
-         //% Obter valor atualizado da odd
-         const odd = await odds.findByPk(bet.oddId);
-         if (!odd) throw new AppError(404, "Opção não encontrada!");
-
-         //% atualizar a odd com os valores da aposta
-         odd.amount = Number(odd.amount) + Number(bet.amount);
-         odd.payment = Number(odd.payment) + (Number(bet.amount) + Number(bet.amount) * odd.payout);
-         odd.bets = Number(odd.bets) + 1;
-         odd.updatedAt = new Date();
-         await odd.save();
-
-         //! atualizar payout das odds
-         const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
-         const balances = oddToUpdate.map((odd) => Number(odd.payment));
-         const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
-         if (balances.length == 2) {
-            const newPayout = RefreshOddsPayout(balances);
-            oddToUpdate.forEach((odd, index) => {
-               odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
-               odd.updatedAt = new Date();
-               odd.save();
-            });
-         }
-
-         //% Salvar aposta
-         const result = await bets.create({
-            userId: user.id!,
-            oddId: bet.oddId,
-            amount: Number(bet.amount),
-            payout: Number(odd.payout),
-            status: "pendent",
-            result: "pendent",
-            award: bet.amount > 15 ? "pending" : "not",
-            bonusPercent: 30,
-            paid: false,
-            group: group,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-         });
-
-         //% Enviar aposta para a Betmotion
-         await PlaceBet({
-            amount: Number(bet.amount),
-            betId: Number(result.id),
-            gameId: Number(odd.gameId),
-            oddValue: odd.payout,
-            userToken: user.betmotionUserToken!,
-         });
-
-         return created.push(result as IBet);
-      });
-
-      res.status(200).json(created);
    } catch (error) {
       next(error);
    }

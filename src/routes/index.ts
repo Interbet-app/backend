@@ -9,7 +9,6 @@ route.get("/bets", Control.GetBets);
 route.post("/bets", AuthUser, Control.CreateBet);
 route.post("/bets/placeBet",AuthAdmin, Control.BetPlaceBet);
 route.get("/bets/amounts",AuthAdmin, Control.GetBetsSum);
-route.post("/bets/multiple", Middle.MultipleBets, AuthUser, Control.CreateMultipleBets);
 route.get("/bets/:userId/",AuthAdmin, Control.GetAnyUserBets);
 route.get("/bets/user/me", AuthUser, Control.GetUserBets);
 
