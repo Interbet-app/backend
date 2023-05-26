@@ -4,7 +4,7 @@ export interface IUser {
    athleticId?: number;
    betmotionUserID?: string;
    betmotionUserToken?: string;
-   maxBetAmount?: number;
+   maxBetAmount?: number | null;
    createdAt: Date;
    updatedAt: Date;
 }

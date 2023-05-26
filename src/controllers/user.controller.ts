@@ -100,7 +100,8 @@ export async function UserSetMaxBet(req: Request, res: Response, next: NextFunct
       const { maxBetAmount, userId } = req.body;
       const user = await users.findByPk(userId);
       if (!user) return res.status(401).json({ message: "Usuário não encontrado" });
-      if (maxBetAmount) user.maxBetAmount = maxBetAmount;
+      if (maxBetAmount > 0) user.maxBetAmount = maxBetAmount;
+      else user.maxBetAmount = null;
       user.updatedAt = new Date();
       await user.save();
       res.status(200).json({ message: "Valor máximo de aposta alterado com sucesso!" });
