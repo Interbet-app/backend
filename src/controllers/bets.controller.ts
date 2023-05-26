@@ -72,7 +72,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       const gameOdds = await odds.findAll({ where: { gameId: odd.gameId } });
       const ids = gameOdds.map((odd) => odd.id!);
       const userGameBetAmount = await bets.sum("amount", { where: { userId: userId, oddId: { [Op.in]: ids } } }) as number;
-      if (user.maxBetAmount && (userGameBetAmount + amount) > Number(user.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite do usuário no jogo.");
+      if (user.maxBetAmount && (Number(userGameBetAmount) + Number(amount)) > Number(user.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite do usuário no jogo.");
 
       const game = await games.findByPk(odd.gameId);
       if (!game) return res.status(404).json({ message: "Jogo não encontrado!" });
