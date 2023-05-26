@@ -1,3 +1,4 @@
+import logger from "../log";
 import { xml2json } from "xml-js";
 
 const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -29,9 +30,9 @@ export const convertXMLtoJson = (xml: any, options: string[]) => {
          }),
          {}
       );
-
       return response;
    } catch (error) {
-      console.log("convertXMLtoJson error ->", error);
+      logger.error("convertXMLtoJson ->" + error);
+      return null;
    }
 };
