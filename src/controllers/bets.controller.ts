@@ -62,6 +62,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       const balance = Number(userBalance?.balance) / 100;
       const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
+      
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
