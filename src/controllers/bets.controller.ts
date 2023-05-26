@@ -60,9 +60,10 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (user.name == "root") throw new AppError(400, "Usuário administrador não pode apostar!");
 
       const userBalance = await GetBalance(user.betmotionUserToken!);
-      logger.info("betmotion balance return", JSON.stringify(userBalance));
-      if (userBalance == null) throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
-      if (userBalance?.Success === "0") throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
+      logger.info("betmotion balance return" + JSON.stringify(userBalance));
+      if (userBalance === null) throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
+      if (userBalance.Success === "0") throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
+      if (Number(userBalance.balance) == 0) throw new AppError(400, "Usuário não tem saldo suficiente!");
       const balance = Number(userBalance?.balance) / 100;
       const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
