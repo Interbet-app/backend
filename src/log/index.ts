@@ -2,9 +2,13 @@ import winston from "winston";
 
 const logger = winston.createLogger({
    format: winston.format.combine(
+      winston.format.errors({ stack: true }),
       winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
       winston.format.json(),
-      winston.format.printf((info) => `{"level":"${info.level}","time":"${info.timestamp}","message":"${info.message}"}`)
+      winston.format.printf(
+         (info) =>
+            `{"level":"${info.level}","time":"${info.timestamp}","message":"${info.message}", "stack": "${info.stack || "no stack"}"}`
+      )
    ),
    transports: [
       new winston.transports.File({ filename: "logs/error.log", level: "error" }),

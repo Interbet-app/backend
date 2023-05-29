@@ -37,12 +37,12 @@ export async function SignInBetMotion(req: Request, res: Response, next: NextFun
          interbetUser = await users.create({
             name: betmotionUser.loginName,
             betmotionUserID: betmotionUserID,
-            betmotionUserToken: betmotionToken.token,
+            betmotionUserToken: betmotionUser.token,
             createdAt: new Date(),
             updatedAt: new Date(),
          });
       } else {
-         interbetUser.betmotionUserToken = betmotionToken.token;
+         interbetUser.betmotionUserToken = betmotionUser.token;
          await interbetUser.save();
       }
 
