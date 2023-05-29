@@ -36,9 +36,7 @@ export async function BetWinner(betId: number, userToken: string, amount: number
    try {
       const response = await Betmotion.post("/api/inter-bet/handle.do", XmlBetWinner({ userToken, betId, amount, gameName }));
       logger.info("awardWinnings response ->" + JSON.stringify(response.data));
-
       const convertedXML = convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as Response;
-      logger.info("awardWinnings extract from xml ->" + JSON.stringify(convertedXML));
       return convertedXML;
    } catch (error) {
       logger.info("awardWinnings error ->" + error);
