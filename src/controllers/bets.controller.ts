@@ -115,10 +115,10 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       await odd.save();
 
       //! atualizar payout das odds
-      const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId, teamId: { [Op.not]: 0 } } });
+      const oddToUpdate = await odds.findAll({ where: { gameId: odd.gameId } });
       const balances = oddToUpdate.map((odd) => Number(odd.payment));
       const startPayOuts = oddToUpdate.map((odd) => Number(odd.startPayOut));
-      if (balances.length == 2) {
+      if (balances.length == 3) {
          const newPayout = RefreshOddsPayout(balances);
          oddToUpdate.forEach((odd, index) => {
             odd.payout = startPayOuts[index] ? (newPayout[index] + startPayOuts[index]) / 2 : newPayout[index];
