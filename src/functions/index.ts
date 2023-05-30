@@ -21,8 +21,8 @@ export class File {
 }
 
 export const RefreshOddsPayout = (balance: number[]) => {
-   const equilibriumConst = balance[0] + balance[1] + balance[1] + 1000;
-   const marginHouse = 0.35;
+   const equilibriumConst = balance[0] + balance[1] + balance[2] + 1000;
+   const marginHouse = 0.3;
    const balanceListDuplicate = [...balance, ...balance];
    const newOdds = [] as any[];
    balance.forEach((bet) => {
