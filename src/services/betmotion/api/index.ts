@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const Betmotion = axios.create({
-   baseURL: "https://bmapi-staging.salsaomni.com",
+   baseURL: "https://api.betmotion.com",
    headers: {
       "Content-Type": "text/xml",
    },
