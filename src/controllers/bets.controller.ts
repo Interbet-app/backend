@@ -98,7 +98,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
          createdAt: new Date(),
          updatedAt: new Date(),
       });
-      if (!bet) throw new AppError(500, "Aposta não foi criada!");
+      if (!bet) throw new AppError(500, "Aposta não pode ser criada!");
 
       const response = await PlaceBet({
          amount: Number(amount),
@@ -107,6 +107,11 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
          oddValue: odd.payout,
          userToken: user.betmotionUserID!,
       });
+
+      if (!response || response.Success === "0") {
+         await bet.destroy();
+         throw new AppError(400, "Aposta não pode ser criada!");
+      }
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
       odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);

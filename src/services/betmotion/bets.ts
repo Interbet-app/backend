@@ -8,6 +8,7 @@ interface IPlaceBetResponse {
    balance: string;
    extTransactionID: string;
    alreadyProcessed: string;
+   Success: string;
 }
 
 export async function PlaceBet({ amount, betId, gameId, oddValue, userToken }: IPlaceBet) {
@@ -17,7 +18,7 @@ export async function PlaceBet({ amount, betId, gameId, oddValue, userToken }: I
          "/api/inter-bet/handle.do",
          XmlPlaceBet({ amount: amountInCents, userToken, betId, gameId, oddValue })
       );
-      return convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed"]) as IPlaceBetResponse;
+      return convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed", "Success"]) as IPlaceBetResponse;
    } catch (error) {
       logger.error("BetmotionPlaceBet ->" + error);
    }
@@ -42,4 +43,3 @@ export async function BetWinner(betId: number, userToken: string, amount: number
       logger.info("awardWinnings error ->" + error);
    }
 }
-
