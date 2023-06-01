@@ -1,5 +1,5 @@
 import Betmotion from "./api";
-import { IPlaceBet, IBetWinner, IBetLoss, XmlPlaceBet, XmlBetLoss, XmlBetWinner } from "./templates";
+import { IPlaceBet, IBetWinner, IBetLoss, XmlRefundBet, XmlPlaceBet, XmlBetLoss, XmlBetWinner, XmlNewCredit, XmlNewDebit } from "./templates";
 import { convertXMLtoJson } from "../../utils/xml";
 import logger from "../../log";
 
@@ -41,5 +41,34 @@ export async function BetWinner(betId: number, userToken: string, amount: number
       return convertedXML;
    } catch (error) {
       logger.info("awardWinnings error ->" + error);
+   }
+}
+
+export async function Refound(betId: number, userToken: string, amount: number, gameName: string) {
+   try {
+      const response = await Betmotion.post("/api/inter-bet/handle.do", XmlRefundBet({ userToken, betId, amount, gameName }));
+
+      logger.info("refound response ->" + JSON.stringify(response.data));
+   } catch (error) {
+      logger.info("refound error ->" + error);
+   }
+}
+export async function NewCredit(betId: number, userToken: string, amount: number) {
+   try {
+      console.log(XmlNewCredit({ userToken, betId, amount }))
+      const response = await Betmotion.post("/api/inter-bet/handle.do", XmlNewCredit({ userToken, betId, amount }));
+      console.log(response)
+      logger.info("newCredit response ->" + JSON.stringify(response.data));
+   } catch (error) {
+      logger.info("newCredit error ->" + error);
+   }
+}
+export async function NewDebit(betId: number, userToken: string, amount: number) {
+   try {
+      console.log(XmlNewDebit({ userToken, betId, amount }))
+      const response = await Betmotion.post("/api/inter-bet/handle.do", XmlNewDebit({ userToken, betId, amount }));
+      logger.info("NewDebit response ->" + JSON.stringify(response.data));
+   } catch (error) {
+      logger.info("NewDebit error ->" + error);
    }
 }
