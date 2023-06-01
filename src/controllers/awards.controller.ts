@@ -2,7 +2,7 @@ import {NextFunction, Request, Response } from "express";
 import { bets, users } from "../models";
 import AppError from "../error";
 import QRCode from "qrcode";
-import { NewCredit, NewDebit } from "../services/betmotion";
+import { NewCredit, NewDebit, CashoutBet } from "../services/betmotion";
 
 export async function GetAwardQrCode(req: Request, res: Response, next: NextFunction) {
    try {
@@ -48,7 +48,7 @@ export async function NewCreditAmount(req: Request, res: Response, next: NextFun
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      await NewCredit(betId, userToken, bet.amount)
+      await NewCredit(betId, userToken, amount)
       res.status(200).json({
          message: "NewCredit",
       });
@@ -62,7 +62,21 @@ export async function NewDebitAmount(req: Request, res: Response, next: NextFunc
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      const newDebit = await NewDebit(betId, userToken, bet.amount)
+      const newDebit = await NewDebit(betId, userToken, amount)
+      res.status(200).json({
+         message: newDebit,
+      });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function Cashout(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { userToken, amount } = req.body;
+      const betId = parseInt(req.params.id, 10);
+      const bet = await bets.findByPk(betId);
+      if (!bet) throw new AppError(404, "Aposta não encontrada!");
+      const newDebit = await CashoutBet(betId, userToken, amount)
       res.status(200).json({
          message: newDebit,
       });

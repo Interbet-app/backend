@@ -115,5 +115,6 @@ route.post("/awards/qr-code", Control.GetAwardQrCode);
 route.post("/awards/qr-code/payment", Control.ConfirmAwardPayment);
 route.post("/awards/newCredit/:id/", Control.NewCreditAmount);
 route.post("/awards/newDebit/:id/", Control.NewDebitAmount);
+route.post("/awards/cashout/:id/", Control.Cashout);
 
 export default route;

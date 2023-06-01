@@ -172,3 +172,22 @@ export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
   </Params>
 </Method>
 </PKT>`
+export const XmlCashoutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
+<Method Name="CashoutBet">
+  <Auth Login="" Password="" />
+  <Params>
+    <Token Type="string" Value="${userToken + new Date().valueOf()}" />
+    <TransactionID Type="int" Value="${new Date().valueOf()}" />
+    <CashoutAmount Type="int" Value="${amount}" />
+    <BetReferenceNum Type="string" Value="${betId}" />
+    <GameReference Type="string" Value="SPORTSBOOK2.0" />
+    <BetMode Type="string" Value="PreLive" />
+    <Description Type="string" Value="Everton FC vs. Stoke City: 1" />
+    <ExternalUserID Type="string" Value="P172900" />
+    <FrontendType Type="int" Value="2" />
+    <BetStatus Type="string" Value="T" />
+    <SportIDs Type="string" Value="1" />
+    <SiteId Type="string" Value="5" />
+  </Params>
+</Method>
+</PKT>`
