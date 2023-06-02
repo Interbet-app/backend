@@ -13,7 +13,8 @@ route.get("/bets/:userId/",AuthAdmin, Control.GetAnyUserBets);
 route.get("/bets/user/me", AuthUser, Control.GetUserBets);
 
 route.get("/bets/game/:id/", Middle.ID, AuthAdmin, Control.GetBetsByGame);
-route.delete("/bets/:id/", Middle.ID, AuthAdmin, Control.DeleteBet);
+route.delete("/bets/:id/", Middle.ID, Control.DeleteBet);
+// route.delete("/bets/:id/", Middle.ID, AuthAdmin, Control.DeleteBet);
 
 route.get("/games/history", Control.GamesHistory);
 route.get("/games/history/search", Control.GamesHistorySearch);
@@ -68,7 +69,8 @@ route.post("/adds", AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthAdmin, Control.DeleteAdds);
 
 route.get("/user", AuthUser, Control.GetUser);
-route.get("/user/all",AuthAdmin, Control.GetAllUsers);
+route.get("/user/all",Control.GetAllUsers);
+// route.get("/user/all",AuthAdmin, Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
 route.post("/user/max-bet-amount", Control.UserSetMaxBet);
@@ -111,5 +113,8 @@ route.post("/dashboard/signin", Control.UserRootLogin);
 //- Premiações
 route.post("/awards/qr-code", Control.GetAwardQrCode);
 route.post("/awards/qr-code/payment", Control.ConfirmAwardPayment);
+route.post("/awards/newCredit/:id/", Control.NewCreditAmount);
+route.post("/awards/newDebit/:id/", Control.NewDebitAmount);
+route.post("/awards/cashout/:id/", Control.Cashout);
 
 export default route;

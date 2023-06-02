@@ -2,6 +2,7 @@ import {NextFunction, Request, Response } from "express";
 import { bets, users } from "../models";
 import AppError from "../error";
 import QRCode from "qrcode";
+import { NewCredit, NewDebit, CashoutBet } from "../services/betmotion";
 
 export async function GetAwardQrCode(req: Request, res: Response, next: NextFunction) {
    try {
@@ -37,6 +38,48 @@ export async function ConfirmAwardPayment(req: Request, res: Response, next: Nex
       await bet.save();
 
       res.status(200).json({ massage: "Prêmio pago com sucesso" });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function NewCreditAmount(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { userToken, amount } = req.body;
+      const betId = parseInt(req.params.id, 10);
+      const bet = await bets.findByPk(betId);
+      if (!bet) throw new AppError(404, "Aposta não encontrada!");
+      await NewCredit(betId, userToken, amount)
+      res.status(200).json({
+         message: "NewCredit",
+      });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function NewDebitAmount(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { userToken, amount } = req.body;
+      const betId = parseInt(req.params.id, 10);
+      const bet = await bets.findByPk(betId);
+      if (!bet) throw new AppError(404, "Aposta não encontrada!");
+      const newDebit = await NewDebit(betId, userToken, amount)
+      res.status(200).json({
+         message: newDebit,
+      });
+   } catch (error) {
+      next(error);
+   }
+}
+export async function Cashout(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { userToken, amount } = req.body;
+      const betId = parseInt(req.params.id, 10);
+      const bet = await bets.findByPk(betId);
+      if (!bet) throw new AppError(404, "Aposta não encontrada!");
+      const newDebit = await CashoutBet(betId, userToken, amount)
+      res.status(200).json({
+         message: newDebit,
+      });
    } catch (error) {
       next(error);
    }

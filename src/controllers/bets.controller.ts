@@ -4,7 +4,7 @@ import sequelize, { Op } from "sequelize";
 import { odds, bets, games, users } from "../models";
 import { IBet, IGame, NewBet } from "../interfaces";
 import { RefreshOddsPayout } from "../functions";
-import { PlaceBet, GetBalance } from "../services/betmotion";
+import { PlaceBet, GetBalance, Refound } from "../services/betmotion";
 import { Cache } from "../cache";
 import AppError from "../error";
 import logger from "../log";
@@ -139,7 +139,11 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
 }
 export async function DeleteBet(req: Request, res: Response, next: NextFunction) {
    try {
+      const { userToken } = req.body;
       const betId = parseInt(req.params.id, 10);
+      const bet = await bets.findByPk(betId);
+      if (!bet) throw new AppError(404, "Aposta não encontrada!");
+      await Refound(betId, userToken, bet.amount, "Refound")
       await bets.destroy({ where: { id: betId } });
       res.status(200).json({
          message: "Aposta excluída com sucesso!, mas o saldo do usuário não foi retornado! se necessário, pode ser feito manualmente.",
