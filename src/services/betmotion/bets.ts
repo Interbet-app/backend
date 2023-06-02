@@ -46,6 +46,7 @@ export async function BetWinner(betId: number, userToken: string, amount: number
 
 export async function Refound(betId: number, userToken: string, amount: number, gameName: string) {
    try {
+      console.log(XmlRefundBet({ userToken, betId, amount, gameName }));
       const response = await Betmotion.post("/api/inter-bet/handle.do", XmlRefundBet({ userToken, betId, amount, gameName }));
 
       logger.info("refound response ->" + JSON.stringify(response.data));

@@ -139,12 +139,12 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
 }
 export async function DeleteBet(req: Request, res: Response, next: NextFunction) {
    try {
-      const { userToken } = req.body;
+      const { userToken, amount } = req.body;
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      await Refound(betId, userToken, bet.amount, "Refound")
-      await bets.destroy({ where: { id: betId } });
+      await Refound(betId, userToken, amount, "Refund");
+      // await bets.destroy({ where: { id: betId } });
       res.status(200).json({
          message: "Aposta excluída com sucesso!, mas o saldo do usuário não foi retornado! se necessário, pode ser feito manualmente.",
       });
