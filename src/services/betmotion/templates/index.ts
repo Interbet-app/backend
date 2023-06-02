@@ -172,7 +172,7 @@ export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
   </Params>
 </Method>
 </PKT>`
-export const XmlCashoutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
+export const XmlCashOutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 <Method Name="CashoutBet">
   <Auth Login="" Password="" />
   <Params>

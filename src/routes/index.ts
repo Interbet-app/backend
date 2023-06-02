@@ -6,19 +6,19 @@ import * as Middle from "../middlewares";
 const route = Router();
 
 route.get("/bets", Control.GetBets);
-route.post("/bets", AuthUser, Control.CreateBet);
-route.post("/bets/placeBet",AuthAdmin, Control.BetPlaceBet);
-route.get("/bets/amounts",AuthAdmin, Control.GetBetsSum);
-route.get("/bets/:userId/",AuthAdmin, Control.GetAnyUserBets);
+route.get("/bets/amounts", AuthAdmin, Control.GetBetsSum);
+route.get("/bets/:userId/", AuthAdmin, Control.GetAnyUserBets);
 route.get("/bets/user/me", AuthUser, Control.GetUserBets);
-
 route.get("/bets/game/:id/", Middle.ID, AuthAdmin, Control.GetBetsByGame);
+route.post("/bets", AuthUser, Control.CreateBet);
+route.post("/bets/newCredit/:id/", Control.NewCreditAmount);
+route.post("/bets/newDebit/:id/", Control.NewDebitAmount);
+route.post("/bets/cashout/:id/", Control.CashOut);
 route.delete("/bets/:id/", Middle.ID, Control.DeleteBet);
-// route.delete("/bets/:id/", Middle.ID, AuthAdmin, Control.DeleteBet);
 
 route.get("/games/history", Control.GamesHistory);
 route.get("/games/history/search", Control.GamesHistorySearch);
-route.post("/games/history",  AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
+route.post("/games/history", AuthAdmin, Middle.CreateGameHistory, Control.GamesHistoryCreate);
 route.delete("/games/history/:id/", Middle.ID, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/games", Control.GetGames);
@@ -27,7 +27,6 @@ route.put("/games", AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", Control.GamesFilter);
 route.get("/games/filter", Control.GamesFilter);
 route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, Control.ProcessGame);
-// route.post("/games/process-result/:id/", Middle.ID, Middle.ProcessGame, AuthAdmin, Control.ProcessGame);
 route.get("/games/details/:id/", Middle.ID, Control.GameDetails);
 route.get("/games/last/team", Control.TeamLastGames);
 route.get("/games/last/athletic", Control.AthleticLastGames);
@@ -69,8 +68,7 @@ route.post("/adds", AuthAdmin, Control.CreateAdds);
 route.delete("/adds/:id/", Middle.ID, AuthAdmin, Control.DeleteAdds);
 
 route.get("/user", AuthUser, Control.GetUser);
-route.get("/user/all",Control.GetAllUsers);
-// route.get("/user/all",AuthAdmin, Control.GetAllUsers);
+route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
 route.post("/user/max-bet-amount", Control.UserSetMaxBet);
@@ -113,8 +111,11 @@ route.post("/dashboard/signin", Control.UserRootLogin);
 //- Premiações
 route.post("/awards/qr-code", Control.GetAwardQrCode);
 route.post("/awards/qr-code/payment", Control.ConfirmAwardPayment);
-route.post("/awards/newCredit/:id/", Control.NewCreditAmount);
-route.post("/awards/newDebit/:id/", Control.NewDebitAmount);
-route.post("/awards/cashout/:id/", Control.Cashout);
+
+//-Transações
+
+route.get("/transactions", AuthAdmin, Control.GetTransactions);
+route.get("/transaction/details", Middle.ID, AuthAdmin, Control.GetTransaction);
+route.delete("/transactions", Middle.ID, AuthAdmin, Control.ClearTransactions);
 
 export default route;
