@@ -18,13 +18,13 @@ export async function PlaceBet({ amount, betId, gameId, oddValue, userToken }: I
       const requestXml = XmlPlaceBet({ amount: amountToCents, userToken, betId, gameId, oddValue });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "PlaceBet",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+     await BetmotionTransactions.create({
+        userToken,
+        betId,
+        action: "PlaceBet",
+        requestXml: requestXml,
+        responseXml: response.data,
+     });
 
       return convertXMLtoJson(response.data, ["token", "balance", "extTransactionID", "alreadyProcessed", "Success"]) as IPlaceBetResponse;
    } catch (error) {
@@ -36,13 +36,13 @@ export async function BetLoss(betId: number, userToken: string, gameName: string
       const requestXml = XmlBetLoss({ userToken, betId, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "LossSignal",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+     await BetmotionTransactions.create({
+        userToken,
+        betId,
+        action: "LossSignal",
+        requestXml: requestXml,
+        responseXml: response.data,
+     });
    } catch (error) {
       logger.info("lossSignal error ->" + error);
    }
@@ -53,7 +53,7 @@ export async function BetWinner(betId: number, userToken: string, amount: number
       const requestXml = XmlBetWinner({ userToken, betId, amount: amountToCents, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
+     await BetmotionTransactions.create({
          userToken,
          betId,
          action: "AwardWinnings",
@@ -72,13 +72,13 @@ export async function Refound(betId: number, userToken: string, amount: number, 
       const requestXml = XmlRefundBet({ userToken, betId, amount: amountToCents, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "Refund",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+     await BetmotionTransactions.create({
+        userToken,
+        betId,
+        action: "Refund",
+        requestXml: requestXml,
+        responseXml: response.data,
+     });
    } catch (error) {
       logger.info("refound error ->" + error);
    }
@@ -89,13 +89,13 @@ export async function NewCredit(betId: number, userToken: string, amount: number
       const requestXml = XmlNewCredit({ userToken, betId, amount: amountToCents });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "newCredit",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+     await BetmotionTransactions.create({
+        userToken,
+        betId,
+        action: "newCredit",
+        requestXml: requestXml,
+        responseXml: response.data,
+     });
    } catch (error) {
       logger.info("NewCredit error ->" + error);
    }
@@ -106,13 +106,13 @@ export async function NewDebit(betId: number, userToken: string, amount: number)
       const requestXml = XmlNewDebit({ userToken, betId, amount: amountToCents });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "NewDebit",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+    await BetmotionTransactions.create({
+       userToken,
+       betId,
+       action: "NewDebit",
+       requestXml: requestXml,
+       responseXml: response.data,
+    });
    } catch (error) {
       logger.info("NewDebit error ->" + error);
    }
@@ -123,13 +123,13 @@ export async function CashOutBet(betId: number, userToken: string, amount: numbe
       const requestXml = XmlCashOutBet({ userToken, betId, amount: amountToCents });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
-      BetmotionTransactions.create({
-         userToken,
-         betId,
-         action: "CashOut",
-         requestXml: requestXml,
-         responseXml: response.data,
-      });
+    await BetmotionTransactions.create({
+       userToken,
+       betId,
+       action: "CashOut",
+       requestXml: requestXml,
+       responseXml: response.data,
+    });
    } catch (error) {
       logger.info("CashOut error ->" + error);
    }

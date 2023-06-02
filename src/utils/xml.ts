@@ -21,8 +21,6 @@ export const checkStatusOfRequest = (xml: string) => {
 export const convertXMLtoJson = (xml: any, options: string[]) => {
    try {
       const xmlResponse = JSON.parse(xml2json(xml, { compact: true, spaces: 4 }));
-
-      console.log(xmlResponse);
       const result = xmlResponse.PKT.Result;
       const returnSet = result.Returnset;
       const response = [...options]?.reduce(
