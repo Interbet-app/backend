@@ -123,11 +123,15 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
 }
 export async function NewCreditAmount(req: Request, res: Response, next: NextFunction) {
    try {
-      const { userToken, amount } = req.body;
+      const { amount } = req.body;
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      await NewCredit(betId, userToken, amount);
+
+      const user = await users.findByPk(bet.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+
+      await NewCredit(betId, user.betmotionUserID!, amount);
       res.status(200).json({ message: "NewCredit" });
    } catch (error) {
       next(error);
@@ -135,11 +139,15 @@ export async function NewCreditAmount(req: Request, res: Response, next: NextFun
 }
 export async function NewDebitAmount(req: Request, res: Response, next: NextFunction) {
    try {
-      const { userToken, amount } = req.body;
+      const { amount } = req.body;
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      const newDebit = await NewDebit(betId, userToken, amount);
+
+      const user = await users.findByPk(bet.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+
+      const newDebit = await NewDebit(betId, user.betmotionUserID!, amount);
       res.status(200).json({ message: newDebit });
    } catch (error) {
       next(error);
@@ -147,11 +155,15 @@ export async function NewDebitAmount(req: Request, res: Response, next: NextFunc
 }
 export async function CashOut(req: Request, res: Response, next: NextFunction) {
    try {
-      const { userToken, amount } = req.body;
+      const { amount } = req.body;
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      const newDebit = await CashOutBet(betId, userToken, amount);
+
+      const user = await users.findByPk(bet.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+
+      const newDebit = await CashOutBet(betId, user.betmotionUserID!, amount);
       res.status(200).json({ message: newDebit });
    } catch (error) {
       next(error);
@@ -159,11 +171,13 @@ export async function CashOut(req: Request, res: Response, next: NextFunction) {
 }
 export async function DeleteBet(req: Request, res: Response, next: NextFunction) {
    try {
-      const { userToken } = req.body;
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
       if (!bet) throw new AppError(404, "Aposta não encontrada!");
-      await Refound(betId, userToken, bet.amount, "Refound");
+      const user = await users.findByPk(bet.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado!");
+
+      await Refound(betId, user.betmotionUserID!, bet.amount, "Refound");
       await bets.destroy({ where: { id: betId } });
       res.status(200).json({ message: "Aposta excluída com sucesso!" });
    } catch (error) {
