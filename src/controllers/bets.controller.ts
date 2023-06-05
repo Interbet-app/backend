@@ -48,14 +48,19 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (userBalance.Success === "0") throw new AppError(400, "Erro ao obter saldo do usuário, efetue login novamente!");
       if (Number(userBalance.balance) == 0) throw new AppError(400, "Usuário não tem saldo suficiente!");
       const balance = Number(userBalance?.balance) / 100;
-      const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
 
+      const globalMaxBetAmount = parseFloat(Cache.get(`settings.userMaxBetAmount`) || "0");
+      const userGlobalBetAmount = await bets.sum("amount", { where: { userId: userId } });
+      const userBetOddAmount = await bets.sum("amount", { where: { userId: userId, oddId: oddId } });
+      if (userGlobalBetAmount && Number(userGlobalBetAmount) + Number(amount) > Number(globalMaxBetAmount))
+         throw new AppError(400, "Essa aposta excede o limite global do usuário.");
+      
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Opção não encontrada!");
       if (odd.status !== "open") throw new AppError(400, "Opção não está mais disponível");
       if (parseFloat(amount) > Number(balance)) throw new AppError(400, "Usuário não tem saldo suficiente!");
-      if (parseFloat(amount) > Number(odd.maxBetAmount)) throw new AppError(400, "Essa aposta excede o limite do jogo.");
-      if (parseFloat(amount) > globalMaxBetAmount) throw new AppError(400, "Essa aposta excede o limite global.");
+      if (parseFloat(amount) + Number(userBetOddAmount) > Number(odd.maxBetAmount))
+         throw new AppError(400, "Essa aposta excede o limite da opção neste jogo.");
 
       const gameOdds = await odds.findAll({ where: { gameId: odd.gameId } });
       const ids = gameOdds.map((odd) => odd.id!);
