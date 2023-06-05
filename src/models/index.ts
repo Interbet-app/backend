@@ -13,3 +13,4 @@ export * from "./rankings.model";
 export * from "./games-history.model";
 export * from "./feedbacks.model";
 export * from "./settings.model";
+export * from "./transactions.model";
