@@ -68,10 +68,11 @@ export async function BetWinner(betId: number, userToken: string, amount: number
 }
 export async function Refound(betId: number, userToken: string, amount: number, gameName: string) {
    try {
+
       const amountToCents = amount * 100;
       const requestXml = XmlRefundBet({ userToken, betId, amount: amountToCents, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
-
+     
      await BetmotionTransactions.create({
         userToken,
         betId,

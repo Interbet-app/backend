@@ -110,7 +110,6 @@ export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner)
 </PKT>`;
 
 export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner ) => `<PKT>
-<PKT>
   <Method Name="RefundBet">
     <Auth Login="" Password="" />
     <Params>
@@ -126,7 +125,6 @@ export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner )
       <FrontendType Type="int" Value="0" />
       <BetStatus Type="string" Value="A" />
       <SportIDs Type="string" Value="66" />
-      <ClientIP Type="string" Value="2804:30c:a15:7700:547e:e92c:c82d:a0c2" />
     </Params>
   </Method>
 </PKT>`
