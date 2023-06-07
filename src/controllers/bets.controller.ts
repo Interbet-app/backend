@@ -117,7 +117,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       if (balances.length == 3) {
          const newPayout = RefreshOddsPayout(balances, startPayOuts, totalBet);
          oddToUpdate.forEach((odd, index) => {
-            odd.payout = newPayout[index];
+            odd.payout = startPayOuts[index];
             odd.updatedAt = new Date();
             odd.save();
          });
