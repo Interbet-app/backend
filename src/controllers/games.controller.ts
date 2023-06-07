@@ -13,6 +13,46 @@ export async function GetGames(_req: Request, res: Response, next: NextFunction)
       next(err);
    }
 }
+export async function GetGamesOdds(_req: Request, res: Response, next: NextFunction) {
+   try {
+     const allGames = await games.findAll();
+     const gamesWithOdds: {
+       name: string;
+       status: "open" | "pendent" | "closed";
+       modality: string;
+       odds: {
+         name: string;
+         startPayout: number;
+         payout: number;
+         amount: number;
+         payment: number;
+       }[];
+     }[] = [];
+ 
+     await Promise.all(
+       allGames.map(async (game) => {
+         const gameOdds = await odds.findAll({ where: { gameId: game.id } });
+         gamesWithOdds.push({
+           name: game.name,
+           status: game.status,
+           modality: game.modality,
+           odds: gameOdds.map((odd) => ({
+             name: odd.name,
+             startPayout: odd.startPayOut,
+             payout: odd.payout,
+             amount: odd.amount,
+             payment: odd.payment,
+           })),
+         });
+       })
+     );
+ 
+     res.status(200).json({ games: gamesWithOdds });
+   } catch (err) {
+     next(err);
+   }
+ }
+ 
 export async function GameDetails(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);

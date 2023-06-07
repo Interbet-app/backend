@@ -22,6 +22,7 @@ route.post("/games/history", AuthAdmin, Middle.CreateGameHistory, Control.GamesH
 route.delete("/games/history/:id/", Middle.ID, AuthAdmin, Control.GamesHistoryDelete);
 
 route.get("/games", Control.GetGames);
+route.get("/games/odds", Control.GetGamesOdds);
 route.post("/games", Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", Control.GamesFilter);

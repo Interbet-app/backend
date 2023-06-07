@@ -20,17 +20,19 @@ export class File {
    }
 }
 
-export const RefreshOddsPayout = (balance: number[]) => {
-   const equilibriumConst = balance[0] + balance[1] + balance[2] + 1000;
-   const marginHouse = 0.3;
-   const balanceListDuplicate = [...balance, ...balance];
-   const newOdds = [] as any[];
-   balance.forEach((bet) => {
-      const A = (balanceListDuplicate[balance.indexOf(bet)] + equilibriumConst)/equilibriumConst;
-      const B = (balanceListDuplicate[balance.indexOf(bet) + 1] + equilibriumConst)/equilibriumConst;
-      const C = (balanceListDuplicate[balance.indexOf(bet) + 2] + equilibriumConst)/equilibriumConst;
-      const odd = (1 - marginHouse) * (1 + B / A + C/A);
+export const RefreshOddsPayout = (balance: number[], startPayOuts: number[], totalBet: number) => {
+   const profits = balance.map(balance => balance - totalBet)
+   const equilibriumConst = totalBet + 1000;
+   const rate = equilibriumConst/(500+equilibriumConst)
+   const balanceListDuplicate = [...profits, ...profits];
+   const newOdds = [] as any [];
+   profits.forEach((bet) => {
+      const A = (balanceListDuplicate[profits.indexOf(bet)] + equilibriumConst)/equilibriumConst;
+      const B = (balanceListDuplicate[profits.indexOf(bet) + 1] + equilibriumConst)/equilibriumConst;
+      const C = (balanceListDuplicate[profits.indexOf(bet) + 2] + equilibriumConst)/equilibriumConst;
+      const odd = (1 + B / A + C/A) - 3;
       newOdds.push(Number(odd.toFixed(2)));
    });
-   return newOdds;
-};
+   const finalOdds = startPayOuts.map(odd => (((odd * (1 - rate) + (newOdds[startPayOuts.indexOf(odd)] + odd)* rate) - 1) * 0.6) + 1)
+   return finalOdds;
+ };
