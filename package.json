@@ -11,7 +11,8 @@
       "start": "node -r dotenv/config ./dist/server.js",
       "build": "tsc",
       "dev": "ts-node-dev -r dotenv/config --files ./src/server.ts",
-      "production": "npm install && tsc"
+      "production": "npm install && tsc",
+      "test": "jest --coverage --verbose --detectOpenHandles --forceExit --runInBand"
    },
    "author": "interbet.app",
    "license": "MIT",
@@ -49,6 +50,11 @@
       "@types/sequelize": "^4.28.15",
       "@types/typescript": "^2.0.0",
       "@types/winston": "^2.4.4",
+      "@types/supertest": "^2.0.12",
+      "@types/jest": "^29.5.2",
+      "jest": "^29.5.0",
+      "supertest": "^6.3.3",
+      "ts-jest": "^29.1.0",
       "ts-node-dev": "^2.0.0",
       "typescript": "^5.0.4"
    },

@@ -6,3 +6,5 @@ dist/
 .env.development
 *.conf
 logs/*
+
+coverage/

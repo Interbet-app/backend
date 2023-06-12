@@ -72,7 +72,7 @@ route.get("/user", AuthUser, Control.GetUser);
 route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
-route.post("/user/max-bet-amount", Control.UserSetMaxBet);
+route.post("/user/max-bet-amount",AuthAdmin, Control.UserSetMaxBet);
 route.get("/user/me", Control.SignInBetMotion);
 route.get("/logout", AuthUser, Control.Logout);
 
