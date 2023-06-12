@@ -7,4 +7,5 @@ export default axios.create({
    headers: {
       "Content-Type": "text/xml",
    },
+   timeout: 10000,
 });

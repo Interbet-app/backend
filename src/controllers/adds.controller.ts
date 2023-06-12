@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response } from "express";
 import { adds } from "../models";
 import { File } from "../functions";
-import { S3 } from "../aws";
+import { Storage } from "../aws";
 import AppError from "../error";
 import multer from "multer";
 import { IAdds } from "../interfaces";
@@ -29,7 +29,7 @@ export async function CreateAdds(req: Request, res: Response, next: NextFunction
          if (check?.type !== "image")
             throw new AppError(422, `File format not allowed! Allowed formats: png, jpeg, jpg`);
 
-         const bucket = new S3();
+         const bucket = new Storage();
          const file_bucket_name = `adds/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
          const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
@@ -54,7 +54,7 @@ export async function DeleteAdds(req: Request, res: Response, next: NextFunction
       const add = await adds.findByPk(id);
       if (!add) throw new AppError(404, "Adds não encontrado!");
 
-      const bucket = new S3();
+      const bucket = new Storage();
       const file = add.image.substring(add.image.indexOf("adds"));
       const result = await bucket.DeleteFile(file);
       if (result instanceof AppError) throw result;

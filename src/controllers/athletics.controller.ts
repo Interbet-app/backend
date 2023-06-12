@@ -2,7 +2,7 @@ import {NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { athletics, teams } from "../models";
 import { IAthletic } from "../interfaces";
-import { S3 } from "../aws";
+import { Storage } from "../aws";
 import { File } from "../functions";
 import multer from "multer";
 import AppError from "../error";
@@ -42,7 +42,7 @@ export async function CreateAthletic(req: Request, res: Response, next: NextFunc
             const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image") throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
-            const bucket = new S3();
+            const bucket = new Storage();
             const file_bucket_name = `athletics/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
             const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
@@ -86,7 +86,7 @@ export async function UpdateAthletic(req: Request, res: Response, next: NextFunc
          const check = File.BreakMimetype(req.file.mimetype);
          if (check?.type !== "image") throw new AppError(422, "Extensão de arquivo inválida, somente png, jpeg e jpg!");
 
-         const bucket = new S3();
+         const bucket = new Storage();
          const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
          const result = await bucket.DeleteFile(to_delete);
          if (result instanceof AppError) throw result;
@@ -116,7 +116,7 @@ export async function DeleteAthletic(req: Request, res: Response, next: NextFunc
       if (!athleticId) throw new AppError(422, "!");
       const athletic = await athletics.findByPk(athleticId);
       if (!athletic) return res.status(404).json({ message: "Atlética não foi encontrada" });
-      const bucket = new S3();
+      const bucket = new Storage();
       const to_delete = athletic.picture.substring(athletic.picture.lastIndexOf("athletics"));
       const result = await bucket.DeleteFile(to_delete);
       if (result instanceof AppError) throw result;

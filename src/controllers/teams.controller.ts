@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import { athletics, teams } from "../models";
 import { ITeam } from "../interfaces";
-import { S3 } from "../aws";
+import { Storage } from "../aws";
 import { File } from "../functions";
 import multer from "multer";
 import AppError from "../error";
@@ -57,7 +57,7 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
             const check = File.BreakMimetype(req.file.mimetype);
             if (check?.type !== "image") throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
 
-            const bucket = new S3();
+            const bucket = new Storage();
             const file_bucket_name = `teams/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
             const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
@@ -68,7 +68,7 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
                abbreviation,
                athleticId,
                sport,
-               picture: result.Location,
+               picture: result.ETag!,
                adminId: adminId ? adminId : null,
                location,
                gender,
@@ -107,7 +107,7 @@ export async function UpdateTeam(req: Request, res: Response, next: NextFunction
          const check = File.BreakMimetype(req.file.mimetype);
          if (check?.type !== "image") throw new AppError(422, "Formato de arquivo inválido!, somente png, jpeg e jpg são permitidos!");
 
-         const bucket = new S3();
+         const bucket = new Storage();
          const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
          const result = await bucket.DeleteFile(to_delete);
          if (result instanceof AppError) throw result;
@@ -136,7 +136,7 @@ export async function DeleteTeam(req: Request, res: Response, next: NextFunction
       const teamId = parseInt(req.params.id, 10);
       const team = await teams.findByPk(teamId);
       if (!team) return res.status(404).json({ message: "Time não encontrado!" });
-      const bucket = new S3();
+      const bucket = new Storage();
       const to_delete = team.picture.substring(team.picture.lastIndexOf("teams"));
       const result = await bucket.DeleteFile(to_delete);
       if (result instanceof AppError) throw result;

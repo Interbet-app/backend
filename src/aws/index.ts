@@ -1,57 +1,47 @@
-import AWS from "aws-sdk";
+import AWS_S3, { S3, PutObjectCommand } from "@aws-sdk/client-s3";
 import AppError from "../error";
 
-export class S3 {
-   private bucket: AWS.S3;
-   private readonly ACCESS_KEY_ID: string;
-   private readonly SECRET_ACCESS_KEY: string;
-   private readonly REGION: string;
-   private readonly BUCKET_NAME: string;
-   constructor() {
-      this.ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID as string;
-      this.SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY as string;
-      this.REGION = process.env.AWS_REGION as string;
-      this.BUCKET_NAME = process.env.AWS_BUCKET as string;
-      this.bucket = new AWS.S3({
-         accessKeyId: this.ACCESS_KEY_ID,
-         secretAccessKey: this.SECRET_ACCESS_KEY,
-         region: this.REGION,
-      });
-   }
+const s3Client = new S3({ region: process.env.AWS_REGION as string });
+interface PutObjectCommandOutput extends AWS_S3.PutObjectCommandOutput {
+   Location: string;
+}
 
-   public async UploadFile(fileBuffer: Buffer, fileName: string): Promise<AWS.S3.ManagedUpload.SendData | AppError> {
+export class Storage {
+   public async UploadFile(fileBuffer: Buffer, fileName: string): Promise<PutObjectCommandOutput | AppError> {
       try {
-         const params = {
-            Bucket: this.BUCKET_NAME,
+         const command = new PutObjectCommand({
+            Bucket: process.env.AWS_BUCKET as string,
             Key: fileName,
             Body: fileBuffer,
-         } as AWS.S3.PutObjectRequest;
-         return await this.bucket.upload(params).promise();
+         });
+
+         const response = await s3Client.send(command);
+         const location = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+         return { ...response, Location: location };
       } catch (error: any) {
          return new AppError(500, "Error uploading file to S3", error);
       }
    }
-   public async FindFile(fileName: string): Promise<AWS.S3.ListObjectsV2Output | AppError> {
+   public async FindFile(fileName: string): Promise<AWS_S3.ListObjectsV2CommandOutput | AppError> {
       try {
-         const params = {
-            Bucket: this.BUCKET_NAME,
+         const command = new AWS_S3.ListObjectsV2Command({
+            Bucket: process.env.AWS_BUCKET as string,
             Prefix: fileName,
-         } as AWS.S3.ListObjectsV2Request;
-         return await this.bucket.listObjectsV2(params).promise();
+         });
+         return await s3Client.send(command);
       } catch (error: any) {
          return new AppError(500, "Error finding file in S3", error);
       }
    }
-   public async DeleteFile(fileName: string): Promise<AWS.S3.DeleteObjectOutput | AppError> {
+   public async DeleteFile(fileName: string): Promise<AWS_S3.DeleteObjectCommandOutput | AppError> {
       try {
-         const params = {
-            Bucket: this.BUCKET_NAME,
+         const command = new AWS_S3.DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET as string,
             Key: fileName,
-         } as AWS.S3.DeleteObjectRequest;
-         return await this.bucket.deleteObject(params).promise();
+         });
+         return await s3Client.send(command);
       } catch (error: any) {
          return new AppError(500, "Error deleting file in S3", error);
       }
    }
 }
-

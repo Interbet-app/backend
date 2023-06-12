@@ -13,9 +13,8 @@ interface IPlaceBetResponse {
 }
 
 export async function PlaceBet({ amount, betId, gameId, oddValue, userToken }: IPlaceBet) {
-   const amountToCents = amount * 100;
    try {
-      const requestXml = XmlPlaceBet({ amount: amountToCents, userToken, betId, gameId, oddValue });
+      const requestXml = XmlPlaceBet({ amount, userToken, betId, gameId, oddValue });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
      await BetmotionTransactions.create({
@@ -49,8 +48,7 @@ export async function BetLoss(betId: number, userToken: string, gameName: string
 }
 export async function BetWinner(betId: number, userToken: string, amount: number, gameName: string) {
    try {
-      const amountToCents = amount * 100;
-      const requestXml = XmlBetWinner({ userToken, betId, amount: amountToCents, gameName });
+      const requestXml = XmlBetWinner({ userToken, betId, amount, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
      await BetmotionTransactions.create({
@@ -68,9 +66,7 @@ export async function BetWinner(betId: number, userToken: string, amount: number
 }
 export async function Refound(betId: number, userToken: string, amount: number, gameName: string) {
    try {
-
-      const amountToCents = amount * 100;
-      const requestXml = XmlRefundBet({ userToken, betId, amount: amountToCents, gameName });
+      const requestXml = XmlRefundBet({ userToken, betId, amount, gameName });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
      
      await BetmotionTransactions.create({
@@ -86,8 +82,7 @@ export async function Refound(betId: number, userToken: string, amount: number, 
 }
 export async function NewCredit(betId: number, userToken: string, amount: number) {
    try {
-      const amountToCents = amount * 100;
-      const requestXml = XmlNewCredit({ userToken, betId, amount: amountToCents });
+      const requestXml = XmlNewCredit({ userToken, betId, amount });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
      await BetmotionTransactions.create({
@@ -103,8 +98,7 @@ export async function NewCredit(betId: number, userToken: string, amount: number
 }
 export async function NewDebit(betId: number, userToken: string, amount: number) {
    try {
-      const amountToCents = amount * 100;
-      const requestXml = XmlNewDebit({ userToken, betId, amount: amountToCents });
+      const requestXml = XmlNewDebit({ userToken, betId, amount });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
     await BetmotionTransactions.create({
@@ -120,8 +114,7 @@ export async function NewDebit(betId: number, userToken: string, amount: number)
 }
 export async function CashOutBet(betId: number, userToken: string, amount: number) {
    try {
-      const amountToCents = amount * 100;
-      const requestXml = XmlCashOutBet({ userToken, betId, amount: amountToCents });
+      const requestXml = XmlCashOutBet({ userToken, betId, amount });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
     await BetmotionTransactions.create({
