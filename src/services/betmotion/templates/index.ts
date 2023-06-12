@@ -26,7 +26,7 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPla
     <Params>
       <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora ddo envio
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
-      <BetAmount Type="int" Value="${amount}" />
+      <BetAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
       <BetReferenceNum Type="string" Value="${betId}" />
       <GameReference Type="string" Value="INTER_BET_GAMES" />
       <BetMode Type="string" Value="Live" />
@@ -96,7 +96,7 @@ export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner)
   <Params>
     <Token Type="string" Value="${userToken + new Date().valueOf()}" />
     <TransactionID Type="int" Value="${new Date().valueOf()}" />
-    <WinAmount Type="int" Value="${amount}" />
+    <WinAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
     <WinReferenceNum Type="string" Value="${betId}" />
     <GameReference Type="string" Value="${gameName}" />
     <BetMode Type="string" Value="Live" />
@@ -110,7 +110,7 @@ export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner)
 </PKT>`;
 
 //? XML para informar o cancelamento de uma aposta
-export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner ) => `<PKT>
+export const XmlRefundBet = ({ userToken, amount, betId, gameName }: IBetWinner) => `<PKT>
   <Method Name="RefundBet">
     <Auth Login="" Password="" />
     <Params>
@@ -118,7 +118,7 @@ export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner )
       <SiteId Type="string" Value="5" />
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetReferenceNum Type="string" Value="${betId}" />
-      <RefundAmount Type="int" Value="${amount}" />
+      <RefundAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
       <GameReference Type="string" Value="INTER_BET_GAMES" />
       <BetMode Type="string" Value="Live" />
       <Description Type="string" Value="${gameName}" />
@@ -128,10 +128,10 @@ export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner )
       <SportIDs Type="string" Value="66" />
     </Params>
   </Method>
-</PKT>`
+</PKT>`;
 
 //? XML para informar uma deposito
-export const XmlNewCredit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
+export const XmlNewCredit = ({ userToken, amount, betId }: IBetWinner) => `<PKT>
 <Method Name="NewCredit">
   <Auth Login="" Password="" />
   <Params>
@@ -139,7 +139,7 @@ export const XmlNewCredit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
     <SiteId Type="string" Value="5" />
     <TransactionID Type="int" Value="${new Date().valueOf()}" />
     <NewCreditReferenceNum Type="string" Value="${betId}" />
-    <NewCreditAmount Type="int" Value="${amount}" />
+    <NewCreditAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
     <GameReference Type="string" Value="INTER_BET_GAMES" />
     <BetMode Type="string" Value="Live" />
     <Description Type="string" Value="Live bet (Multiple)" />
@@ -150,10 +150,10 @@ export const XmlNewCredit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
     <ClientIP Type="string" Value="2804:30c:a15:7700:992e:79a:127d:cbe6" />
   </Params>
 </Method>
-</PKT>`
+</PKT>`;
 
 //? XML para informar uma retirada
-export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
+export const XmlNewDebit = ({ userToken, amount, betId }: IBetWinner) => `<PKT>
 <Method Name="NewDebit">
   <Auth Login="" Password="" />
   <Params>
@@ -161,7 +161,7 @@ export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
     <SiteId Type="string" Value="5" />
     <TransactionID Type="int" Value="${new Date().valueOf()}" />
     <NewDebitReferenceNum Type="string" Value="${betId}" />
-    <NewDebitAmount Type="int" Value="${amount}" />
+    <NewDebitAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
     <GameReference Type="string" Value="INTER_BET_GAMES" />
     <BetMode Type="string" Value="Live" />
     <Description Type="string" Value="Live bet (Multiple)" />
@@ -172,7 +172,7 @@ export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
     <ClientIP Type="string" Value="2804:30c:a15:7700:992e:79a:127d:cbe6" />
   </Params>
 </Method>
-</PKT>`
+</PKT>`;
 
 export const XmlCashOutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 <Method Name="CashoutBet">
@@ -180,7 +180,7 @@ export const XmlCashOutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
   <Params>
     <Token Type="string" Value="${userToken + new Date().valueOf()}" />
     <TransactionID Type="int" Value="${new Date().valueOf()}" />
-    <CashoutAmount Type="int" Value="${amount}" />
+    <CashoutAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
     <BetReferenceNum Type="string" Value="${betId}" />
     <GameReference Type="string" Value="SPORTSBOOK2.0" />
     <BetMode Type="string" Value="PreLive" />
