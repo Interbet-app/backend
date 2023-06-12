@@ -109,6 +109,7 @@ export const XmlBetWinner = ({ userToken, betId, amount, gameName }: IBetWinner)
 </Method>
 </PKT>`;
 
+//? XML para informar o cancelamento de uma aposta
 export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner ) => `<PKT>
   <Method Name="RefundBet">
     <Auth Login="" Password="" />
@@ -129,6 +130,7 @@ export const XmlRefundBet = ({userToken, amount, betId, gameName} : IBetWinner )
   </Method>
 </PKT>`
 
+//? XML para informar uma deposito
 export const XmlNewCredit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 <Method Name="NewCredit">
   <Auth Login="" Password="" />
@@ -150,6 +152,7 @@ export const XmlNewCredit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 </Method>
 </PKT>`
 
+//? XML para informar uma retirada
 export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 <Method Name="NewDebit">
   <Auth Login="" Password="" />
@@ -170,6 +173,7 @@ export const XmlNewDebit = ({userToken, amount, betId} : IBetWinner) => `<PKT>
   </Params>
 </Method>
 </PKT>`
+
 export const XmlCashOutBet = ({userToken, amount, betId} : IBetWinner) => `<PKT>
 <Method Name="CashoutBet">
   <Auth Login="" Password="" />
