@@ -15,44 +15,46 @@ export async function GetGames(_req: Request, res: Response, next: NextFunction)
 }
 export async function GetGamesOdds(_req: Request, res: Response, next: NextFunction) {
    try {
-     const allGames = await games.findAll();
-     const gamesWithOdds: {
-       name: string;
-       status: "open" | "pendent" | "closed";
-       modality: string;
-       odds: {
+      const allGames = await games.findAll();
+      const gamesWithOdds: {
+         game: IGame;
          name: string;
-         startPayout: number;
-         payout: number;
-         amount: number;
-         payment: number;
-       }[];
-     }[] = [];
- 
-     await Promise.all(
-       allGames.map(async (game) => {
-         const gameOdds = await odds.findAll({ where: { gameId: game.id } });
-         gamesWithOdds.push({
-           name: game.name,
-           status: game.status,
-           modality: game.modality,
-           odds: gameOdds.map((odd) => ({
-             name: odd.name,
-             startPayout: odd.startPayOut,
-             payout: odd.payout,
-             amount: odd.amount,
-             payment: odd.payment,
-           })),
-         });
-       })
-     );
- 
-     res.status(200).json({ games: gamesWithOdds });
+         status: "open" | "pendent" | "closed";
+         modality: string;
+         odds: {
+            name: string;
+            startPayout: number;
+            payout: number;
+            amount: number;
+            payment: number;
+         }[];
+      }[] = [];
+
+      await Promise.all(
+         allGames.map(async (game) => {
+            const gameOdds = await odds.findAll({ where: { gameId: game.id } });
+            gamesWithOdds.push({
+               game: game,
+               name: game.name,
+               status: game.status,
+               modality: game.modality,
+               odds: gameOdds.map((odd) => ({
+                  name: odd.name,
+                  startPayout: odd.startPayOut,
+                  payout: odd.payout,
+                  amount: odd.amount,
+                  payment: odd.payment,
+               })),
+            });
+         })
+      );
+
+      res.status(200).json({ games: gamesWithOdds });
    } catch (err) {
-     next(err);
+      next(err);
    }
- }
- 
+}
+
 export async function GameDetails(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);
@@ -230,7 +232,7 @@ export async function ProcessGame(req: Request, res: Response, next: NextFunctio
                const user = await users.findByPk(aposta.userId);
                if (!user) throw new AppError(404, `Usuário '${aposta.userId}' não foi encontrado para  atualizar BetMotion!`);
                //! 9 -> atualizar BetMotion
-               const amount = Number(aposta.amount) * Number(aposta.payout) as number;
+               const amount = (Number(aposta.amount) * Number(aposta.payout)) as number;
                if (aposta.result === "win") await BetWinner(aposta.id!, user.betmotionUserID!, amount, game.name);
                else await BetLoss(aposta.id!, user.betmotionUserID!, game.name);
             });
