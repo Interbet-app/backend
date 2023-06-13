@@ -56,20 +56,22 @@ export async function CreateOdd(req: Request, res: Response, next: NextFunction)
 }
 export async function UpdateOdd(req: Request, res: Response, next: NextFunction) {
    try {
-      const { oddId, gameId, name, teamId, payout, maxBetAmount, offer, status } = req.body;
+      const { oddId, gameId, name, teamId, payout, maxBetAmount, offer, status,startPayOut } = req.body;
       const odd = await odds.findByPk(oddId);
       if (!odd) throw new AppError(404, "Odd not found");
 
-      odd.gameId = gameId;
-      odd.name = name;
-      odd.teamId = teamId;
-      odd.startPayOut = payout;
-      odd.payout = payout;
-      odd.maxBetAmount = maxBetAmount;
-      odd.offer = offer;
-      if(status) odd.status = status;
+      if (gameId) odd.gameId = gameId;
+      if (name) odd.name = name;
+      if (teamId) odd.teamId = teamId;
+      if (payout) odd.payout = payout;
+      if (maxBetAmount) odd.maxBetAmount = maxBetAmount;
+      if (offer) odd.offer = offer;
+      if (status) odd.status = status;
+      if (startPayOut) odd.startPayOut = startPayOut;
+      
       odd.updatedAt = new Date();
       await odd.save();
+
       res.status(200).json(odd as IOdd);
    } catch (error) {
       next(error);
