@@ -37,16 +37,14 @@ export async function GamesHistorySearch(req: Request, res: Response, next: Next
             ],
          },
       });
-      const history = games.map((item: IGameHistory) => item as IGameHistory);
-      const pictures = team.map((item: any) => item as ITeamModel);
 
-      const response = history.map((item: IGameHistory) => {
-         const teamA = pictures.find((team) => team.name === item.teamA || team.abbreviation === item.teamA);
-         const teamB = pictures.find((team) => team.name === item.teamB || team.abbreviation === item.teamB);
+      const response = games.map((item) => {
+         const teamA = team.find((team) => team.name === item.teamA || team.abbreviation === item.teamA);
+         const teamB = team.find((team) => team.name === item.teamB || team.abbreviation === item.teamB);
          return {
-            ...item,
-            teamA: teamA?.picture,
-            teamB: teamB?.picture,
+            ...item.dataValues,
+            teamAPic: teamA?.picture,
+            teamBPic: teamB?.picture,
          };
       });
 
