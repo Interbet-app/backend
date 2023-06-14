@@ -5,32 +5,8 @@ import { IGameHistory } from "../interfaces";
 
 export async function GamesHistory(_req: Request, res: Response, next: NextFunction) {
    try {
-      gamesHistory
-         .findAll()
-         .then((response) => res.status(200).json(response))
-         .catch((err) => console.log(err));
-   } catch (error) {
-      next(error);
-   }
-}
-export async function GamesHistorySearch(req: Request, res: Response, next: NextFunction) {
-   try {
-      const { event, teamA, teamB, gender } = req.query;
-      const games = await gamesHistory.findAll({
-         where: {
-            gender: gender as string,
-            event: event as string,
-            [Op.or]: [{ teamA: { [Op.like]: `%${teamA}%` } }, { teamB: { [Op.like]: `%${teamB}%` } }],
-         },
-      });
-
-      const team = (await teams.findAll({
-         where: {
-            gender: gender as string,
-         },
-         attributes: ["name", "picture", "abbreviation"],
-      })) as ITeamModel[];
-
+      const games = await gamesHistory.findAll();
+      const team = (await teams.findAll({ attributes: ["name", "picture", "abbreviation"] })) as ITeamModel[];
       const response = games.map((item) => {
          const teamA = team.find((team) => team.name.includes(item.teamA) || team.abbreviation.includes(item.teamA));
          const teamB = team.find((team) => team.name.includes(item.teamB) || team.abbreviation.includes(item.teamB));
@@ -55,6 +31,23 @@ export async function GamesHistorySearch(req: Request, res: Response, next: Next
             date: item.date,
          };
       });
+
+      res.status(200).json(response);
+   } catch (error) {
+      next(error);
+   }
+}
+export async function GamesHistorySearch(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { event, teamA, teamB, gender } = req.query;
+      const history = await gamesHistory.findAll({
+         where: {
+            gender: gender as string,
+            event: event as string,
+            [Op.or]: [{ teamA: { [Op.like]: `%${teamA}%` } }, { teamB: { [Op.like]: `%${teamB}%` } }],
+         },
+      });
+      const response = history.map((item: IGameHistory) => item as IGameHistory);
 
       res.status(200).json(response);
    } catch (error) {
