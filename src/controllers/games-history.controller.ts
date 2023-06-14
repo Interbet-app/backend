@@ -19,32 +19,40 @@ export async function GamesHistorySearch(req: Request, res: Response, next: Next
       const games = await gamesHistory.findAll({
          where: {
             gender: gender as string,
-            [Op.or]: [
-               { event: { [Op.like]: `%${event}%` } },
-               { teamA: { [Op.like]: `%${teamA}%` } },
-               { teamB: { [Op.like]: `%${teamB}%` } },
-            ],
+            event: event as string,
+            [Op.or]: [{ teamA: { [Op.like]: `%${teamA}%` } }, { teamB: { [Op.like]: `%${teamB}%` } }],
          },
       });
 
-      const team = await teams.findAll({
+      const team = (await teams.findAll({
          where: {
-            [Op.or]: [
-               { name: { [Op.like]: `%${teamA}%` } },
-               { name: { [Op.like]: `%${teamB}%` } },
-               { abbreviation: { [Op.like]: `%${teamA}%` } },
-               { abbreviation: { [Op.like]: `%${teamB}%` } },
-            ],
+            gender: gender as string,
          },
-      });
+         attributes: ["name", "picture", "abbreviation"],
+      })) as ITeamModel[];
 
       const response = games.map((item) => {
-         const teamA = team.find((team) => team.name === item.teamA || team.abbreviation === item.teamA);
-         const teamB = team.find((team) => team.name === item.teamB || team.abbreviation === item.teamB);
+         const teamA = team.find((team) => team.name.includes(item.teamA) || team.abbreviation.includes(item.teamA));
+         const teamB = team.find((team) => team.name.includes(item.teamB) || team.abbreviation.includes(item.teamB));
          return {
-            ...item.dataValues,
-            teamAPic: teamA?.picture,
-            teamBPic: teamB?.picture,
+            A: {
+               name: teamA?.name,
+               abbreviation: teamA?.abbreviation,
+               picture: teamA?.picture,
+               score: item.scoreA,
+            },
+            B: {
+               name: teamB?.name,
+               abbreviation: teamB?.abbreviation,
+               picture: teamB?.picture,
+               score: item.scoreB,
+            },
+            gameId: item.gameId,
+            gender: item.gender,
+            event: item.event,
+            confrontType: item.confrontType,
+            serie: item.serie,
+            date: item.date,
          };
       });
 
