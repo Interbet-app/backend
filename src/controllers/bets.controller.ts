@@ -104,7 +104,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
       }
 
       odd.amount = Number(odd.amount) + parseFloat(amount);
-      odd.payment = Number(odd.payment) + (parseFloat(amount) + parseFloat(amount) * odd.payout);
+      odd.payment = Number(odd.payment) + (parseFloat(amount) * odd.payout);
       odd.bets = Number(odd.bets) + 1;
       odd.updatedAt = new Date();
       await odd.save();
