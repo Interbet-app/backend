@@ -4,7 +4,7 @@ import { BetWinner, BetLoss } from "../services/betmotion";
 
 export async function BetmotionNotificationTask() {
    try {
-      const bets_to_process = await bets.findAll({ where: { betmotion: false } });
+      const bets_to_process = await bets.findAll({ where: { betmotion: false, status: "completed" } });
 
       for (const bet of bets_to_process) {
          const user = await users.findByPk(bet.userId);
@@ -19,7 +19,9 @@ export async function BetmotionNotificationTask() {
          const game = await games.findOne({ where: { id: odd?.gameId } });
 
          if (!game || !odd) {
-            logger.error(`Jogo ou Odd não encontrado para atualizar BetMotion! BetId:${bet.id}, OddId:${bet.oddId} Amount:${bet.amount} Result:${bet.result}`);
+            logger.error(
+               `Jogo ou Odd não encontrado para atualizar BetMotion! BetId:${bet.id}, OddId:${bet.oddId} Amount:${bet.amount} Result:${bet.result}`
+            );
             continue;
          }
 
@@ -32,8 +34,8 @@ export async function BetmotionNotificationTask() {
             await bet.save();
          } catch (error) {
             logger.error(`Erro ao atualizar BetMotion! BetId:${bet.id}, OddId:${bet.oddId} Amount:${bet.amount} Result:${bet.result}`);
-             logger.error(error);
-             continue;
+            logger.error(error);
+            continue;
          }
       }
    } catch (error) {
