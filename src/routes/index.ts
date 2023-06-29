@@ -14,7 +14,7 @@ route.post("/bets", AuthUser, Control.CreateBet);
 route.post("/bets/newCredit/:id/", Control.NewCreditAmount);
 route.post("/bets/newDebit/:id/", Control.NewDebitAmount);
 route.post("/bets/cashout/:id/", Control.CashOut);
-route.delete("/bets/:id/", Middle.ID, Control.DeleteBet);
+route.put("/bets/:id/", Middle.ID, Control.RefundBet);
 
 route.get("/games/history", Control.GamesHistory);
 route.get("/games/history/search", Control.GamesHistorySearch);
