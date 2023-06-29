@@ -1,10 +1,11 @@
 import CronJob from "cron";
 import logger from "../log";
 import { CloseGames } from "./game.task";
+import { BetmotionNotificationTask } from "./betmotion.task";
 
 
 async function FiveTasks() {
-
+   BetmotionNotificationTask();
 }
 async function OneTasks() {
    //? fechar jogos que já terminaram

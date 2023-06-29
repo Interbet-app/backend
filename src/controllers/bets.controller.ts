@@ -84,6 +84,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
          bonusPercent: 30,
          group: "0",
          paid: false,
+         betmotion: false,
          award: amount > 15 ? "pending" : "not",
          createdAt: new Date(),
          updatedAt: new Date(),
