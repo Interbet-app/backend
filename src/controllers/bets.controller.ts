@@ -177,7 +177,7 @@ export async function CashOut(req: Request, res: Response, next: NextFunction) {
       next(error);
    }
 }
-export async function DeleteBet(req: Request, res: Response, next: NextFunction) {
+export async function RefundBet(req: Request, res: Response, next: NextFunction) {
    try {
       const betId = parseInt(req.params.id, 10);
       const bet = await bets.findByPk(betId);
@@ -186,7 +186,7 @@ export async function DeleteBet(req: Request, res: Response, next: NextFunction)
       if (!user) throw new AppError(404, "Usuário não encontrado!");
 
       await Refound(betId, user.betmotionUserID!, bet.amount, "Refound");
-      await bets.destroy({ where: { id: betId } });
+      await bets.update({ status: "refund" }, { where: { id: betId } });
       res.status(200).json({ message: "Aposta excluída com sucesso!" });
    } catch (error) {
       next(error);

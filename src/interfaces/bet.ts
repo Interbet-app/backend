@@ -4,7 +4,7 @@ export interface IBet {
    oddId: number;
    payout: number;
    amount: number;
-   status: "pendent" | "completed";
+   status: "pendent" | "completed" | "refund" | "canceled";
    result: "pendent" | "win" | "lose";
    bonusPercent: number;
    award: "not" | "pending" | "completed";

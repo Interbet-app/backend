@@ -11,6 +11,7 @@ export async function GetAwardQrCode(req: Request, res: Response, next: NextFunc
       const bet = await bets.findByPk(Number(betId));
       if (!bet) throw new AppError(404, "Bet not found");
       if (bet.award === "not") throw new AppError(422, "Aposta não tem direito a prêmio");
+      if (bet.status === "refund") throw new AppError(422, "Aposta foi reembolsada");
       if (bet.award === "completed") throw new AppError(422, "Prêmio já foi pago");
 
       const user = await users.findByPk(bet.userId);

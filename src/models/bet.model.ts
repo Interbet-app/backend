@@ -10,7 +10,7 @@ export const bets = Database.define<IBetModel>("bets", {
    oddId: { type: Sequelize.BIGINT.UNSIGNED, allowNull: true },
    payout: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
    amount: { type: Sequelize.DECIMAL(10, 2), allowNull: false },
-   status: { type: Sequelize.ENUM("pendent", "completed"), allowNull: false },
+   status: { type: Sequelize.ENUM("pendent", "completed","refund","canceled"), allowNull: false },
    result: { type: Sequelize.ENUM("pendent", "win", "lose"), allowNull: false },
    bonusPercent: { type: Sequelize.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
    betmotion: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
