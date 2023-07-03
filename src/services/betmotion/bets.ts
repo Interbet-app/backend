@@ -12,9 +12,9 @@ interface IPlaceBetResponse {
    Success: string;
 }
 
-export async function PlaceBet({ amount, betId, gameId, oddValue, userToken }: IPlaceBet) {
+export async function PlaceBet({ amount, betId, gameId, oddPayout, userToken }: IPlaceBet) {
    try {
-      const requestXml = XmlPlaceBet({ amount, userToken, betId, gameId, oddValue });
+      const requestXml = XmlPlaceBet({ amount, userToken, betId, gameId, oddPayout });
       const response = await Betmotion.post("/api/inter-bet/handle.do", requestXml);
 
      await BetmotionTransactions.create({

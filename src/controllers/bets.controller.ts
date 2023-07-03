@@ -95,7 +95,7 @@ export async function CreateBet(req: Request, res: Response, next: NextFunction)
          amount: Number(amount),
          betId: Number(bet.id),
          gameId: Number(game.id),
-         oddValue: odd.payout,
+         oddPayout: odd.payout,
          userToken: user.betmotionUserID!,
       });
 

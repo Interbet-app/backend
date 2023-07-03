@@ -3,7 +3,7 @@ export interface IPlaceBet {
    amount: number;
    betId: number;
    gameId: number;
-   oddValue: number;
+   oddPayout: number;
 }
 
 export interface IBetLoss {
@@ -20,11 +20,11 @@ export interface IBetWinner {
 }
 
 //? XML para informar uma aposta realizada pelo usuário
-export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPlaceBet) => `<PKT>
+export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddPayout }: IPlaceBet) => `<PKT>
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
-      <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora ddo envio
+      <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora do envio
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
       <BetReferenceNum Type="string" Value="${betId}" />
@@ -53,20 +53,20 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddValue }: IPla
               <MarketID Type="string" Value="186" />
               <ExtType Type="string" Value="186/{$COMPETITOR1}" />
               <Outcome Type="string" Value="Wojciech Marek" />
-              <Odds Type="double" Value="1.550" />
+              <Odds Type="double" Value="${oddPayout}" />
             </Market>
           </Event>
         </EventList>
-        <BetStake Type="int" Value="2000">
+        <BetStake Type="int" Value="${(amount * 100).toFixed(0)}">
           <CombLength Type="int" Value="1" />
           <Winnings Type="int" Value="2000" />
           <MultipleBonus Type="int" Value="0" />
-          <Odds Type="double" Value="${oddValue}" />
+          <Odds Type="double" Value="${oddPayout}" />
         </BetStake>
       </Bet>
     </Params>
   </Method>
-  </PKT>`;
+</PKT>`;
 
 //? XML para informar o resultado de uma aposta perdida
 export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>
