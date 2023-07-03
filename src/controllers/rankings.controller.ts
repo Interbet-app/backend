@@ -63,6 +63,7 @@ export async function AthleticsRanking(_req: Request, res: Response, next: NextF
          return {
             athleticId: athletic.id,
             athleticName: athletic.name,
+            athleticAbbreviation: athletic.abbreviation,
             athleticPicture: athletic.picture,
             amount,
          };
