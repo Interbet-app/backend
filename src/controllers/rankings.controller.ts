@@ -35,10 +35,9 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: NextF
          const athletic = await athletics.findByPk(user?.athleticId);
          return {
             userId: pos.userId,
-            username: user?.name,
+            username: !user?.anonymous ?user?.name : "Jogador",
             picture: athletic?.picture,
             amount: pos.amount,
-            anonymous: user?.anonymous,
          };
       }));
       res.status(200).json(response);
