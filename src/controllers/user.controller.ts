@@ -13,7 +13,15 @@ export async function GetUser(_req: Request, res: Response, next: NextFunction) 
       if (!user) throw new AppError(404, "Usuário não encontrado");
       const balanceInfo = await GetBalance(user.betmotionUserToken!);
       if (!balanceInfo?.externalUserID) throw new AppError(400, "Não foi possível obter saldo do usuário!");
-      res.status(200).json({ ...user as IUser, balance: Number(balanceInfo?.balance) / 100 });
+      res.status(200).json({
+         name: user.name,
+         id: user.id,
+         athleticId: user.athleticId,
+         balance: Number(balanceInfo?.balance) / 100,
+         betmotionUserID: balanceInfo?.externalUserID,
+         betmotionUserToken: user.betmotionUserToken,
+         anonymous: user.anonymous,
+      });
    } catch (error) {
       next(error);
    }
