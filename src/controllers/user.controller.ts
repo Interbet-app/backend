@@ -11,7 +11,9 @@ export async function GetUser(_req: Request, res: Response, next: NextFunction) 
       const token = Jwt.getLocals(res, next) as Token;
       const user = await users.findByPk(token.userId);
       if (!user) throw new AppError(404, "Usuário não encontrado");
-      res.status(200).json(user as IUser);
+      const balanceInfo = await GetBalance(user.betmotionUserToken!);
+      if (!balanceInfo?.externalUserID) throw new AppError(400, "Não foi possível obter saldo do usuário!");
+      res.status(200).json({ ...user as IUser, balance: Number(balanceInfo?.balance) / 100 });
    } catch (error) {
       next(error);
    }

@@ -2,6 +2,8 @@ import {NextFunction, Request, Response } from "express";
 import sequelize, { Op } from "sequelize";
 import { athletics, bets, odds, rankings, teams, users } from "../models";
 import { IRanking } from "../interfaces";
+import { Jwt, Token } from "../auth";
+import AppError from "../error";
 
 export async function EventRanking(req: Request, res: Response, next: NextFunction) {
    try {
@@ -36,6 +38,7 @@ export async function UsersBetsRanking(_req: Request, res: Response, next: NextF
             username: user?.name,
             picture: athletic?.picture,
             amount: pos.amount,
+            anonymous: user?.anonymous,
          };
       }));
       res.status(200).json(response);
@@ -76,4 +79,20 @@ export async function AthleticsRanking(_req: Request, res: Response, next: NextF
    }
 }
 
+
+export async function UsersRankingHide(req: Request, res: Response, next: NextFunction) {
+   try {
+      const { username } = req.body;
+      const token = Jwt.getLocals(res, next) as Token;
+      
+      const user = await users.findByPk(token.userId);
+      if (!user) throw new AppError(404, "Usuário não encontrado");
+
+      if (user.name !== username) throw new AppError(401, "Usuário não autorizado");
+      await user.update({ anonymous: true });
+      res.status(200).json({ message: "Usuário oculto com sucesso" });
+   } catch (error) {
+      next(error);
+   }
+}
 

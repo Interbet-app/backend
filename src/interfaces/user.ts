@@ -7,4 +7,5 @@ export interface IUser {
    maxBetAmount?: number | null;
    createdAt: Date;
    updatedAt: Date;
+   anonymous?: boolean;
 }

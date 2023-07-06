@@ -72,7 +72,7 @@ route.get("/user", AuthUser, Control.GetUser);
 route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
-route.post("/user/max-bet-amount",AuthAdmin, Control.UserSetMaxBet);
+route.post("/user/max-bet-amount", AuthAdmin, Control.UserSetMaxBet);
 route.get("/user/me", Control.SignInBetMotion);
 route.get("/logout", AuthUser, Control.Logout);
 
@@ -92,6 +92,7 @@ route.delete("/maintenances/:id/", Middle.ID, AuthAdmin, Control.DeleteMaintenan
 route.get("/ranking/bets", Control.UsersBetsRanking);
 route.get("/ranking/athletics", Control.AthleticsRanking);
 route.get("/ranking/:id/", Middle.ID, Control.EventRanking);
+route.post("/ranking/hide-username", AuthUser, Control.UsersRankingHide);
 
 //- Logs
 route.get("/logs", AuthAdmin, Control.ShowLogs);
