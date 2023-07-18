@@ -29,6 +29,7 @@ export const create_event = Joi.object({
    gender: Joi.string().valid("masculino", "feminino").required(),
 });
 
+
 export const create_game = Joi.object({
    eventId: Joi.number().required(),
    name: Joi.string().max(40).required(),
