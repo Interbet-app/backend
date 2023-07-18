@@ -8,5 +8,6 @@ export interface IEvent {
    endDate: Date;
    createdAt: Date;
    type: "stitches" | "kill";
+   gender: "masculino" | "feminino";
    updatedAt: Date;
 }

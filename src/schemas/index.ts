@@ -26,6 +26,7 @@ export const create_event = Joi.object({
    startDate: Joi.date().required(),
    endDate: Joi.date().required(),
    type: Joi.string().valid("stitches", "kill").required(),
+   gender: Joi.string().valid("masculino", "feminino").required(),
 });
 
 export const create_game = Joi.object({

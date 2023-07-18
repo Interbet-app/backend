@@ -13,6 +13,7 @@ export const events = Database.define<IEventModel>("events", {
    startDate: { type: Sequelize.DATE, allowNull: false },
    endDate: { type: Sequelize.DATE, allowNull: false },
    type: { type: Sequelize.ENUM("stitches", "kill"), allowNull: false },
+   gender: { type: Sequelize.ENUM("masculino", "feminino"), allowNull: false },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });
