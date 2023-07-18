@@ -23,10 +23,7 @@ export const create_event = Joi.object({
    description: Joi.string().max(255).required(),
    title: Joi.string().max(40).required(),
    location: Joi.string().max(80).required(),
-   startDate: Joi.date().required(),
-   endDate: Joi.date().required(),
    type: Joi.string().valid("stitches", "kill").required(),
-   gender: Joi.string().valid("masculino", "feminino").required(),
 });
 
 

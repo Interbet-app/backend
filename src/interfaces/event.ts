@@ -4,10 +4,7 @@ export interface IEvent {
    title: string;
    description: string;
    location: string;
-   startDate: Date;
-   endDate: Date;
    createdAt: Date;
    type: "stitches" | "kill";
-   gender: "masculino" | "feminino";
    updatedAt: Date;
 }
