@@ -23,6 +23,9 @@ export const create_event = Joi.object({
    description: Joi.string().max(255).required(),
    title: Joi.string().max(40).required(),
    location: Joi.string().max(80).required(),
+   startDate: Joi.date().required(),
+   endDate: Joi.date().required(),
+   type: Joi.string().valid("stitches", "kill").required(),
 });
 
 export const create_game = Joi.object({
@@ -67,7 +70,6 @@ export const update_odd = Joi.object({
    status: Joi.string().valid("open", "lock").optional(),
    startPayOut: Joi.number().min(0).optional(),
 });
-
 
 export const create_player = Joi.object({
    teamId: Joi.number().required(),

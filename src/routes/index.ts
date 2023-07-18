@@ -61,6 +61,7 @@ route.put("/athletics", AuthAdmin, Control.UpdateAthletic);
 route.delete("/athletics/:id/", Middle.ID, AuthAdmin, Control.DeleteAthletic);
 
 route.get("/events", Control.GetEvents);
+route.get("/events/classification/:id/", Middle.ID, Control.GetEventClassification);
 route.post("/events", AuthAdmin, Middle.CreateEvent, Control.CreateEvent);
 route.delete("/events/:id/", AuthAdmin, Control.DeleteEvent);
 
