@@ -23,6 +23,7 @@ route.delete("/games/history/:id/", Middle.ID, AuthAdmin, Control.GamesHistoryDe
 
 route.get("/games", Control.GetGames);
 route.get("/games/odds", Control.GetGamesOdds);
+route.get("/games/chronology", Control.GetChronology);
 route.post("/games", Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", Control.GamesFilter);

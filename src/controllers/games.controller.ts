@@ -3,7 +3,6 @@ import { Op } from "sequelize";
 import { bets, events, odds, games, users, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
-import { BetWinner, BetLoss } from "../services/betmotion";
 
 export async function GetGames(_req: Request, res: Response, next: NextFunction) {
    try {

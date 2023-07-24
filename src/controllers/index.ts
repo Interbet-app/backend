@@ -16,3 +16,4 @@ export * from "./feedbacks.controller";
 export * from "./awards.controller";
 export * from "./settings.controller";
 export * from "./transactions.controller";
+export * from "./chronology.controller";
