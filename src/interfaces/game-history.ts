@@ -10,5 +10,5 @@ export interface IGameHistory {
    confrontType?: string;
    gender: string;
    serie: string;
-   date?: string;
+   date?: Date;
 }

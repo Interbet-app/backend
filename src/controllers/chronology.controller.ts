@@ -28,7 +28,7 @@ type IChronology = {
 export async function GetChronology(_req: Request, res: Response, next: NextFunction) {
    try {
       const data = await Promise.all([games.findAll(), gamesHistory.findAll(), odds.findAll(), teams.findAll(), events.findAll()]);
-      const Chronology: IChronology[] = [];
+      let Chronology: IChronology[] = [];
 
       data[0].forEach((game) => {
          const date = DateTime.fromJSDate(game.startDate).startOf("day").toMillis();
@@ -38,7 +38,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
       });
 
       data[1].forEach((history) => {
-         const date = DateTime.fromISO(history.date!).startOf("day").toMillis();
+         const date = DateTime.fromJSDate(history.date!).startOf("day").toMillis();
          if (Chronology.findIndex((value) => value.date === date) === -1) {
             Chronology.push({ date });
          }
@@ -51,78 +51,85 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
          });
 
          const histories_of_day = data[1].filter((history) => {
-            const start = DateTime.fromISO(history.date!).startOf("day").toMillis();
+            const start = DateTime.fromJSDate(history.date!).startOf("day").toMillis();
             return item.date === start;
          });
 
          const Events: IEvent[] = [];
 
          data[4].forEach((event) => {
-            const games_of_event = games_of_day.filter((game) => game.eventId === event.id);
-            const histories_of_event = histories_of_day.filter((history) => history.event === event.name);
+            const games_of_event = games_of_day.filter((game) => game.dataValues.eventId === event.id);
+            const histories_of_event = histories_of_day.filter((history) => history.dataValues.event === event.name);
             const jogos: IGame[] = [];
 
             games_of_event.forEach((game) => {
-               const options = data[2].filter((odd) => odd.gameId === game.id);
-               const teamA = data[3].find((team) => options.length > 0 && team.id === options[0].teamId);
-               const teamB = data[3].find((team) => options.length > 0 && team.id === options[1].teamId);
+               const options = data[2].filter((odd) => odd.dataValues.gameId === game.dataValues.id);
+               const teamA = data[3].find((team) => options.length > 0 && team.dataValues.id === options[0].dataValues.teamId);
+               const teamB = data[3].find((team) => options.length > 0 && team.dataValues.id === options[1].dataValues.teamId);
 
-               jogos.push({
-                  id: game.id,
-                  status: game.status,
-                  teams: [
-                     {
-                        id: teamA!.id,
-                        name: teamA!.name,
-                        abbreviation: teamA!.abbreviation,
-                        picture: teamA!.picture,
-                        score: game.goalsA,
-                     },
-                     {
-                        id: teamB!.id,
-                        name: teamB!.name,
-                        abbreviation: teamB!.abbreviation,
-                        picture: teamB!.picture,
-                        score: game.goalsB,
-                     },
-                  ],
-               });
+               if (teamA && teamB)
+                  jogos.push({
+                     id: game.dataValues.id,
+                     status: game.dataValues.status,
+                     teams: [
+                        {
+                           id: teamA!.id,
+                           name: teamA!.name,
+                           abbreviation: teamA!.abbreviation,
+                           picture: teamA!.picture,
+                           score: game.dataValues.goalsA,
+                        },
+                        {
+                           id: teamB!.id,
+                           name: teamB!.name,
+                           abbreviation: teamB!.abbreviation,
+                           picture: teamB!.picture,
+                           score: game.dataValues.goalsB,
+                        },
+                     ],
+                  });
             });
 
             histories_of_event.forEach((history) => {
-               const teamA = data[3].find((team) => team.name === history.teamA);
-               const teamB = data[3].find((team) => team.name === history.teamB);
+               const teamA = data[3].find((team) => team.name === history.dataValues.teamA);
+               const teamB = data[3].find((team) => team.name === history.dataValues.teamB);
 
-               jogos.push({
-                  id: history.gameId,
-                  status: "history",
-                  teams: [
-                     {
-                        id: teamA!.id,
-                        name: teamA!.name,
-                        abbreviation: teamA!.abbreviation,
-                        picture: teamA!.picture,
-                        score: history.scoreA,
-                     },
-                     {
-                        id: teamB!.id,
-                        name: teamB!.name,
-                        abbreviation: teamB!.abbreviation,
-                        picture: teamB!.picture,
-                        score: history.scoreB,
-                     },
-                  ],
+               if (teamA && teamB)
+                  jogos.push({
+                     id: history.gameId,
+                     status: "history",
+                     teams: [
+                        {
+                           id: teamA!.id,
+                           name: teamA!.name,
+                           abbreviation: teamA!.abbreviation,
+                           picture: teamA!.picture,
+                           score: history.scoreA,
+                        },
+                        {
+                           id: teamB!.id,
+                           name: teamB!.name,
+                           abbreviation: teamB!.abbreviation,
+                           picture: teamB!.picture,
+                           score: history.scoreB,
+                        },
+                     ],
+                  });
+            });
+
+            if (jogos.length > 0)
+               Events.push({
+                  id: event.id,
+                  name: event.name,
+                  type: event.type,
+                  games: jogos,
                });
-            });
-
-            Events.push({
-               id: event.id,
-               name: event.name,
-               type: event.type,
-               games: jogos,
-            });
          });
+
+         item.events = Events;
       });
+
+      //console.log(Chronology);
 
       res.status(200).json({ Chronology });
    } catch (err) {

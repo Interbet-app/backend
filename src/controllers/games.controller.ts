@@ -191,7 +191,7 @@ export async function ProcessGame(req: Request, res: Response, next: NextFunctio
          throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
 
       //? processar a classificação dos times do evento do jogo
-      await UpdateRanking(game.eventId, teamA, teamB, game.startDate.toISOString(), next);
+      await UpdateRanking(game.eventId, teamA, teamB, game.startDate, next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
@@ -293,7 +293,7 @@ export async function AthleticLastGames(req: Request, res: Response, next: NextF
       next(error);
    }
 }
-async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: string, next: NextFunction) {
+async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: Date, next: NextFunction) {
    try {
       const event = await events.findByPk(eventId);
       if (!event) throw new AppError(404, "Evento não foi encontrado!");
