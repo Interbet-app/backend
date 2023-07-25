@@ -7,11 +7,13 @@ type ITeam = {
    name: string;
    abbreviation: string;
    picture: string;
+   gender: string;
    score?: number;
 };
 type IGame = {
    id?: number;
    status: string;
+   date: string;
    teams: ITeam[];
 };
 type IEvent = {
@@ -71,12 +73,14 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                   jogos.push({
                      id: game.dataValues.id,
                      status: game.dataValues.status,
+                     date: DateTime.fromJSDate(game.startDate).toISO(),
                      teams: [
                         {
                            id: teamA!.id,
                            name: teamA!.name,
                            abbreviation: teamA!.abbreviation,
                            picture: teamA!.picture,
+                           gender: teamA.gender,
                            score: game.dataValues.goalsA,
                         },
                         {
@@ -84,6 +88,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamB!.name,
                            abbreviation: teamB!.abbreviation,
                            picture: teamB!.picture,
+                           gender: teamB.gender,
                            score: game.dataValues.goalsB,
                         },
                      ],
@@ -98,12 +103,14 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                   jogos.push({
                      id: history.gameId,
                      status: "history",
+                     date: DateTime.fromJSDate(history.date!).toISO(),
                      teams: [
                         {
                            id: teamA!.id,
                            name: teamA!.name,
                            abbreviation: teamA!.abbreviation,
                            picture: teamA!.picture,
+                           gender: teamA.gender,
                            score: history.scoreA,
                         },
                         {
@@ -111,6 +118,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamB!.name,
                            abbreviation: teamB!.abbreviation,
                            picture: teamB!.picture,
+                           gender: teamB.gender,
                            score: history.scoreB,
                         },
                      ],
@@ -129,7 +137,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
          item.events = Events;
       });
 
-      //console.log(Chronology);
+      Chronology = Chronology.filter((item) => item.events && item.events.length > 0);
 
       res.status(200).json({ Chronology });
    } catch (err) {
