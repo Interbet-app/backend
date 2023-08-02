@@ -6,5 +6,6 @@ export interface IEvent {
    location: string;
    createdAt: Date;
    type: "stitches" | "kill";
+   gender?: string;
    updatedAt: Date;
 }

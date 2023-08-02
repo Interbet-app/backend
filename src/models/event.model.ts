@@ -11,6 +11,7 @@ export const events = Database.define<IEventModel>("events", {
    title: { type: Sequelize.STRING(40), allowNull: false },
    location: { type: Sequelize.STRING(80), allowNull: true },
    type: { type: Sequelize.ENUM("stitches", "kill"), allowNull: false },
+   gender: { type: Sequelize.STRING(50), allowNull: false, defaultValue: "" },
    createdAt: Sequelize.DATE,
    updatedAt: Sequelize.DATE,
 });

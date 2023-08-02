@@ -20,6 +20,7 @@ type IEvent = {
    id?: number;
    name: string;
    type: "stitches" | "kill";
+   gender?: string;
    games: IGame[];
 };
 type IChronology = {
@@ -131,6 +132,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                   name: event.name,
                   type: event.type,
                   games: jogos,
+                  gender: event.gender,
                });
          });
 
