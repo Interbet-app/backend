@@ -103,6 +103,7 @@ export async function GamesFilter(req: Request, res: Response, next: NextFunctio
             winnerOddId: game.winnerOddId,
             goalsA: game.goalsA,
             goalsB: game.goalsB,
+            group: game.group,
             createdAt: game.createdAt,
             updatedAt: game.updatedAt,
             odds: result.filter((odd) => odd.gameId === game.id) as IOdd[],
@@ -116,7 +117,7 @@ export async function GamesFilter(req: Request, res: Response, next: NextFunctio
 }
 export async function CreateGame(req: Request, res: Response, next: NextFunction) {
    try {
-      const { eventId, name, status, modality, location, startDate, winnerCommission } = req.body;
+      const { eventId, name, status, modality, location, startDate, winnerCommission, group } = req.body;
       const event = await events.findByPk(eventId);
       if (!event) return res.status(404).json({ message: `Evento '${eventId}' não foi encontrado!` });
       const game = await games.create({
@@ -125,6 +126,7 @@ export async function CreateGame(req: Request, res: Response, next: NextFunction
          status: status,
          modality: modality,
          location: location,
+         group: group,
          winnerCommission: winnerCommission > 0 ? winnerCommission : -1,
          startDate: new Date(startDate),
          createdAt: new Date(),
