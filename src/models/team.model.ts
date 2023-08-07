@@ -10,7 +10,6 @@ export const teams = Database.define<ITeamModel>("teams", {
    athleticId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: false },
    name: { type: Sequelize.STRING(60), allowNull: false },
    abbreviation: { type: Sequelize.STRING(20), allowNull: false },
-   location: { type: Sequelize.STRING(80), allowNull: false },
    picture: { type: Sequelize.STRING, allowNull: true },
    gender: { type: Sequelize.STRING, allowNull: true },
    sport: { type: Sequelize.STRING, allowNull: true },

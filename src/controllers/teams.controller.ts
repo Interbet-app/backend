@@ -39,13 +39,12 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
       const storage = multer.memoryStorage();
       multer({ storage }).single("picture")(req, res, async (error: any) => {
          try {
-            const { name, abbreviation, athleticId, location, gender, adminId, sport } = req.body;
+            const { name, abbreviation, athleticId, gender, adminId, sport } = req.body;
             if (error) throw new AppError(400, error.message);
             if (!req.file) throw new AppError(422, "Foto do time é obrigatória!");
             if (!name) throw new AppError(422, "Nome do time é obrigatório!");
             if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
             if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
-            if (!location) throw new AppError(422, "Localização do time é obrigatório!");
             if (!gender) throw new AppError(422, "Gênero do time é obrigatório!");
             if (!sport) throw new AppError(422, "Esporte do time é obrigatório!");
 
@@ -70,7 +69,6 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
                sport,
                picture: result.ETag!,
                adminId: adminId ? adminId : null,
-               location,
                gender,
                createdAt: new Date(),
                updatedAt: new Date(),
@@ -95,7 +93,6 @@ export async function UpdateTeam(req: Request, res: Response, next: NextFunction
          if (!teamId) throw new AppError(422, "Id do time é obrigatório!");
          if (!name) throw new AppError(422, "Nome do time é obrigatório!");
          if (!abbreviation) throw new AppError(422, "Sigla do time é obrigatória!");
-         if (!location) throw new AppError(422, "Localização do time é obrigatória!");
          if (!athleticId) throw new AppError(422, "Id da atlética é obrigatório!");
          if (!gender) throw new AppError(422, "Gênero é obrigatório!");
 
@@ -119,7 +116,6 @@ export async function UpdateTeam(req: Request, res: Response, next: NextFunction
          team.name = name;
          team.abbreviation = abbreviation;
          team.picture = result2.Location;
-         team.location = location;
          team.gender = gender;
          team.athleticId = athleticId;
          if (adminId) team.adminId = adminId;
