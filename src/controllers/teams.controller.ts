@@ -60,6 +60,7 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
             const file_bucket_name = `teams/pictures/` + Date.now().toString() + "_." + req.file.mimetype.split("/")[1];
             const result = await bucket.UploadFile(req.file.buffer, file_bucket_name);
 
+            
             //Se o upload para o bucket na aws falhou, retorna o erro
             if (result instanceof AppError) throw result;
             const team = await teams.create({
