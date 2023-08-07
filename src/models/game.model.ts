@@ -11,7 +11,7 @@ export const games = Database.define<IGameModel>("games", {
    status: { type: Sequelize.ENUM("open", "pendent", "closed"), allowNull: false, defaultValue: "open" },
    modality: { type: Sequelize.STRING(40), allowNull: true },
    winnerOddId: { type: Sequelize.INTEGER, allowNull: true },
-   group: { type: Sequelize.STRING(40), allowNull: true, defaultValue: "A" },
+   group: { type: Sequelize.STRING(10), allowNull: true, defaultValue: "A" },
    winnerCommission: { type: Sequelize.DECIMAL(10, 2), allowNull: true, defaultValue: -1 },
    goalsA: { type: Sequelize.INTEGER, allowNull: true, defaultValue: 0 },
    goalsB: { type: Sequelize.INTEGER, allowNull: true, defaultValue: 0 },

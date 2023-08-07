@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, events, odds, games, users, teams, athletics, rankings, gamesHistory } from "../models";
+import { bets, events, odds, games, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
 
