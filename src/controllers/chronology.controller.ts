@@ -35,10 +35,10 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
 
       //Cria um array com todas as datas de jogos e históricos
       for (let i = 0; i < 90; i++) {
-         const start = DateTime.now().minus({ days: i }).startOf("day").toMillis();
-         Chronology.push({ date: start });
+         if (i < 20) Chronology.push({ date: DateTime.now().plus({ days: i }).startOf("day").toMillis() });
+         Chronology.push({ date: DateTime.now().minus({ days: i }).startOf("day").toMillis() });
       }
-      for (let i = 0; i < 20; i++) {
+      for (let i = 1; i < 20; i++) {
          const start = DateTime.now().plus({ days: i }).startOf("day").toMillis();
          Chronology.push({ date: start });
       }
