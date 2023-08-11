@@ -119,26 +119,22 @@ export async function GetEventClassification(req: Request, res: Response, next: 
          //Critérios de eliminação: - 1º - derrota
          type Kill = {
             date: Date;
-            winnerTeamId: ITeam;
-            loserTeamId: ITeam;
+            group?: string;
+            teams: ITeam[];
          };
          const kills = [] as Kill[];
 
          preparedMatches.forEach((match) => {
-            if (match.goalsA! > match.goalsB!) {
-               kills.push({
-                  date: match.startDate,
-                  winnerTeamId: Teams.find((team) => team.id === match.teams[0].teamId)!.dataValues,
-                  loserTeamId: Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues,
-               });
-            } else if (match.goalsA! < match.goalsB!) {
-               kills.push({
-                  date: match.startDate,
-                  winnerTeamId: Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues,
-                  loserTeamId: Teams.find((team) => team.id === match.teams[0].teamId)!.dataValues,
-               });
-            }
+            kills.push({
+               date: match.startDate,
+               group: match.group,
+               teams: [
+                  { ...Teams.find((team) => team.id === match.teams[0].teamId)!.dataValues },
+                  { ...Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues },
+               ],
+            });
          });
+
          kills.sort((a, b) => {
             if (a.date < b.date) return -1;
             if (a.date > b.date) return 1;
