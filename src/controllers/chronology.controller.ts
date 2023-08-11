@@ -66,7 +66,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
             const jogos: IGame[] = [];
 
             games_of_event.forEach((game) => {
-               const options = data[2].filter((odd) => odd.dataValues.gameId === game.dataValues.id);
+               const options = data[2].filter((odd) => odd.dataValues.gameId === game.dataValues.id && odd.dataValues.teamId != 0);
                const teamA = data[3].find((team) => options.length > 0 && team.dataValues.id === options[0].dataValues.teamId);
                const teamB = data[3].find((team) => options.length > 0 && team.dataValues.id === options[1].dataValues.teamId);
 
@@ -135,7 +135,6 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                   gender: event.gender,
                });
          });
-
          item.events = Events;
       });
 
