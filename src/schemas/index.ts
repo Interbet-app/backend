@@ -35,6 +35,7 @@ export const create_game = Joi.object({
    modality: Joi.string().max(60).required(),
    location: Joi.string().max(60).required(),
    startDate: Joi.date().required(),
+   group: Joi.string().required(),
 });
 
 export const update_game = Joi.object({
