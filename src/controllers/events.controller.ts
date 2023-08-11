@@ -115,8 +115,7 @@ export async function GetEventClassification(req: Request, res: Response, next: 
 
          res.status(200).json({ classification: stitches });
       } else {
-         //Classificação por mata-mata (kill)
-         //Critérios de eliminação: - 1º - derrota
+         //Tabela de mata-mata (kill)
          type Kill = {
             date: Date;
             group?: string;
@@ -133,12 +132,6 @@ export async function GetEventClassification(req: Request, res: Response, next: 
                   { ...Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues },
                ],
             });
-         });
-
-         kills.sort((a, b) => {
-            if (a.date < b.date) return -1;
-            if (a.date > b.date) return 1;
-            return 0;
          });
 
          res.status(200).json({ classification: kills });

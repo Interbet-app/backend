@@ -33,19 +33,11 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
       const data = await Promise.all([games.findAll(), gamesHistory.findAll(), odds.findAll(), teams.findAll(), events.findAll()]);
       let Chronology: IChronology[] = [];
 
-      data[0].forEach((game) => {
-         const date = DateTime.fromJSDate(game.startDate).startOf("day").toMillis();
-         if (Chronology.findIndex((value) => value.date === date) === -1) {
-            Chronology.push({ date });
-         }
-      });
-
-      data[1].forEach((history) => {
-         const date = DateTime.fromJSDate(history.date!).startOf("day").toMillis();
-         if (Chronology.findIndex((value) => value.date === date) === -1) {
-            Chronology.push({ date });
-         }
-      });
+      //Cria um array com todas as datas de jogos e históricos
+      for (let i = 0; i < 90; i++) {
+         const start = DateTime.utc().minus({ days: i }).startOf("day").toMillis();
+         Chronology.push({ date: start });
+      }
 
       Chronology.forEach((item) => {
          const games_of_day = data[0].filter((game) => {
