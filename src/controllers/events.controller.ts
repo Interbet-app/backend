@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import e, { NextFunction, Request, Response } from "express";
 import { events, games, odds, teams } from "../models";
 import { IEvent, ITeam } from "../interfaces";
 import { Op } from "sequelize";
@@ -116,10 +116,14 @@ export async function GetEventClassification(req: Request, res: Response, next: 
          res.status(200).json({ classification: stitches });
       } else {
          //Tabela de mata-mata (kill)
+         interface ITeams extends ITeam {
+            goals: number;
+         };
+
          type Kill = {
             date: Date;
             group?: string;
-            teams: ITeam[];
+            teams: ITeams[];
          };
          const kills = [] as Kill[];
 
@@ -128,8 +132,14 @@ export async function GetEventClassification(req: Request, res: Response, next: 
                date: match.startDate,
                group: match.group,
                teams: [
-                  { ...Teams.find((team) => team.id === match.teams[0].teamId)!.dataValues },
-                  { ...Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues },
+                  {
+                     ...Teams.find((team) => team.id === match.teams[0].teamId)!.dataValues,
+                    goals: match.goalsA ?? 0,
+                  },
+                  {
+                     ...Teams.find((team) => team.id === match.teams[1].teamId)!.dataValues,
+                     goals: match.goalsB ?? 0,
+                  },
                ],
             });
          });
