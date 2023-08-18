@@ -7,6 +7,7 @@ type ITeam = {
    name: string;
    abbreviation: string;
    picture: string;
+   athleticId?: number;
    gender: string;
    score?: number;
 };
@@ -77,6 +78,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamA!.name,
                            abbreviation: teamA!.abbreviation,
                            picture: teamA!.picture,
+                           athleticId: teamA!.athleticId,
                            gender: teamA.gender,
                            score: game.dataValues.goalsA,
                         },
@@ -85,6 +87,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamB!.name,
                            abbreviation: teamB!.abbreviation,
                            picture: teamB!.picture,
+                           athleticId: teamB!.athleticId,
                            gender: teamB.gender,
                            score: game.dataValues.goalsB,
                         },
@@ -107,6 +110,7 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamA!.name,
                            abbreviation: teamA!.abbreviation,
                            picture: teamA!.picture,
+                           athleticId: teamA!.athleticId,
                            gender: teamA.gender,
                            score: history.scoreA,
                         },
@@ -115,8 +119,10 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
                            name: teamB!.name,
                            abbreviation: teamB!.abbreviation,
                            picture: teamB!.picture,
+                           athleticId: teamB!.athleticId,
                            gender: teamB.gender,
                            score: history.scoreB,
+
                         },
                      ],
                   });
