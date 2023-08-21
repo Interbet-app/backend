@@ -39,11 +39,10 @@ export async function GamesHistory(_req: Request, res: Response, next: NextFunct
 }
 export async function GamesHistorySearch(req: Request, res: Response, next: NextFunction) {
    try {
-      const { event, teamA, teamB, gender } = req.query;
+      const { teamA, teamB, gender } = req.query;
       const history = await gamesHistory.findAll({
          where: {
             gender: gender as string,
-            event: event as string,
             [Op.or]: [{ teamA: { [Op.like]: `%${teamA}%` } }, { teamB: { [Op.like]: `%${teamB}%` } }],
          },
       });
