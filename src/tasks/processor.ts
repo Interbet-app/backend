@@ -3,7 +3,6 @@ import logger from "../log";
 import { CloseGames } from "./game.task";
 import { BetmotionNotificationTask } from "./betmotion.task";
 
-
 async function FiveTasks() {
    BetmotionNotificationTask();
 }
@@ -26,4 +25,3 @@ export class TaskProcessor {
       this.five.stop();
    }
 }
-

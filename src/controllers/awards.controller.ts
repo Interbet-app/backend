@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { bets, users } from "../models";
 import AppError from "../error";
 import QRCode from "qrcode";
-import { NewCredit, NewDebit, CashOutBet } from "../services/betmotion";
 
 export async function GetAwardQrCode(req: Request, res: Response, next: NextFunction) {
    try {
