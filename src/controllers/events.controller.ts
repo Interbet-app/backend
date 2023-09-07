@@ -153,13 +153,14 @@ export async function GetEventClassification(req: Request, res: Response, next: 
 
 export async function CreateEvent(req: Request, res: Response, next: NextFunction) {
    try {
-      const { name, description, title, location, type } = req.body;
+      const { name, description, title, location, type ,gender} = req.body;
       const event = await events.create({
          name,
          description,
          title,
          location,
          type,
+         gender,
          createdAt: new Date(),
          updatedAt: new Date(),
       });
