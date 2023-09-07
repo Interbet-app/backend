@@ -24,7 +24,7 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddPayout }: IPl
   <Method Name="PlaceBet">
     <Auth Login="" Password="" />
     <Params>
-      <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora ddo envio
+      <Token Type="string" Value="${userToken + new Date().valueOf()}" /> //? timestamp da hora do envio
       <TransactionID Type="int" Value="${new Date().valueOf()}" />
       <BetAmount Type="int" Value="${(amount * 100).toFixed(0)}" />
       <BetReferenceNum Type="string" Value="${betId}" />
@@ -66,7 +66,7 @@ export const XmlPlaceBet = ({ userToken, amount, betId, gameId, oddPayout }: IPl
       </Bet>
     </Params>
   </Method>
-  </PKT>`;
+</PKT>`;
 
 //? XML para informar o resultado de uma aposta perdida
 export const XmlBetLoss = ({ userToken, betId, gameName }: IBetLoss) => `<PKT>

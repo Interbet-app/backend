@@ -9,6 +9,7 @@ export interface IGame {
    winnerCommission?: number;
    goalsA?: number;
    goalsB?: number;
+   group?: string;
    startDate: Date;
    createdAt: Date;
    updatedAt: Date;

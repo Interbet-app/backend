@@ -4,7 +4,6 @@ export interface ITeam {
    athleticId: number;
    name: string;
    abbreviation: string;
-   location: string;
    picture: string;
    sport : string;
    gender: string;

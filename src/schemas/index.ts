@@ -23,6 +23,8 @@ export const create_event = Joi.object({
    description: Joi.string().max(255).required(),
    title: Joi.string().max(40).required(),
    location: Joi.string().max(80).required(),
+   type: Joi.string().valid("stitches", "kill").required(),
+   gender: Joi.string().valid("Masculino", "Feminino", "Misto").required(),
 });
 
 export const create_game = Joi.object({
@@ -33,6 +35,7 @@ export const create_game = Joi.object({
    modality: Joi.string().max(60).required(),
    location: Joi.string().max(60).required(),
    startDate: Joi.date().required(),
+   group: Joi.string().required(),
 });
 
 export const update_game = Joi.object({
@@ -58,15 +61,15 @@ export const create_odd = Joi.object({
 
 export const update_odd = Joi.object({
    oddId: Joi.number().required(),
-   gameId: Joi.number().required(),
-   teamId: Joi.number().required(),
-   name: Joi.string().max(60).required(),
-   payout: Joi.number().required(),
-   maxBetAmount: Joi.number().required(),
-   offer: Joi.boolean().required(),
+   gameId: Joi.number().optional(),
+   teamId: Joi.number().optional(),
+   name: Joi.string().max(60).optional(),
+   payout: Joi.number().min(0).optional(),
+   maxBetAmount: Joi.number().optional(),
+   offer: Joi.boolean().optional(),
    status: Joi.string().valid("open", "lock").optional(),
+   startPayOut: Joi.number().min(0).optional(),
 });
-
 
 export const create_player = Joi.object({
    teamId: Joi.number().required(),

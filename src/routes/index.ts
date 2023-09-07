@@ -23,6 +23,7 @@ route.delete("/games/history/:id/", Middle.ID, AuthAdmin, Control.GamesHistoryDe
 
 route.get("/games", Control.GetGames);
 route.get("/games/odds", Control.GetGamesOdds);
+route.get("/games/chronology", Control.GetChronology);
 route.post("/games", Middle.CreateGame, Control.CreateGame);
 route.put("/games", AuthAdmin, Middle.UpdateGame, Control.UpdateGame);
 route.get("/games/full", Control.GamesFilter);
@@ -61,6 +62,7 @@ route.put("/athletics", AuthAdmin, Control.UpdateAthletic);
 route.delete("/athletics/:id/", Middle.ID, AuthAdmin, Control.DeleteAthletic);
 
 route.get("/events", Control.GetEvents);
+route.get("/events/classification/:id/", Middle.ID, Control.GetEventClassification);
 route.post("/events", AuthAdmin, Middle.CreateEvent, Control.CreateEvent);
 route.delete("/events/:id/", AuthAdmin, Control.DeleteEvent);
 
@@ -72,7 +74,7 @@ route.get("/user", AuthUser, Control.GetUser);
 route.get("/user/all", Control.GetAllUsers);
 route.post("/user/athletic/admin", AuthAdmin, Control.SetAthleticAndTeamAdminId);
 route.put("/user", AuthUser, Control.UserUpdate);
-route.post("/user/max-bet-amount", Control.UserSetMaxBet);
+route.post("/user/max-bet-amount", AuthAdmin, Control.UserSetMaxBet);
 route.get("/user/me", Control.SignInBetMotion);
 route.get("/logout", AuthUser, Control.Logout);
 
@@ -92,6 +94,7 @@ route.delete("/maintenances/:id/", Middle.ID, AuthAdmin, Control.DeleteMaintenan
 route.get("/ranking/bets", Control.UsersBetsRanking);
 route.get("/ranking/athletics", Control.AthleticsRanking);
 route.get("/ranking/:id/", Middle.ID, Control.EventRanking);
+route.post("/ranking/hide-username", AuthUser, Control.UsersRankingHide);
 
 //- Logs
 route.get("/logs", AuthAdmin, Control.ShowLogs);

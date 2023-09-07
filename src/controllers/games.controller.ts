@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, events, odds, games, users, teams, athletics, rankings, gamesHistory } from "../models";
+import { bets, events, odds, games, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
 import AppError from "../error";
-import { BetWinner, BetLoss } from "../services/betmotion";
 
 export async function GetGames(_req: Request, res: Response, next: NextFunction) {
    try {
@@ -15,44 +14,46 @@ export async function GetGames(_req: Request, res: Response, next: NextFunction)
 }
 export async function GetGamesOdds(_req: Request, res: Response, next: NextFunction) {
    try {
-     const allGames = await games.findAll();
-     const gamesWithOdds: {
-       name: string;
-       status: "open" | "pendent" | "closed";
-       modality: string;
-       odds: {
+      const allGames = await games.findAll();
+      const gamesWithOdds: {
+         game: IGame;
          name: string;
-         startPayout: number;
-         payout: number;
-         amount: number;
-         payment: number;
-       }[];
-     }[] = [];
- 
-     await Promise.all(
-       allGames.map(async (game) => {
-         const gameOdds = await odds.findAll({ where: { gameId: game.id } });
-         gamesWithOdds.push({
-           name: game.name,
-           status: game.status,
-           modality: game.modality,
-           odds: gameOdds.map((odd) => ({
-             name: odd.name,
-             startPayout: odd.startPayOut,
-             payout: odd.payout,
-             amount: odd.amount,
-             payment: odd.payment,
-           })),
-         });
-       })
-     );
- 
-     res.status(200).json({ games: gamesWithOdds });
+         status: "open" | "pendent" | "closed";
+         modality: string;
+         odds: {
+            name: string;
+            startPayout: number;
+            payout: number;
+            amount: number;
+            payment: number;
+         }[];
+      }[] = [];
+
+      await Promise.all(
+         allGames.map(async (game) => {
+            const gameOdds = await odds.findAll({ where: { gameId: game.id } });
+            gamesWithOdds.push({
+               game: game,
+               name: game.name,
+               status: game.status,
+               modality: game.modality,
+               odds: gameOdds.map((odd) => ({
+                  name: odd.name,
+                  startPayout: odd.startPayOut,
+                  payout: odd.payout,
+                  amount: odd.amount,
+                  payment: odd.payment,
+               })),
+            });
+         })
+      );
+
+      res.status(200).json({ games: gamesWithOdds });
    } catch (err) {
-     next(err);
+      next(err);
    }
- }
- 
+}
+
 export async function GameDetails(req: Request, res: Response, next: NextFunction) {
    try {
       const gameId = parseInt(req.params.id, 10);
@@ -102,6 +103,7 @@ export async function GamesFilter(req: Request, res: Response, next: NextFunctio
             winnerOddId: game.winnerOddId,
             goalsA: game.goalsA,
             goalsB: game.goalsB,
+            group: game.group,
             createdAt: game.createdAt,
             updatedAt: game.updatedAt,
             odds: result.filter((odd) => odd.gameId === game.id) as IOdd[],
@@ -115,7 +117,7 @@ export async function GamesFilter(req: Request, res: Response, next: NextFunctio
 }
 export async function CreateGame(req: Request, res: Response, next: NextFunction) {
    try {
-      const { eventId, name, status, modality, location, startDate, winnerCommission } = req.body;
+      const { eventId, name, status, modality, location, startDate, winnerCommission, group } = req.body;
       const event = await events.findByPk(eventId);
       if (!event) return res.status(404).json({ message: `Evento '${eventId}' não foi encontrado!` });
       const game = await games.create({
@@ -124,6 +126,7 @@ export async function CreateGame(req: Request, res: Response, next: NextFunction
          status: status,
          modality: modality,
          location: location,
+         group: group,
          winnerCommission: winnerCommission > 0 ? winnerCommission : -1,
          startDate: new Date(startDate),
          createdAt: new Date(),
@@ -190,7 +193,7 @@ export async function ProcessGame(req: Request, res: Response, next: NextFunctio
          throw new AppError(400, `Não existem Opções de apostas cadastradas para os times '${teamA.id}' e '${teamB.id}'!`);
 
       //? processar a classificação dos times do evento do jogo
-      await UpdateRanking(game.eventId, teamA, teamB, game.startDate.toISOString(), next);
+      await UpdateRanking(game.eventId, teamA, teamB, game.startDate, next);
 
       //% 1 -> Obter a odd ganhadora
       let winnerOdd = options.find((option) => option.id === winnerOddId);
@@ -292,7 +295,7 @@ export async function AthleticLastGames(req: Request, res: Response, next: NextF
       next(error);
    }
 }
-async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: string, next: NextFunction) {
+async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, gameDate: Date, next: NextFunction) {
    try {
       const event = await events.findByPk(eventId);
       if (!event) throw new AppError(404, "Evento não foi encontrado!");

@@ -10,6 +10,7 @@ export interface IBet {
    award: "not" | "pending" | "completed";
    betmotion: boolean;
    paid: boolean;
+   betmotion: boolean;
    group?: string;
    createdAt: Date;
    updatedAt: Date;
