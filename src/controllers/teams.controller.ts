@@ -68,7 +68,7 @@ export async function CreateTeam(req: Request, res: Response, next: NextFunction
                abbreviation,
                athleticId,
                sport,
-               picture: result.ETag!,
+               picture: result.Location,
                adminId: adminId ? adminId : null,
                gender,
                createdAt: new Date(),
