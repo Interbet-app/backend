@@ -39,10 +39,6 @@ export async function GetChronology(_req: Request, res: Response, next: NextFunc
          if (i < 20) Chronology.push({ date: DateTime.now().plus({ days: i }).startOf("day").toMillis() });
          Chronology.push({ date: DateTime.now().minus({ days: i }).startOf("day").toMillis() });
       }
-      for (let i = 1; i < 20; i++) {
-         const start = DateTime.now().plus({ days: i }).startOf("day").toMillis();
-         Chronology.push({ date: start });
-      }
 
       Chronology.forEach((item) => {
          const games_of_day = data[0].filter((game) => {
