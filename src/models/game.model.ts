@@ -8,7 +8,7 @@ export const games = Database.define<IGameModel>("games", {
    id: { type: Sequelize.BIGINT.UNSIGNED, primaryKey: true, autoIncrement: true },
    eventId: { type: Sequelize.INTEGER.UNSIGNED, allowNull: true },
    name: { type: Sequelize.STRING(60), allowNull: false },
-   status: { type: Sequelize.ENUM("open", "pendent", "closed"), allowNull: false, defaultValue: "open" },
+   status: { type: Sequelize.ENUM("open", "pendent", "closed", "postponed"), allowNull: false, defaultValue: "open" },
    modality: { type: Sequelize.STRING(40), allowNull: true },
    winnerOddId: { type: Sequelize.INTEGER, allowNull: true },
    group: { type: Sequelize.STRING(30), allowNull: true, defaultValue: "A" },

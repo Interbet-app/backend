@@ -3,7 +3,7 @@ export interface IGame {
    eventId: number;
    winnerOddId?: number;
    name: string;
-   status: "open" | "pendent" | "closed";
+   status: "open" | "pendent" | "closed" | "postponed";
    modality: string;
    location: string;
    winnerCommission?: number;
