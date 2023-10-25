@@ -34,6 +34,7 @@ route.get("/games/last/team", Control.TeamLastGames);
 route.get("/games/last/athletic", Control.AthleticLastGames);
 route.get("/games/:id/", Middle.ID, Control.GetGame);
 route.delete("/games/:id/", Middle.ID, AuthAdmin, Control.DeleteGame);
+route.put("/games/postponed/:id/", Middle.ID, AuthAdmin, Control.PostponeGame);
 
 route.get("/odds", Control.GetOdds);
 route.get("/odds/:id/", Middle.ID, Control.GetOdd);

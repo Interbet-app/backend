@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
-import { bets, events, odds, games, teams, athletics, rankings, gamesHistory } from "../models";
+import { bets, events, odds, users, games, teams, athletics, rankings, gamesHistory } from "../models";
 import { IGame, IOdd, ITeam, TeamResult } from "../interfaces";
+import { Refound } from "../services/betmotion";
+
 import AppError from "../error";
 
 export async function GetGames(_req: Request, res: Response, next: NextFunction) {
@@ -18,7 +20,7 @@ export async function GetGamesOdds(_req: Request, res: Response, next: NextFunct
       const gamesWithOdds: {
          game: IGame;
          name: string;
-         status: "open" | "pendent" | "closed";
+         status: "open" | "pendent" | "closed" | "postponed";
          modality: string;
          odds: {
             name: string;
@@ -369,6 +371,61 @@ async function UpdateRanking(eventId: number, A: TeamResult, B: TeamResult, game
          await rankingB.save();
       }
    } catch (error) {
+      next(error);
+   }
+}
+// Importação dos módulos e bibliotecas necessárias.
+export async function PostponeGame(req: Request, res: Response, next: NextFunction) {
+   try {
+      // Tenta converter o ID do jogo de string para número.
+      const id = parseInt(req.params.id, 10);
+
+      // Busca o jogo pelo seu ID na base de dados.
+      const game = await games.findByPk(id);
+      
+      // Se o jogo não for encontrado, retorna um erro 404.
+      if (!game) return res.status(404).json({ message: `Jogo '${id}' não foi encontrado!` });
+      
+      // Atualiza o status do jogo para "adiado" e a data de atualização.
+      game.status = "postponed";
+      game.updatedAt = new Date();
+      await game.save();  // Salva as alterações no banco de dados.
+
+      // Busca todas as opções de apostas associadas a esse jogo.
+      let options = await odds.findAll({ where: { gameId: id } });
+      
+      // Se não houver opções de apostas, retorna um erro 400.
+      if (!options) return res.status(400).json({ message: `Não existem Opções de apostas cadastradas para o jogo '${id}'!` });
+      
+      // Mapeia as opções de apostas para obter seus IDs.
+      const searchOdds = options.map((option) => option.id!);
+      
+      // Se existirem opções de apostas, processa as apostas associadas.
+      if (searchOdds.length > 0) {
+         // Busca todas as apostas associadas às opções de apostas do jogo.
+         const apostas = await bets.findAll({ where: { oddId: { [Op.in]: searchOdds } } });
+         
+         // Processa cada aposta, reembolsando o usuário e atualizando o status da aposta.
+         for (let i = 0; i < apostas.length; i++) {
+            let bet = apostas[i];
+            
+            // Busca o usuário associado à aposta.
+            const user = await users.findByPk(bet.userId);
+            
+            // Se o usuário ou a aposta não forem encontrados, lança um erro.
+            if (!user) throw new AppError(404, "Usuário não encontrado!");
+            if (!bet.id) throw new AppError(404, "Aposta não encontrada!");
+            
+            // Reembolsa o usuário e atualiza o status da aposta para "refund".
+            await Refound(bet.id, user.betmotionUserID!, bet.amount, "Refound");
+            await bets.update({ status: "refund" }, { where: { id: bet.id } });
+         }
+      }
+
+      // Retorna uma resposta de sucesso indicando que o jogo foi adiado.
+      res.status(204).json({ message: `Jogo '${id}' foi adiado com sucesso!` });
+   } catch (error) {
+      // Se ocorrer algum erro durante o processo, encaminha para o middleware de erro.
       next(error);
    }
 }
